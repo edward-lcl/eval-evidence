@@ -214,6 +214,19 @@ class ProductTests(unittest.TestCase):
         schema = json.loads(BUNDLE_SCHEMA.read_text())
         self.assertEqual(schema["properties"]["schema_version"]["const"], BUNDLE_SCHEMA_VERSION)
 
+    def test_trusted_publishing_is_oidc_only_and_checksum_gated(self):
+        workflow = (ROOT / ".github/workflows/publish-pypi.yml").read_text()
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertIn("environment: pypi", workflow)
+        self.assertIn("id-token: write", workflow)
+        self.assertIn("shasum -a 256 -c", workflow)
+        self.assertIn(
+            "pypa/gh-action-pypi-publish@ba38be9e461d3875417946c167d0b5f3d385a247",
+            workflow,
+        )
+        self.assertNotIn("PYPI_TOKEN", workflow)
+        self.assertNotIn("password:", workflow)
+
     def test_composite_action_rejects_escape_patterns_before_cli(self):
         action = (ROOT / "action.yml").read_text()
         self.assertIn("supplied.is_absolute()", action)

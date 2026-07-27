@@ -1,0 +1,42 @@
+name: Publish to PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing audited GitHub release tag to publish
+        required: true
+        default: v0.1.0
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download audited GitHub release artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir dist checksums
+          gh release download "$RELEASE_TAG" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern '*.whl' \
+            --pattern '*.tar.gz' \
+            --dir dist
+          gh release download "$RELEASE_TAG" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern SHA256SUMS \
+            --dir checksums
+          test "$(find dist -maxdepth 1 -type f | wc -l | tr -d ' ')" = 2
+          (cd dist && shasum -a 256 -c ../checksums/SHA256SUMS)
+
+      - name: Publish exact audited artifacts with OIDC
+        uses: pypa/gh-action-pypi-publish@ba38be9e461d3875417946c167d0b5f3d385a247 # v1.14.1
