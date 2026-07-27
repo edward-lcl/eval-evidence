@@ -67,9 +67,15 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _reject_nonfinite_json(value: str) -> None:
+    raise IntegrityError(f"Non-finite JSON number is not permitted: {value}")
+
+
 def load_json(path: Path) -> Any:
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(
+            path.read_text(encoding="utf-8"), parse_constant=_reject_nonfinite_json
+        )
     except FileNotFoundError as exc:
         raise IntegrityError(f"Missing required file: {path}") from exc
     except UnicodeDecodeError as exc:

@@ -72,6 +72,22 @@ class ProductTests(unittest.TestCase):
             with self.assertRaisesRegex(IntegrityError, "Generic manifest schema error at run"):
                 GenericManifestAdapter().load(root)
 
+    def test_nonfinite_json_and_orphan_provenance_fail_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_generic_demo(Path(directory) / "run")
+            (root / "eval-run.json").write_text('{"value": NaN}', encoding="utf-8")
+            with self.assertRaisesRegex(IntegrityError, "Non-finite JSON number"):
+                GenericManifestAdapter().load(root)
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_generic_demo(Path(directory) / "run")
+            document = json.loads((root / "eval-run.json").read_text())
+            document["provenance"]["not_an_instrument_field"] = {
+                "status": "observed", "source": "bad"
+            }
+            (root / "eval-run.json").write_text(json.dumps(document), encoding="utf-8")
+            with self.assertRaisesRegex(IntegrityError, "fields absent from instrument"):
+                GenericManifestAdapter().load(root)
+
     def test_reference_mutation_is_detected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = materialize_generic_demo(Path(directory) / "run")
@@ -144,6 +160,21 @@ class ProductTests(unittest.TestCase):
             self.assertEqual(result.returncode, 2)
             self.assertIn("same output filename", result.stderr)
             self.assertFalse(output.exists())
+
+    def test_bundle_refuses_to_overwrite_a_source_reference(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_generic_demo(Path(directory) / "run")
+            source = root / "outputs/scores.json"
+            before = source.read_bytes()
+            result = subprocess.run(
+                [sys.executable, "-m", "eval_evidence", "bundle", str(root), "-o", str(source)],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+            )
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("Refusing to overwrite referenced source file", result.stderr)
+            self.assertEqual(source.read_bytes(), before)
 
     def test_cli_plain_error_has_no_traceback(self):
         with tempfile.TemporaryDirectory() as directory:

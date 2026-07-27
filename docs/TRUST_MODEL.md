@@ -21,7 +21,8 @@ Threats not addressed:
 - concurrent time-of-check/time-of-use mutation;
 - fabricated source artifacts hashed consistently by an attacker;
 - key compromise, reviewer impersonation, or physical sensor fraud;
-- confidentiality of the source files (the bundle hashes them but does not encrypt them).
+- confidentiality of the source files (the bundle hashes them but does not encrypt them);
+- resource exhaustion from extremely large but syntactically valid JSON or referenced files.
 
 ## Gate before signing
 

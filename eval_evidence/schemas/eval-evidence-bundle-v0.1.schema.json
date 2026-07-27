@@ -94,6 +94,25 @@
         "sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
         "bytes": {"type": ["integer", "null"], "minimum": 0}
       },
+      "allOf": [
+        {
+          "if": {"properties": {"present": {"const": true}}},
+          "then": {
+            "properties": {
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "bytes": {"type": "integer", "minimum": 0}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"present": {"const": false}}},
+          "then": {"properties": {"sha256": {"type": "null"}, "bytes": {"type": "null"}}}
+        },
+        {
+          "if": {"properties": {"required": {"const": true}}},
+          "then": {"properties": {"present": {"const": true}}}
+        }
+      ],
       "additionalProperties": false
     },
     "evidence": {

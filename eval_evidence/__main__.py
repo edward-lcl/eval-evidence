@@ -15,6 +15,7 @@ from .core import (
     build_bundle,
     canonical_json_bytes,
     load_json,
+    safe_run_path,
     verify_bundle,
     verify_referenced_files,
 )
@@ -143,6 +144,13 @@ def command_bundle(args: argparse.Namespace) -> int:
         if resolved_destination in destinations:
             raise IntegrityError(
                 f"Multiple runs map to the same output filename: {destination.name}"
+            )
+        referenced_paths = {
+            safe_run_path(run.root, reference.path) for reference in run.references
+        }
+        if resolved_destination in referenced_paths:
+            raise IntegrityError(
+                f"Refusing to overwrite referenced source file: {destination}"
             )
         destinations.add(resolved_destination)
         prepared.append((destination, bundle, match, run))

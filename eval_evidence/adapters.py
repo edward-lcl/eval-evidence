@@ -127,6 +127,11 @@ class GenericManifestAdapter:
         provenance = document.get("provenance") or {}
         if not isinstance(provenance, dict):
             raise IntegrityError("provenance must be an object")
+        extra_provenance = sorted(set(provenance).difference(instrument_doc))
+        if extra_provenance:
+            raise IntegrityError(
+                f"provenance names fields absent from instrument: {extra_provenance}"
+            )
         instrument: dict[str, EvidenceValue] = {}
         for name, value in instrument_doc.items():
             declaration = provenance.get(name)
