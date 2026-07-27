@@ -48,10 +48,24 @@ eval-evidence verify /tmp/evidence.json --run-root /tmp/demo
 ## Release state
 
 The GitHub repository and CI are public. GitHub CI covers Python 3.11–3.13, distribution
-scope, installed-wheel demo, and the composite action. PyPI publication is a separate
-remaining gate because this environment has no PyPI token or configured Trusted
-Publisher. Do not claim PyPI availability until the project page exists and the
-published artifacts reproduce the audited release.
+scope, installed-wheel demo, and the composite action. The repository-side PyPI Trusted
+Publishing path is configured without a stored token: `.github/workflows/publish-pypi.yml`
+downloads the exact audited GitHub release assets, verifies `SHA256SUMS`, and publishes
+from the protected `pypi` environment using a short-lived OIDC credential.
+
+The remaining first-publication step is to register this pending publisher while logged
+into PyPI:
+
+- PyPI project: `eval-evidence`
+- GitHub owner: `edward-lcl`
+- repository: `eval-evidence`
+- workflow: `publish-pypi.yml`
+- environment: `pypi`
+
+A pending publisher does not reserve the name. After registering it, dispatch **Publish
+to PyPI** with tag `v0.1.0`; successful publication creates the project and converts the
+publisher to a normal trusted publisher. Do not claim PyPI availability until the
+project page exists and the published hashes match the audited release.
 
 ## Next highest-value milestone
 
