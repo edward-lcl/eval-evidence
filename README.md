@@ -22,7 +22,7 @@ It works offline, runs no models, uploads nothing, and treats missing evidence a
 Python 3.11+:
 
 ```bash
-python -m pip install eval-evidence
+python -m pip install "eval-evidence @ git+https://github.com/edward-lcl/eval-evidence@v0.1.0"
 eval-evidence demo -o /tmp/eval-run
 eval-evidence check /tmp/eval-run
 eval-evidence bundle /tmp/eval-run -o /tmp/eval-evidence.json

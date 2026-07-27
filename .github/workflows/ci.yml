@@ -40,3 +40,17 @@ jobs:
       - run: /tmp/eval-evidence-venv/bin/pip install dist/*.whl
       - run: /tmp/eval-evidence-venv/bin/eval-evidence demo -o /tmp/demo
       - run: /tmp/eval-evidence-venv/bin/eval-evidence check /tmp/demo
+
+  action-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - run: python -m pip install .
+      - run: eval-evidence demo -o .eval-evidence-demo
+      - uses: ./
+        with:
+          run-path: .eval-evidence-demo
+          adapter: generic
