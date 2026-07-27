@@ -1,0 +1,60 @@
+name: Eval Evidence Check
+description: Build and verify machine-checkable evidence for evaluation runs
+branding:
+  icon: shield
+  color: blue
+
+inputs:
+  run-path:
+    description: Repository-relative run or archive directory
+    required: true
+  adapter:
+    description: Adapter to use (auto, generic, or harbor)
+    required: false
+    default: auto
+  max-runs:
+    description: Optional positive limit for deterministic archive checks
+    required: false
+    default: ""
+  python-version:
+    description: Python version used to run Eval Evidence
+    required: false
+    default: "3.11"
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: Install Eval Evidence
+      shell: bash
+      run: python -m pip install "$GITHUB_ACTION_PATH"
+    - name: Check evaluation evidence
+      shell: bash
+      env:
+        EVAL_EVIDENCE_RUN_PATH: ${{ inputs.run-path }}
+        EVAL_EVIDENCE_ADAPTER: ${{ inputs.adapter }}
+        EVAL_EVIDENCE_MAX_RUNS: ${{ inputs.max-runs }}
+      run: |
+        resolved="$(python - <<'PY'
+        import os
+        from pathlib import Path
+        root = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+        supplied = Path(os.environ["EVAL_EVIDENCE_RUN_PATH"])
+        if supplied.is_absolute() or ".." in supplied.parts:
+            raise SystemExit("run-path must be repository-relative and cannot contain '..'")
+        candidate = (root / supplied).resolve()
+        try:
+            candidate.relative_to(root)
+        except ValueError:
+            raise SystemExit("run-path escapes GITHUB_WORKSPACE")
+        print(candidate)
+        PY
+        )"
+        args=("$resolved" --adapter "$EVAL_EVIDENCE_ADAPTER")
+        if [[ -n "$EVAL_EVIDENCE_MAX_RUNS" ]]; then
+          args+=(--max-runs "$EVAL_EVIDENCE_MAX_RUNS")
+        fi
+        eval-evidence check "${args[@]}"

@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eval-evidence"
+version = "0.1.0"
+description = "Machine-checkable evidence for AI evaluation runs"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "Edward Lue Chee Lip" }]
+maintainers = [{ name = "Edward Lue Chee Lip", email = "eluecheelip@gmail.com" }]
+keywords = ["ai-evaluation", "evaluation", "provenance", "benchmark-integrity", "harbor"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development :: Testing",
+]
+dependencies = ["jsonschema>=4.20,<5"]
+
+[project.optional-dependencies]
+test = ["build>=1.2", "pytest>=8"]
+
+[project.urls]
+Source = "https://github.com/edward-lcl/eval-evidence"
+Issues = "https://github.com/edward-lcl/eval-evidence/issues"
+Security = "https://github.com/edward-lcl/eval-evidence/security/policy"
+
+[project.scripts]
+eval-evidence = "eval_evidence.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["eval_evidence*"]
+
+[tool.setuptools.package-data]
+"eval_evidence.schemas" = ["*.json"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]

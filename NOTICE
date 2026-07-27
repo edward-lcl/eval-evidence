@@ -1,0 +1,13 @@
+Eval Evidence
+Copyright 2026 Edward Lue Chee Lip
+
+Licensed under the Apache License, Version 2.0.
+
+This standalone repository contains project-authored Python code, JSON Schemas,
+documentation, tests, packaging, and CI integration for Eval Evidence. It contains no
+Terminal-Bench/TB3 corpus data, trajectories, raw evaluation archives, manuscripts,
+preserved pull-request material, or third-party source trees.
+
+Harbor and other third-party projects retain their own licenses and notices. The Harbor
+adapter is an independently authored compatibility layer and includes no Harbor source
+code.

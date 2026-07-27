@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/edward-lcl/eval-evidence/main/eval_evidence/schemas/eval-evidence-instrument-v0.1.schema.json",
+  "title": "Eval Evidence instrument manifest v0.1",
+  "type": "object",
+  "required": ["schema_version", "fields", "coverage"],
+  "properties": {
+    "schema_version": {"const": "eval-evidence.instrument/v0.1"},
+    "fields": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["value", "status", "source"],
+        "properties": {
+          "value": {},
+          "status": {
+            "enum": ["observed", "derived", "operator_asserted", "provider_asserted", "unavailable"]
+          },
+          "source": {"type": "string", "minLength": 1},
+          "note": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["available_fraction", "field_count", "status_counts"],
+      "properties": {
+        "available_fraction": {"type": "number", "minimum": 0, "maximum": 1},
+        "field_count": {"type": "integer", "minimum": 1},
+        "status_counts": {
+          "type": "object",
+          "required": ["derived", "observed", "operator_asserted", "provider_asserted", "unavailable"],
+          "properties": {
+            "derived": {"type": "integer", "minimum": 0},
+            "observed": {"type": "integer", "minimum": 0},
+            "operator_asserted": {"type": "integer", "minimum": 0},
+            "provider_asserted": {"type": "integer", "minimum": 0},
+            "unavailable": {"type": "integer", "minimum": 0}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

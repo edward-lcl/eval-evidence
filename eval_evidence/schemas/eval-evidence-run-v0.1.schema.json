@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/edward-lcl/eval-evidence/main/eval_evidence/schemas/eval-evidence-run-v0.1.schema.json",
+  "title": "Eval Evidence generic run manifest v0.1",
+  "type": "object",
+  "required": ["schema_version", "run", "instrument", "metrics", "outcome", "references"],
+  "properties": {
+    "schema_version": {"const": "eval-evidence.run/v0.1"},
+    "run": {
+      "type": "object",
+      "required": ["id", "task_id"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "task_id": {"type": "string", "minLength": 1},
+        "task_revision": {"type": ["string", "null"]},
+        "started_at": {"type": ["string", "null"]},
+        "finished_at": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "instrument": {"type": "object"},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": ["observed", "derived", "operator_asserted", "provider_asserted", "unavailable"]
+          },
+          "source": {"type": "string", "minLength": 1},
+          "note": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "input_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "cache_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "output_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "cost_usd": {"type": ["number", "null"], "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "outcome": {
+      "type": "object",
+      "required": ["termination_reason"],
+      "properties": {
+        "reward": {},
+        "scores": {},
+        "termination_reason": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "role"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "role": {"type": "string", "minLength": 1},
+          "required": {"type": "boolean", "default": true}
+        },
+        "additionalProperties": false
+      }
+    },
+    "item_validity": {"$ref": "#/$defs/claimSetInput"},
+    "verifier_evidence": {"$ref": "#/$defs/claimSetInput"},
+    "extensions": {"type": "object"}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "claimInput": {},
+    "claimSetInput": {
+      "type": "object",
+      "properties": {
+        "status": {"enum": ["reported", "adjudicated", "run_outputs_only"]},
+        "claims": {
+          "type": "object",
+          "additionalProperties": {"$ref": "#/$defs/claimInput"}
+        },
+        "note": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    }
+  }
+}
