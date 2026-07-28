@@ -1,0 +1,39 @@
+# Real-Harbor readiness session (redacted)
+# Captured 2026-07-28 from a private local TB3 working archive.
+# Roots, task/run identifiers, UUIDs, prompts, trajectories, and source values are omitted.
+
+$ export EVAL_EVIDENCE_REAL_HARBOR_ROOT="$PRIVATE_JOB_ROOT"
+exit code: 0
+
+$ export EVAL_EVIDENCE_REAL_HARBOR_TRANSCRIPT=/tmp/harbor-readiness.json
+exit code: 0
+
+$ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.test_readiness.ReadinessTests.test_real_harbor_archive_when_supplied -v
+test_real_harbor_archive_when_supplied (tests.test_readiness.ReadinessTests.test_real_harbor_archive_when_supplied) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.040s
+
+OK
+exit code: 0
+
+$ PYTHONDONTWRITEBYTECODE=1 python3 -m eval_evidence check "$EVAL_EVIDENCE_REAL_HARBOR_ROOT"
+redacted summary: discovered=7 checked=7 valid=true compatibility_warnings=7 failed=0
+exit code: 0
+
+$ PYTHONDONTWRITEBYTECODE=1 python3 -m eval_evidence inspect "$EVAL_EVIDENCE_REAL_HARBOR_ROOT" --explain
+redacted summary: explained_runs=7
+exit code: 0
+
+# Source/value review against result.json, config.json, and agent/trajectory.json
+PASS: 7 genuine trials loaded, bundled, schema-checked, and source-file verified
+PASS: 133 instrument-path, metric, termination, step-count, and schema-version derivations were checked against source JSON
+PASS: 59 unavailable-field states were checked as absent or mapped-candidate null
+PASS: missing optional outputs observed in 7 of 7 trials
+PASS: ATIF-v1.5 and ATIF-v1.6 were observed and retained as non-fatal compatibility warnings; neither was silently treated as the recognized ATIF-v1.7 shape
+PASS: six trials had instrument coverage 0.60; one had 0.45, reconciled to genuinely absent/null source fields
+PASS: dogfooding found `max_wall_time_s` was unavailable despite six `result.json:agent_result.timeout_sec` values; the adapter fallback and regression test were added, then this protocol was rerun
+exit code: 0
+
+# Readiness conclusion
+The local real-data protocol passed and the field-level review is complete. G2 remains unmet because regular CI still lacks an approved sanitized structural fixture or secure fixture access; without EVAL_EVIDENCE_REAL_HARBOR_ROOT, the named test skips.

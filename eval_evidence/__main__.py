@@ -11,6 +11,7 @@ from pathlib import Path
 from . import __version__
 from .adapters import ADAPTERS, discover_runs
 from .core import (
+    BUNDLE_SCHEMA_VERSION,
     IntegrityError,
     build_bundle,
     canonical_json_bytes,
@@ -45,15 +46,38 @@ def _add_run_options(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def _evaluate(path: Path, adapter_name: str, schema: Path, max_runs: int | None = None) -> dict:
+def _compat_warnings(bundle: dict) -> list[str]:
+    harbor = bundle.get("extensions", {}).get("harbor", {})
+    compat = harbor.get("adapter_compat", {}) if isinstance(harbor, dict) else {}
+    if not isinstance(compat, dict) or compat.get("recognized") is not False:
+        return []
+    seen = compat.get("trajectory_schema_version")
+    tested = compat.get("tested_against", [])
+    return [
+        f"Unrecognized Harbor trajectory schema version {seen!r}; "
+        f"adapter was tested against {tested!r}. Mapping was best-effort."
+    ]
+
+
+def _evaluate(
+    path: Path,
+    adapter_name: str,
+    schema: Path,
+    max_runs: int | None = None,
+    min_coverage: float | None = None,
+) -> dict:
     if max_runs is not None and max_runs < 1:
         raise IntegrityError("--max-runs must be positive")
+    if min_coverage is not None and not 0 <= min_coverage <= 1:
+        raise IntegrityError("--min-coverage must be between 0 and 1")
     matches = discover_runs(path, adapter_name)
     selected = matches[:max_runs] if max_runs is not None else matches
     rows = []
     failures = 0
+    policy_failures = 0
     unavailable_heavy = 0
     referenced_file_fail = 0
+    compat_warning_count = 0
     for match in selected:
         try:
             run = match.adapter.load(match.root)
@@ -61,12 +85,23 @@ def _evaluate(path: Path, adapter_name: str, schema: Path, max_runs: int | None 
             schema_errors = verify_bundle(bundle, schema_path=schema)
             reference_errors = verify_referenced_files(bundle, match.root)
             errors = schema_errors + reference_errors
+            policy_errors = []
+            coverage = bundle["instrument_manifest"]["coverage"]
+            available_fraction = coverage["available_fraction"]
+            if min_coverage is not None and available_fraction < min_coverage:
+                policy_errors.append(
+                    f"Instrument coverage {available_fraction:.6f} is below "
+                    f"--min-coverage {min_coverage:.6f}"
+                )
             fields = bundle["instrument_manifest"]["fields"]
             unavailable = sum(value["status"] == "unavailable" for value in fields.values())
             heavy = bool(fields and unavailable / len(fields) >= 0.5)
+            warnings = _compat_warnings(bundle)
             unavailable_heavy += int(heavy)
             referenced_file_fail += int(bool(reference_errors))
+            compat_warning_count += len(warnings)
             failures += int(bool(errors))
+            policy_failures += int(bool(policy_errors))
             rows.append(
                 {
                     "root": str(match.root),
@@ -75,9 +110,11 @@ def _evaluate(path: Path, adapter_name: str, schema: Path, max_runs: int | None 
                     "task_id": run.task_id,
                     "valid": not errors,
                     "bundle_digest": bundle["bundle_digest"]["value"],
-                    "instrument_coverage": bundle["instrument_manifest"]["coverage"],
+                    "instrument_coverage": coverage,
                     "unavailable_heavy": heavy,
+                    "compat_warnings": warnings,
                     "errors": errors,
+                    "policy_errors": policy_errors,
                 }
             )
         except Exception as exc:  # isolate malformed runs in an archive
@@ -87,11 +124,16 @@ def _evaluate(path: Path, adapter_name: str, schema: Path, max_runs: int | None 
                     "root": str(match.root),
                     "adapter": match.adapter.name,
                     "valid": False,
+                    "compat_warnings": [],
                     "errors": [f"{type(exc).__name__}: {exc}"],
+                    "policy_errors": [],
                 }
             )
     return {
         "valid": failures == 0,
+        "policy_passed": policy_failures == 0,
+        "tool_version": __version__,
+        "bundle_schema_version": BUNDLE_SCHEMA_VERSION,
         "root": str(path.resolve()),
         "discovered_runs": len(matches),
         "checked_runs": len(selected),
@@ -99,8 +141,10 @@ def _evaluate(path: Path, adapter_name: str, schema: Path, max_runs: int | None 
         "summary": {
             "ok": len(selected) - failures,
             "failed": failures,
+            "policy_failed": policy_failures,
             "unavailable_heavy": unavailable_heavy,
             "referenced_file_fail": referenced_file_fail,
+            "compat_warnings": compat_warning_count,
         },
         "runs": rows,
         "scope": (
@@ -111,9 +155,15 @@ def _evaluate(path: Path, adapter_name: str, schema: Path, max_runs: int | None 
 
 
 def command_check(args: argparse.Namespace) -> int:
-    report = _evaluate(args.path, args.adapter, args.schema, args.max_runs)
+    report = _evaluate(
+        args.path,
+        args.adapter,
+        args.schema,
+        args.max_runs,
+        args.min_coverage,
+    )
     emit(report)
-    return 0 if report["valid"] else 1
+    return 0 if report["valid"] and report["policy_passed"] else 1
 
 
 def _safe_output_stem(run_id: str) -> str:
@@ -197,20 +247,29 @@ def command_inspect(args: argparse.Namespace) -> int:
         run = match.adapter.load(match.root)
         bundle = build_bundle(run)
         fields = bundle["instrument_manifest"]["fields"]
-        rows.append(
-            {
-                "root": str(match.root),
-                "adapter": match.adapter.name,
-                "run_id": run.run_id,
-                "task_id": run.task_id,
-                "source_format": run.source_format,
-                "coverage": bundle["instrument_manifest"]["coverage"],
-                "available_fields": sorted(k for k, v in fields.items() if v["status"] != "unavailable"),
-                "unavailable_fields": sorted(k for k, v in fields.items() if v["status"] == "unavailable"),
-                "item_validity_status": bundle["item_validity"]["status"],
-                "verifier_evidence_status": bundle["verifier_evidence"]["status"],
+        row = {
+            "root": str(match.root),
+            "adapter": match.adapter.name,
+            "run_id": run.run_id,
+            "task_id": run.task_id,
+            "source_format": run.source_format,
+            "coverage": bundle["instrument_manifest"]["coverage"],
+            "available_fields": sorted(
+                k for k, v in fields.items() if v["status"] != "unavailable"
+            ),
+            "unavailable_fields": sorted(
+                k for k, v in fields.items() if v["status"] == "unavailable"
+            ),
+            "item_validity_status": bundle["item_validity"]["status"],
+            "verifier_evidence_status": bundle["verifier_evidence"]["status"],
+        }
+        if args.explain:
+            row["field_sources"] = {
+                name: value["source"]
+                for name, value in sorted(fields.items())
+                if value["status"] != "unavailable"
             }
-        )
+        rows.append(row)
     emit({"runs": rows})
     return 0
 
@@ -247,6 +306,11 @@ def parser() -> argparse.ArgumentParser:
     check = sub.add_parser("check", help="auto-detect, build, and verify runs in one step")
     _add_run_options(check)
     check.add_argument("--max-runs", type=int)
+    check.add_argument(
+        "--min-coverage",
+        type=float,
+        help="fail runs whose available instrument-field fraction is below FLOAT (0..1)",
+    )
     check.set_defaults(func=command_check)
 
     bundle = sub.add_parser("bundle", aliases=["build"], help="write canonical evidence bundles")
@@ -256,6 +320,11 @@ def parser() -> argparse.ArgumentParser:
 
     inspect = sub.add_parser("inspect", help="show adapter and evidence coverage without writing")
     _add_run_options(inspect)
+    inspect.add_argument(
+        "--explain",
+        action="store_true",
+        help="include each available instrument field's adapter source",
+    )
     inspect.set_defaults(func=command_inspect)
 
     verify = sub.add_parser("verify", help="verify an existing evidence bundle")
@@ -267,6 +336,7 @@ def parser() -> argparse.ArgumentParser:
     audit = sub.add_parser("audit", help="compatibility alias for check")
     _add_run_options(audit)
     audit.add_argument("--max-runs", "--max-trials", dest="max_runs", type=int)
+    audit.add_argument("--min-coverage", type=float)
     audit.set_defaults(func=command_check)
 
     demo = sub.add_parser("demo", help="write a deterministic synthetic example run")

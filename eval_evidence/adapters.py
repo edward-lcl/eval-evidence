@@ -37,6 +37,10 @@ def _first(mapping: dict[str, Any], *names: str) -> Any:
     return None
 
 
+def _coalesce(*values: Any) -> Any:
+    return next((value for value in values if value is not None), None)
+
+
 def _reward(result: dict[str, Any]) -> Any:
     rewards = _get(result, "verifier_result", "rewards")
     if not isinstance(rewards, dict):
@@ -196,6 +200,7 @@ class HarborAdapter:
 
     name = "harbor"
     required = ("result.json", "config.json", "agent/trajectory.json")
+    KNOWN_TRAJECTORY_SCHEMA_VERSIONS: frozenset[str] = frozenset({"ATIF-v1.7"})
 
     def detect(self, path: Path) -> int:
         return 80 if all((path / relative).is_file() for relative in self.required) else 0
@@ -231,12 +236,18 @@ class HarborAdapter:
         agent_info = result.get("agent_info") if isinstance(result.get("agent_info"), dict) else {}
         model_info = agent_info.get("model_info") if isinstance(agent_info.get("model_info"), dict) else {}
         agent_config = config.get("agent") if isinstance(config.get("agent"), dict) else {}
+        agent_result = result.get("agent_result") if isinstance(result.get("agent_result"), dict) else {}
         kwargs = agent_config.get("kwargs") if isinstance(agent_config.get("kwargs"), dict) else {}
         environment = config.get("environment") if isinstance(config.get("environment"), dict) else {}
         task_config = config.get("task") if isinstance(config.get("task"), dict) else {}
         verifier_config = config.get("verifier") if isinstance(config.get("verifier"), dict) else {}
         model_name = model_info.get("name") or agent_config.get("model_name") or _get(trajectory, "agent", "model_name")
         effort = _first(kwargs, "effort", "thinking", "reasoning_effort", "thinking_budget")
+        max_wall_time = _first(agent_config, "override_timeout_sec", "max_timeout_sec")
+        max_wall_time_source = "Harbor config.json:agent"
+        if max_wall_time is None:
+            max_wall_time = agent_result.get("timeout_sec")
+            max_wall_time_source = "Harbor result.json:agent_result.timeout_sec"
         sampling_names = (
             "temperature", "top_p", "top_k", "seed", "max_tokens",
             "frequency_penalty", "presence_penalty", "stop_sequences",
@@ -254,7 +265,7 @@ class HarborAdapter:
             "harness_name": derived("harbor", "recognized Harbor trial layout"),
             "tools": derived(tools, "Harbor config.json:agent", "Configured tools may omit provider-side effective definitions"),
             "max_turns": observed(_first(kwargs, "max_turns", "max_steps"), "Harbor config.json:agent.kwargs"),
-            "max_wall_time_s": observed(_first(agent_config, "override_timeout_sec", "max_timeout_sec"), "Harbor config.json:agent"),
+            "max_wall_time_s": observed(max_wall_time, max_wall_time_source),
             "effort_or_thinking": observed(effort, "Harbor config.json:agent.kwargs"),
             "sampling_parameters": observed(sampling or None, "Harbor config.json:agent.kwargs"),
             "task_checksum": observed(result.get("task_checksum"), "Harbor result.json:task_checksum"),
@@ -273,7 +284,6 @@ class HarborAdapter:
             FileReference("verifier/test-stdout.txt", "verifier-output", False),
             FileReference("artifacts/manifest.json", "artifact-manifest", False),
         ]
-        agent_result = result.get("agent_result") if isinstance(result.get("agent_result"), dict) else {}
         final_metrics = trajectory.get("final_metrics") if isinstance(trajectory.get("final_metrics"), dict) else {}
         rewards = _get(result, "verifier_result", "rewards")
         verifier_evidence = {
@@ -284,6 +294,11 @@ class HarborAdapter:
             },
             "note": "Reward is a reported outcome, not reward-independent proof of correctness.",
         }
+        trajectory_schema_version = trajectory.get("schema_version")
+        trajectory_schema_recognized = (
+            isinstance(trajectory_schema_version, str)
+            and trajectory_schema_version in self.KNOWN_TRAJECTORY_SCHEMA_VERSIONS
+        )
         return NormalizedRun(
             root=root,
             adapter=self.name,
@@ -296,10 +311,22 @@ class HarborAdapter:
             started_at=result.get("started_at"),
             finished_at=result.get("finished_at"),
             metrics={
-                "input_tokens": agent_result.get("n_input_tokens", final_metrics.get("total_prompt_tokens")),
-                "cache_tokens": agent_result.get("n_cache_tokens", final_metrics.get("total_cached_tokens")),
-                "output_tokens": agent_result.get("n_output_tokens", final_metrics.get("total_completion_tokens")),
-                "cost_usd": agent_result.get("cost_usd", final_metrics.get("total_cost_usd")),
+                "input_tokens": _coalesce(
+                    agent_result.get("n_input_tokens"),
+                    final_metrics.get("total_prompt_tokens"),
+                ),
+                "cache_tokens": _coalesce(
+                    agent_result.get("n_cache_tokens"),
+                    final_metrics.get("total_cached_tokens"),
+                ),
+                "output_tokens": _coalesce(
+                    agent_result.get("n_output_tokens"),
+                    final_metrics.get("total_completion_tokens"),
+                ),
+                "cost_usd": _coalesce(
+                    agent_result.get("cost_usd"),
+                    final_metrics.get("total_cost_usd"),
+                ),
             },
             reward=_reward(result),
             scores=rewards,
@@ -307,7 +334,12 @@ class HarborAdapter:
             verifier_evidence=verifier_evidence,
             extensions={
                 "harbor": {
-                    "trajectory_schema_version": trajectory.get("schema_version"),
+                    "adapter_compat": {
+                        "trajectory_schema_version": trajectory_schema_version,
+                        "recognized": trajectory_schema_recognized,
+                        "tested_against": sorted(self.KNOWN_TRAJECTORY_SCHEMA_VERSIONS),
+                    },
+                    "trajectory_schema_version": trajectory_schema_version,
                     "trajectory_session_id": trajectory.get("session_id") or trajectory.get("trajectory_id"),
                     "trajectory_step_count": len(trajectory.get("steps") or []) if isinstance(trajectory.get("steps"), list) else None,
                 }

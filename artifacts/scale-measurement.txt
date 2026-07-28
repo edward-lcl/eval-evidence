@@ -1,0 +1,31 @@
+# Real-archive discovery scale measurement (redacted)
+
+Captured 2026-07-28 against a private local copy of the frozen TB3 working snapshot
+`3c5be84efd707da8`. No run roots, identifiers, task contents, or values are retained.
+
+Environment:
+
+```text
+Eval Evidence: current 0.2.0 source checkout
+Python: 3.14.5
+OS: macOS 26.5.2, arm64
+Measurement: /usr/bin/time -l around Harbor discover_runs only
+```
+
+Result:
+
+```json
+{
+  "adapter": "harbor",
+  "discovered_runs": 8633,
+  "elapsed_seconds": 5.248431,
+  "maximum_resident_set_bytes": 44761088,
+  "within_documented_run_bound": true
+}
+```
+
+`discover_runs` completed successfully below the documented 10,000-run support bound.
+The measurement covers recursive discovery and adapter-shape detection only; it does not
+measure JSON loading, bundle creation, schema validation, or referenced-file hashing.
+It is a single-machine observation, not a latency guarantee. `--max-runs` still applies
+after discovery and therefore does not bound traversal of an adversarially large tree.

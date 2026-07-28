@@ -112,6 +112,7 @@ def materialize_harbor_demo(root: Path) -> Path:
             "agent": {
                 "name": "synthetic-agent",
                 "model_name": "example/synthetic-model",
+                "override_timeout_sec": 60,
                 "skills": [],
                 "mcp_servers": [],
                 "kwargs": {"max_turns": 8, "temperature": 0, "seed": 7},

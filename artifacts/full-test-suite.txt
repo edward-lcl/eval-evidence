@@ -1,0 +1,42 @@
+$ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
+test_archive_check_isolates_malformed_run (test_product.ProductTests.test_archive_check_isolates_malformed_run) ... ok
+test_bundle_refuses_to_overwrite_a_source_reference (test_product.ProductTests.test_bundle_refuses_to_overwrite_a_source_reference) ... ok
+test_bundle_tamper_matrix (test_product.ProductTests.test_bundle_tamper_matrix) ... ok
+test_cli_plain_error_has_no_traceback (test_product.ProductTests.test_cli_plain_error_has_no_traceback) ... ok
+test_cli_quickstart_both_formats (test_product.ProductTests.test_cli_quickstart_both_formats) ... ok
+test_composite_action_rejects_escape_patterns_before_cli (test_product.ProductTests.test_composite_action_rejects_escape_patterns_before_cli) ... ok
+test_generic_demo_is_schema_valid_and_byte_deterministic (test_product.ProductTests.test_generic_demo_is_schema_valid_and_byte_deterministic) ... ok
+test_generic_manifest_validates_against_published_schema (test_product.ProductTests.test_generic_manifest_validates_against_published_schema) ... ok
+test_generic_manifest_wins_when_both_shapes_exist (test_product.ProductTests.test_generic_manifest_wins_when_both_shapes_exist) ... ok
+test_harbor_is_first_class_adapter_not_canonical_format (test_product.ProductTests.test_harbor_is_first_class_adapter_not_canonical_format) ... ok
+test_harbor_metrics_fall_back_when_primary_value_is_null (test_product.ProductTests.test_harbor_metrics_fall_back_when_primary_value_is_null) ... ok
+test_harbor_wall_time_falls_back_to_result_timeout (test_product.ProductTests.test_harbor_wall_time_falls_back_to_result_timeout) ... ok
+test_inspect_explain_and_minimum_coverage_gate (test_product.ProductTests.test_inspect_explain_and_minimum_coverage_gate) ... ok
+test_multi_run_output_collision_fails_before_writing (test_product.ProductTests.test_multi_run_output_collision_fails_before_writing) ... ok
+test_nonfinite_json_and_orphan_provenance_fail_closed (test_product.ProductTests.test_nonfinite_json_and_orphan_provenance_fail_closed) ... ok
+test_redigested_bundle_is_internally_valid_not_authentic (test_product.ProductTests.test_redigested_bundle_is_internally_valid_not_authentic) ... ok
+test_reference_mutation_is_detected (test_product.ProductTests.test_reference_mutation_is_detected) ... ok
+test_schema_ids_and_wire_ids_are_distinct_and_explicit (test_product.ProductTests.test_schema_ids_and_wire_ids_are_distinct_and_explicit) ... ok
+test_symlink_escape_is_rejected (test_product.ProductTests.test_symlink_escape_is_rejected) ... ok
+test_textual_path_escape_is_rejected (test_product.ProductTests.test_textual_path_escape_is_rejected) ... ok
+test_trusted_publishing_is_oidc_only_and_checksum_gated (test_product.ProductTests.test_trusted_publishing_is_oidc_only_and_checksum_gated) ... ok
+test_unknown_harbor_trajectory_version_warns_without_failing (test_product.ProductTests.test_unknown_harbor_trajectory_version_warns_without_failing) ... ok
+test_every_gate_names_an_existing_test (test_readiness.ReadinessTests.test_every_gate_names_an_existing_test) ... ok
+test_real_harbor_archive_when_supplied (test_readiness.ReadinessTests.test_real_harbor_archive_when_supplied) ... skipped 'set EVAL_EVIDENCE_REAL_HARBOR_ROOT to a redacted genuine Harbor job archive'
+
+----------------------------------------------------------------------
+Ran 24 tests in 1.535s
+
+OK (skipped=1)
+exit code: 0
+
+$ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.test_product.ProductTests.test_cli_quickstart_both_formats tests.test_product.ProductTests.test_unknown_harbor_trajectory_version_warns_without_failing tests.test_product.ProductTests.test_bundle_tamper_matrix -v
+test_cli_quickstart_both_formats (tests.test_product.ProductTests.test_cli_quickstart_both_formats) ... ok
+test_unknown_harbor_trajectory_version_warns_without_failing (tests.test_product.ProductTests.test_unknown_harbor_trajectory_version_warns_without_failing) ... ok
+test_bundle_tamper_matrix (tests.test_product.ProductTests.test_bundle_tamper_matrix) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.578s
+
+OK
+exit code: 0

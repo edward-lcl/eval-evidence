@@ -1,0 +1,43 @@
+# Eval Evidence clean-wheel session
+# Current 0.2.0 working-tree candidate; not a published-artifact receipt.
+
+$ python -m build --wheel --sdist --outdir $SCRATCH/dist
+Successfully built eval_evidence-0.2.0-py3-none-any.whl and eval_evidence-0.2.0.tar.gz
+exit code: 0
+
+$ sha256(wheel and sdist)
+995ac901fa72c4c83e7728acaa560f3ec417e9e141a7f0dcb85d59abd07d79e3 eval_evidence-0.2.0-py3-none-any.whl
+7e73fd3e58b13ea1fc826f4661f12a651b6d86c2d325102ad7169880e746dca4 eval_evidence-0.2.0.tar.gz
+exit code: 0
+
+$ python scripts/audit_distribution.py $SCRATCH/dist
+{
+  "authorized_for_distribution": true,
+  "claim_boundary": "archive and metadata audit only; not trusted execution or rights beyond LICENSE/NOTICE",
+  "errors": [],
+  "forbidden_member_count": 0,
+  "license_expression": "Apache-2.0",
+  "package": "eval-evidence",
+  "packaged_schemas": [
+    "eval-evidence-bundle-v0.1.schema.json",
+    "eval-evidence-instrument-v0.1.schema.json",
+    "eval-evidence-run-v0.1.schema.json",
+    "otel-genai-crosswalk-v0.1.json"
+  ],
+  "sdist_file_count": 47,
+  "technical_valid": true,
+  "version": "0.2.0",
+  "wheel_file_count": 18
+}
+exit code: 0
+
+$ $CLEAN_VENV/bin/eval-evidence --version
+eval-evidence 0.2.0
+exit code: 0
+
+$ bash scripts/dogfood.sh $CLEAN_VENV/bin/python $SCRATCH/work
+generic demo/check/bundle/verify: exit code 0
+harbor demo/check/bundle/verify: exit code 0
+referenced-file tamper: observed inner exit code 1, path named
+bundle-claim tamper: observed inner exit code 1, Bundle digest mismatch named
+dogfood script exit code: 0

@@ -19,10 +19,10 @@ It works offline, runs no models, uploads nothing, and treats missing evidence a
 
 ## Five-minute quickstart
 
-Python 3.11+:
+Python 3.11–3.14:
 
 ```bash
-python -m pip install "eval-evidence @ git+https://github.com/edward-lcl/eval-evidence@v0.1.0"
+python -m pip install "eval-evidence @ git+https://github.com/edward-lcl/eval-evidence@main"
 eval-evidence demo -o /tmp/eval-run
 eval-evidence check /tmp/eval-run
 eval-evidence bundle /tmp/eval-run -o /tmp/eval-evidence.json
@@ -31,7 +31,24 @@ eval-evidence verify /tmp/eval-evidence.json --run-root /tmp/eval-run
 
 The demo is deterministic and synthetic. `check` is the one-command path: it detects
 the input adapter, builds a bundle in memory, validates the schema and digest, re-hashes
-local references, and reports evidence coverage.
+local references, and reports evidence coverage. Use `check --min-coverage 0.5` when CI
+should reject a run with less than 50% of instrument fields available. Coverage
+shortfalls appear under `policy_errors`; they return exit 1 without mislabeling schema,
+digest, or reference integrity as invalid.
+
+## Use it before, after, or on prior runs
+
+| When | How Eval Evidence fits |
+|---|---|
+| Before a new run | Configure the existing harness to retain model-response identity, instrument settings, task/environment/verifier digests, and source artifacts. v0.2 does not yet provide a preflight or live monitor. |
+| After a run | Run `check`, seal a bundle, store it separately, and verify it against the stable run root. |
+| On historical runs | Reprocess retained Harbor trials directly, or add an honestly sourced generic manifest to a preserved copy. No model rerun is required. Missing historical evidence remains `unavailable`. |
+| When publishing | Compare recorded conditions and disclose integrity failures, material differences, unknowns, denominators, and exclusions. Campaign packages and generated comparison reports are future work. |
+
+A retrospective bundle establishes archive identity from the time it is created; it
+cannot prove the archive was unchanged since the original evaluation without an older
+trusted baseline. See the [product lifecycle](docs/LIFECYCLE.md) for prospective setup,
+retrospective import, and the role of static graphics.
 
 ## Works with any evaluation stack
 
@@ -65,6 +82,11 @@ eval-evidence check /path/to/run
 eval-evidence bundle /path/to/run -o evidence.json
 ```
 
+For manually assembled manifests, add `provenance` entries rather than allowing a
+system-card claim or operator-entered value to look like a run-time observation. See
+the [owner walkthrough](docs/OWNER_WALKTHROUGH.md) for a complete application example
+and a paired-result investigation.
+
 ### Harbor
 
 Harbor trial directories are detected directly from `result.json`, `config.json`, and
@@ -75,8 +97,9 @@ eval-evidence check /path/to/harbor-job
 eval-evidence bundle /path/to/harbor-job -o evidence/
 ```
 
-Harbor is the first adapter, not the canonical format. See
-[`docs/ADAPTERS.md`](docs/ADAPTERS.md) to integrate another evaluator.
+Harbor is the first adapter, not the canonical format. See the reviewable
+[`Harbor field mapping`](docs/HARBOR_MAPPING.md) and
+[`adapter guide`](docs/ADAPTERS.md) to inspect it or integrate another evaluator.
 
 ## One entry point per audience
 
@@ -89,17 +112,36 @@ Harbor is the first adapter, not the canonical format. See
 
 ## GitHub Action
 
-Pin the action to a release tag or commit:
+During the 0.2.0 pre-release review, use `main`; for production, replace it with the
+reviewed commit SHA or `v0.2.0` after that tag exists:
 
 ```yaml
-- uses: edward-lcl/eval-evidence@v0.1.0
+- uses: edward-lcl/eval-evidence@main
   with:
     run-path: evaluation-runs
     adapter: auto
 ```
 
+The `main` install above is intentional while 0.2.0 is under review; the older
+`v0.1.0` tag does not provide `--min-coverage`, `inspect --explain`, or Harbor schema
+compatibility warnings.
+
 `run-path` must remain inside the checked-out repository. Absolute paths, `..`, and
-resolved escapes are rejected.
+resolved escapes are rejected. The action also accepts optional `max-runs` and
+`min-coverage` inputs.
+
+## Exit codes and verification boundary
+
+| Exit | Meaning |
+|---|---|
+| `0` | Command completed and all requested checks passed. |
+| `1` | Checks completed, but a run/bundle was invalid, a reference differed, or a requested coverage threshold was missed. |
+| `2` | Usage, discovery, unsafe-path, malformed-input, or output precondition error prevented the requested check. |
+
+`verify BUNDLE` without `--run-root` checks the JSON schema and whether the bundle's
+claims match its embedded digest. It does **not** re-hash source files. Add
+`--run-root PATH` to compare referenced files with local bytes. Neither mode proves who
+created the bundle: anyone who edits an unsigned bundle can recompute its digest.
 
 ## What a bundle does not prove
 
@@ -113,7 +155,7 @@ resolved escapes are rejected.
 - This tool is not a leaderboard, model runner, certification authority, hosted
   registry, or physical-verification system.
 
-Version 0.1 intentionally emits `attestation.signature: null`. The trust model in
+The v0.1 bundle contract intentionally emits `attestation.signature: null`. The trust model in
 [`docs/TRUST_MODEL.md`](docs/TRUST_MODEL.md) describes the gate before signing or a
 physical verifier is added.
 
@@ -139,8 +181,13 @@ python -m build --wheel --sdist --outdir dist
 python scripts/audit_distribution.py dist
 ```
 
-See the [bundle specification](docs/BUNDLE_SPEC.md), [adapter guide](docs/ADAPTERS.md),
-[trust model](docs/TRUST_MODEL.md), and [security policy](SECURITY.md).
+See the [readiness gates](docs/READINESS.md),
+[product lifecycle](docs/LIFECYCLE.md),
+[owner walkthrough](docs/OWNER_WALKTHROUGH.md),
+[Terminal-Bench review brief](docs/TBENCH_REVIEW.md),
+[bundle specification](docs/BUNDLE_SPEC.md), [adapter guide](docs/ADAPTERS.md),
+[compatibility policy](docs/COMPATIBILITY.md), [trust model](docs/TRUST_MODEL.md),
+and [security policy](SECURITY.md).
 
 ## License
 

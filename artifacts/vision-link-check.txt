@@ -1,0 +1,10 @@
+$ python3 deterministic docs/VISION.md reference check (paths kept repository-relative)
+PASS: ../CONTRIBUTING.md
+PASS: ADAPTERS.md
+PASS: COMPATIBILITY.md
+PASS: HARBOR_MAPPING.md
+PASS: READINESS.md
+PASS: TBENCH_REVIEW.md
+PASS: TRUST_MODEL.md
+checked 7 local references; unresolved=0
+exit code: 0

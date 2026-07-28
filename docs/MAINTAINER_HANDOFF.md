@@ -12,7 +12,7 @@
 The initially considered PyPI name `eval-integrity` is owned by an unrelated project.
 `eval-evidence` was the recorded fallback and is the only identity used here.
 
-## What v0.1 contains
+## What the 0.2.0 candidate contains
 
 - generic `eval-run.json` adapter;
 - Harbor trial adapter;
@@ -47,8 +47,8 @@ eval-evidence verify /tmp/evidence.json --run-root /tmp/demo
 
 ## Release state
 
-The GitHub repository and CI are public. GitHub CI covers Python 3.11–3.13, distribution
-scope, installed-wheel demo, and the composite action. The repository-side PyPI Trusted
+The GitHub repository and CI are public. GitHub CI covers Python 3.11–3.14, distribution
+scope, installed-wheel dogfood on Linux/macOS/Windows, and the composite action. The repository-side PyPI Trusted
 Publishing path is configured without a stored token: `.github/workflows/publish-pypi.yml`
 downloads the exact audited GitHub release assets, verifies `SHA256SUMS`, and publishes
 from the protected `pypi` environment using a short-lived OIDC credential.
@@ -63,7 +63,7 @@ into PyPI:
 - environment: `pypi`
 
 A pending publisher does not reserve the name. After registering it, dispatch **Publish
-to PyPI** with tag `v0.1.0`; successful publication creates the project and converts the
+to PyPI** with tag `v0.2.0`; successful publication creates the project and converts the
 publisher to a normal trusted publisher. Do not claim PyPI availability until the
 project page exists and the published hashes match the audited release.
 

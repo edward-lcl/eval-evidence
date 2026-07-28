@@ -1,0 +1,114 @@
+# Eval Evidence CLI demo session
+# Captured from the current source tree on 2026-07-28.
+
+$ python3 -m eval_evidence demo -o /tmp/ee-product-session/eval-run
+{
+  "format": "generic",
+  "next": "eval-evidence check /tmp/ee-product-session/eval-run",
+  "root": "/tmp/ee-product-session/eval-run",
+  "synthetic": true
+}
+exit code: 0
+
+$ python3 -m eval_evidence check /tmp/ee-product-session/eval-run
+{
+  "bundle_schema_version": "eval-evidence.bundle/v0.1",
+  "checked_runs": 1,
+  "discovered_runs": 1,
+  "policy_passed": true,
+  "root": "/private/tmp/ee-product-session/eval-run",
+  "runs": [
+    {
+      "adapter": "generic",
+      "bundle_digest": "d60b0eaa1f9239eb57430a86b7831d893bb92111064c323671e2830325ba4cf9",
+      "compat_warnings": [],
+      "errors": [],
+      "instrument_coverage": {
+        "available_fraction": 0.3,
+        "field_count": 20,
+        "status_counts": {
+          "derived": 0,
+          "observed": 4,
+          "operator_asserted": 2,
+          "provider_asserted": 0,
+          "unavailable": 14
+        }
+      },
+      "policy_errors": [],
+      "root": "/private/tmp/ee-product-session/eval-run",
+      "run_id": "synthetic-run-001",
+      "task_id": "synthetic-arithmetic",
+      "unavailable_heavy": true,
+      "valid": true
+    }
+  ],
+  "scope": "schema, bundle digest, and local referenced-file identity; no model execution, trusted-runner signature, or physical-truth claim",
+  "summary": {
+    "compat_warnings": 0,
+    "failed": 0,
+    "ok": 1,
+    "policy_failed": 0,
+    "referenced_file_fail": 0,
+    "unavailable_heavy": 1
+  },
+  "tool_version": "0.2.0",
+  "truncated": false,
+  "valid": true
+}
+exit code: 0
+
+$ python3 -m eval_evidence bundle /tmp/ee-product-session/eval-run -o /tmp/ee-product-session/eval-evidence.json
+{
+  "written": [
+    {
+      "adapter": "generic",
+      "bundle_digest": "d60b0eaa1f9239eb57430a86b7831d893bb92111064c323671e2830325ba4cf9",
+      "output": "/tmp/ee-product-session/eval-evidence.json",
+      "root": "/private/tmp/ee-product-session/eval-run"
+    }
+  ]
+}
+exit code: 0
+
+$ python3 -m eval_evidence verify /tmp/ee-product-session/eval-evidence.json --run-root /tmp/ee-product-session/eval-run
+{
+  "bundle": "/tmp/ee-product-session/eval-evidence.json",
+  "bundle_digest": {
+    "algorithm": "sha256",
+    "value": "d60b0eaa1f9239eb57430a86b7831d893bb92111064c323671e2830325ba4cf9"
+  },
+  "errors": [],
+  "referenced_files_checked": true,
+  "scope": "content/schema identity only; not trusted attestation",
+  "valid": true
+}
+exit code: 0
+
+# Tamper demonstration: flip one byte in the referenced outputs/scores.json without changing its size.
+$ python3 - <<'PY'  # one-byte tamper of outputs/scores.json
+from pathlib import Path
+path = Path('/tmp/ee-product-session/eval-run/outputs/scores.json')
+data = bytearray(path.read_bytes())
+index = len(data) // 2
+data[index] ^= 0x01
+path.write_bytes(bytes(data))
+print(f'flipped byte {index} in {path}; size remains {len(data)} bytes')
+PY
+flipped byte 16 in /tmp/ee-product-session/eval-run/outputs/scores.json; size remains 33 bytes
+exit code: 0
+
+$ python3 -m eval_evidence verify /tmp/ee-product-session/eval-evidence.json --run-root /tmp/ee-product-session/eval-run
+{
+  "bundle": "/tmp/ee-product-session/eval-evidence.json",
+  "bundle_digest": {
+    "algorithm": "sha256",
+    "value": "d60b0eaa1f9239eb57430a86b7831d893bb92111064c323671e2830325ba4cf9"
+  },
+  "errors": [
+    "Referenced file digest mismatch for outputs/scores.json"
+  ],
+  "referenced_files_checked": true,
+  "scope": "content/schema identity only; not trusted attestation",
+  "valid": false
+}
+exit code: 1
