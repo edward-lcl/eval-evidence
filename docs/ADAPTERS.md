@@ -47,7 +47,10 @@ Adapters ignore unknown source fields: retaining a new field must not cause an o
 reader to fail. A missing or unknown Harbor trajectory `schema_version` is different:
 it is preserved under `extensions.harbor.adapter_compat` and surfaced by `check` as a
 compatibility warning. The warning does not change bundle validity or the command's
-exit code. The Harbor adapter currently recognizes `ATIF-v1.7`.
+exit code. The Harbor adapter recognizes `ATIF-v1.5`, `ATIF-v1.6`, and
+`ATIF-v1.7` for the root agent, steps, and final-metrics fields it reads. This is not a
+claim that Eval Evidence validates the complete ATIF document; Harbor owns that
+validation.
 
 Wire-contract versioning follows these rules:
 
@@ -55,11 +58,13 @@ Wire-contract versioning follows these rules:
   `eval-evidence.run/v0.1`;
 - changing instrument field shape, evidence statuses, or field meaning moves
   `eval-evidence.instrument/v0.1`;
-- changing bundle shape, canonical digest scope, or an adapter mapping's semantic
-  interpretation of source values moves `eval-evidence.bundle/v0.1`.
+- changing bundle shape, canonical digest scope, or the contract-level meaning of a
+  normalized field moves `eval-evidence.bundle/v0.1`.
 
-Adding recognition for a source-harness version without changing mapping semantics is
-a tool compatibility update and is recorded in the package changelog. A mapping change
-that changes bundle bytes by changing their meaning requires the applicable wire
-`schema_version` bump; ordinary run-to-run value differences do not. See
+Source-harness recognition, fallback corrections, and safer adapter redaction that
+preserve the normalized field's contract-level meaning are tool compatibility updates.
+They are recorded in the package changelog and deterministic golden tests because they
+can change bundle bytes. A mapping change that changes what a normalized field means
+requires the applicable wire `schema_version` bump; ordinary run-to-run value
+or source-selection differences do not. See
 [`COMPATIBILITY.md`](COMPATIBILITY.md) for support and deprecation policy.

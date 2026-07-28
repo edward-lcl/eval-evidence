@@ -1,28 +1,29 @@
 # Eval Evidence
 
-**Machine-checkable evidence for AI evaluation runs.**
+**A post-run evidence envelope and integrity checker for AI evaluations.**
 
 > A score should travel with a machine-checkable record of what was observed,
 > asserted, derived, and unavailable.
 
-Eval Evidence produces a deterministic JSON bundle that joins three questions without
-collapsing them into another score:
+Eval Evidence produces a deterministic JSON bundle that carries three kinds of evidence
+without pretending to adjudicate them:
 
-1. **Is the item valid?** Carry item-validity claims—or state that none were supplied.
-2. **What instrument produced the result?** Record model, agent, harness, budgets, and
-   other fields with explicit provenance and coverage.
-3. **What does the verifier establish?** Keep reward and reward-independent evidence
-   separate.
+1. **Item validity:** record supplied validity claims—or state that none were supplied.
+2. **Evaluation instrument:** record model, agent, harness, budgets, and other fields
+   with explicit provenance and coverage.
+3. **Verifier evidence:** keep reported rewards separate from reward-independent
+   evidence.
 
 It works offline, runs no models, uploads nothing, and treats missing evidence as
-`unavailable` rather than guessing.
+`unavailable` rather than guessing. It checks bundle and referenced-file identity; it
+cannot decide whether a task is broken, a verifier is correct, or one model is better.
 
 ## Five-minute quickstart
 
 Python 3.11–3.14:
 
 ```bash
-python -m pip install "eval-evidence @ git+https://github.com/edward-lcl/eval-evidence@main"
+python -m pip install "eval-evidence @ git+https://github.com/edward-lcl/eval-evidence@release/v0.2.0-readiness"
 eval-evidence demo -o /tmp/eval-run
 eval-evidence check /tmp/eval-run
 eval-evidence bundle /tmp/eval-run -o /tmp/eval-evidence.json
@@ -31,10 +32,13 @@ eval-evidence verify /tmp/eval-evidence.json --run-root /tmp/eval-run
 
 The demo is deterministic and synthetic. `check` is the one-command path: it detects
 the input adapter, builds a bundle in memory, validates the schema and digest, re-hashes
-local references, and reports evidence coverage. Use `check --min-coverage 0.5` when CI
-should reject a run with less than 50% of instrument fields available. Coverage
-shortfalls appear under `policy_errors`; they return exit 1 without mislabeling schema,
-digest, or reference integrity as invalid.
+local references, and reports evidence coverage. An optional
+`check --min-coverage VALUE` heuristic can reject records below an operator-chosen
+completeness fraction. Coverage shortfalls appear under `policy_errors`; they return
+exit 1 without mislabeling schema, digest, or reference integrity as invalid. No default
+threshold is recommended: any fraction can still omit model-response, harness,
+environment, or verifier identity. This is not a comparability or claim-readiness score;
+critical-field policy profiles are future work.
 
 ## Use it before, after, or on prior runs
 
@@ -97,38 +101,49 @@ eval-evidence check /path/to/harbor-job
 eval-evidence bundle /path/to/harbor-job -o evidence/
 ```
 
-Harbor is the first adapter, not the canonical format. See the reviewable
-[`Harbor field mapping`](docs/HARBOR_MAPPING.md) and
-[`adapter guide`](docs/ADAPTERS.md) to inspect it or integrate another evaluator.
+Harbor is the first adapter, not the canonical format. This complements `harbor view`:
+the viewer explores jobs and compares results, while Eval Evidence creates portable
+per-trial evidence envelopes for offline integrity and provenance checks. Version 0.2
+does not create a job-level denominator/index manifest or decide whether trials are
+comparable.
+
+Terminal-Bench and Harbor maintainers should start with the focused
+[`review brief`](docs/TBENCH_REVIEW.md), then red-line the reviewable
+[`Harbor field mapping`](docs/HARBOR_MAPPING.md). The
+[`adapter guide`](docs/ADAPTERS.md) covers other evaluators.
 
 ## One entry point per audience
 
 | Audience | Start here | Benefit |
 |---|---|---|
-| Benchmark maintainers | `eval-evidence check ./runs` in CI | Detect malformed, mutated, and evidence-poor run records before release |
+| Benchmark maintainers | `eval-evidence check ./runs` in CI | Reject malformed or evidence-poor records; seal bundles separately for later mutation checks |
 | Frontier labs and eval teams | Emit `eval-run.json` | Carry instrument settings and unavailable state across harness boundaries |
 | Reviewers and auditors | `verify` offline | Check schema, digest, and referenced bytes without executing the evaluation |
 | Runtime and physical-verification teams | Populate future attestation profiles | Reuse the evidence format while adding a separately scoped trust layer |
 
-## GitHub Action
+## Check-only GitHub Action
 
-During the 0.2.0 pre-release review, use `main`; for production, replace it with the
-reviewed commit SHA or `v0.2.0` after that tag exists:
+During the 0.2.0 pre-release review, use the review branch; for production, replace it
+with the reviewed commit SHA or `v0.2.0` after that tag exists:
 
 ```yaml
-- uses: edward-lcl/eval-evidence@main
+- uses: edward-lcl/eval-evidence@release/v0.2.0-readiness
   with:
     run-path: evaluation-runs
     adapter: auto
 ```
 
-The `main` install above is intentional while 0.2.0 is under review; the older
-`v0.1.0` tag does not provide `--min-coverage`, `inspect --explain`, or Harbor schema
-compatibility warnings.
+The review-branch reference is intentional while pull request #2 is open; the older
+`main`/`v0.1.0` code does not provide `--min-coverage`, `inspect --explain`, or Harbor
+schema compatibility warnings. The review branch is mutable; pull request #2 records
+the tested head SHA. Record that SHA for reproduction, and pin an accepted commit or
+release tag before relying on it in production.
 
-`run-path` must remain inside the checked-out repository. Absolute paths, `..`, and
-resolved escapes are rejected. The action also accepts optional `max-runs` and
-`min-coverage` inputs.
+The Action runs `check` in memory. It does not write or upload a baseline bundle, so it
+cannot by itself detect a later mutation. Stage downloaded Harbor artifacts inside the
+checkout before invoking it: `run-path` must remain repository-relative. Absolute
+paths, `..`, and resolved escapes are rejected. The Action also accepts optional
+`max-runs` and `min-coverage` inputs.
 
 ## Exit codes and verification boundary
 
@@ -150,8 +165,11 @@ created the bundle: anyone who edits an unsigned bundle can recompute its digest
 - A signature can authenticate a signer and scoped claims; it cannot make claims true.
 - Provider-side policy, prompt assembly, or effective network enforcement remain
   unavailable unless the run records them.
-- Eval Evidence hashes referenced files but does not copy prompts, trajectories,
-  credentials, or environment variables into the bundle.
+- Eval Evidence hashes referenced files rather than copying their contents. The Harbor
+  adapter does not copy prompts, trajectories, tool paths/URLs, credentials, or
+  environment variables; it does carry selected identifiers and configured values.
+  Generic manifest values and extensions are user-supplied and are embedded, so review
+  every bundle before sharing it.
 - This tool is not a leaderboard, model runner, certification authority, hosted
   registry, or physical-verification system.
 

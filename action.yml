@@ -1,5 +1,5 @@
 name: Eval Evidence Check
-description: Build and verify machine-checkable evidence for evaluation runs
+description: Check evaluation run structure, evidence coverage, and current referenced bytes
 branding:
   icon: shield
   color: blue

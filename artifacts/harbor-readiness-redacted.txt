@@ -18,7 +18,7 @@ OK
 exit code: 0
 
 $ PYTHONDONTWRITEBYTECODE=1 python3 -m eval_evidence check "$EVAL_EVIDENCE_REAL_HARBOR_ROOT"
-redacted summary: discovered=7 checked=7 valid=true compatibility_warnings=7 failed=0
+redacted summary: discovered=7 checked=7 valid=true compatibility_warnings=0 failed=0
 exit code: 0
 
 $ PYTHONDONTWRITEBYTECODE=1 python3 -m eval_evidence inspect "$EVAL_EVIDENCE_REAL_HARBOR_ROOT" --explain
@@ -30,7 +30,7 @@ PASS: 7 genuine trials loaded, bundled, schema-checked, and source-file verified
 PASS: 133 instrument-path, metric, termination, step-count, and schema-version derivations were checked against source JSON
 PASS: 59 unavailable-field states were checked as absent or mapped-candidate null
 PASS: missing optional outputs observed in 7 of 7 trials
-PASS: ATIF-v1.5 and ATIF-v1.6 were observed and retained as non-fatal compatibility warnings; neither was silently treated as the recognized ATIF-v1.7 shape
+PASS: ATIF-v1.5 and ATIF-v1.6 were observed; after reviewing the stable root fields against Harbor's published version history, both were added to the recognized surface and all 7 trials reported compatibility_warnings=0
 PASS: six trials had instrument coverage 0.60; one had 0.45, reconciled to genuinely absent/null source fields
 PASS: dogfooding found `max_wall_time_s` was unavailable despite six `result.json:agent_result.timeout_sec` values; the adapter fallback and regression test were added, then this protocol was rerun
 exit code: 0

@@ -6,7 +6,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
-from .core import IntegrityError, RUN_SCHEMA_VERSION, load_json, safe_run_path
+from .core import (
+    IntegrityError,
+    RUN_SCHEMA_VERSION,
+    canonical_json_bytes,
+    load_json,
+    safe_run_path,
+    sha256_bytes,
+)
 from .models import EvidenceValue, FileReference, NormalizedRun, derived, observed, unavailable
 
 GENERIC_MANIFEST = "eval-run.json"
@@ -200,7 +207,9 @@ class HarborAdapter:
 
     name = "harbor"
     required = ("result.json", "config.json", "agent/trajectory.json")
-    KNOWN_TRAJECTORY_SCHEMA_VERSIONS: frozenset[str] = frozenset({"ATIF-v1.7"})
+    KNOWN_TRAJECTORY_SCHEMA_VERSIONS: frozenset[str] = frozenset(
+        {"ATIF-v1.5", "ATIF-v1.6", "ATIF-v1.7"}
+    )
 
     def detect(self, path: Path) -> int:
         return 80 if all((path / relative).is_file() for relative in self.required) else 0
@@ -253,9 +262,20 @@ class HarborAdapter:
             "frequency_penalty", "presence_penalty", "stop_sequences",
         )
         sampling = {name: kwargs[name] for name in sampling_names if kwargs.get(name) is not None}
+        configured_skills = agent_config.get("skills") or []
+        configured_mcp_servers = agent_config.get("mcp_servers") or []
         tools = {
-            "skills": agent_config.get("skills") or [],
-            "mcp_servers": agent_config.get("mcp_servers") or [],
+            "skill_count": len(configured_skills),
+            "skills_sha256": sha256_bytes(canonical_json_bytes(configured_skills)),
+            "mcp_server_count": len(configured_mcp_servers),
+            "mcp_servers_sha256": sha256_bytes(
+                canonical_json_bytes(configured_mcp_servers)
+            ),
+        }
+        safe_verifier_config = {
+            name: verifier_config[name]
+            for name in ("disable", "override_timeout_sec", "max_timeout_sec")
+            if verifier_config.get(name) is not None
         }
         instrument = {
             "model_id": observed(model_name, "Harbor result/config/trajectory"),
@@ -270,9 +290,12 @@ class HarborAdapter:
             "sampling_parameters": observed(sampling or None, "Harbor config.json:agent.kwargs"),
             "task_checksum": observed(result.get("task_checksum"), "Harbor result.json:task_checksum"),
             "network_policy": derived(
-                {"extra_allowed_hosts": environment.get("extra_allowed_hosts") or []},
-                "Harbor config.json:environment.extra_allowed_hosts",
-                "Configuration is not proof of effective enforcement",
+                {
+                    "extra_allowed_hosts": environment.get("extra_allowed_hosts") or [],
+                    "agent_extra_allowed_hosts": agent_config.get("extra_allowed_hosts") or [],
+                },
+                "Harbor config.json:environment/agent.extra_allowed_hosts",
+                "Configured layers are not proof of effective enforcement",
             ),
         }
         references = [
@@ -290,7 +313,11 @@ class HarborAdapter:
             "status": "run_outputs_only",
             "claims": {
                 "raw_reward": observed(_reward(result), "Harbor result.json:verifier_result.rewards").as_dict(),
-                "configured_verifier": observed(verifier_config or None, "Harbor config.json:verifier").as_dict(),
+                "configured_verifier": observed(
+                    safe_verifier_config or None,
+                    "selected non-secret Harbor config.json:verifier fields",
+                    "Environment, kwargs, import paths, and log filters are not copied",
+                ).as_dict(),
             },
             "note": "Reward is a reported outcome, not reward-independent proof of correctness.",
         }
@@ -330,7 +357,10 @@ class HarborAdapter:
             },
             reward=_reward(result),
             scores=rewards,
-            termination_reason=str(_get(result, "exception_info", "exception_type") or "completed"),
+            termination_reason=str(
+                _get(result, "exception_info", "exception_type")
+                or ("completed" if result.get("finished_at") is not None else "unavailable")
+            ),
             verifier_evidence=verifier_evidence,
             extensions={
                 "harbor": {

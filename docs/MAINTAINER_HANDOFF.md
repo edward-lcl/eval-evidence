@@ -53,8 +53,10 @@ Publishing path is configured without a stored token: `.github/workflows/publish
 downloads the exact audited GitHub release assets, verifies `SHA256SUMS`, and publishes
 from the protected `pypi` environment using a short-lived OIDC credential.
 
-The remaining first-publication step is to register this pending publisher while logged
-into PyPI:
+Publication is not the only remaining readiness step. The genuine-Harbor G2 gate still
+needs an approved sanitized fixture or secure CI access, and the Terminal-Bench/Harbor
+mapping review is pending. Separately, the remaining PyPI infrastructure step is to
+register this pending publisher while logged into PyPI:
 
 - PyPI project: `eval-evidence`
 - GitHub owner: `edward-lcl`
@@ -69,10 +71,15 @@ project page exists and the published hashes match the audited release.
 
 ## Next highest-value milestone
 
-Obtain one real consumer outside the original analysis repository. Prefer a small
-integration that emits `eval-run.json`; use the built-in Harbor adapter as proof that
-the normalized contract is not tied to one framework. Record friction before adding a
-plugin system or more adapters.
+Complete the narrow Harbor maintainer review in [`TBENCH_REVIEW.md`](TBENCH_REVIEW.md):
+correct the mapping, choose a reproducible G2 fixture route, and decide the source of a
+future job-level denominator/index contract. Do not mistake per-trial bundle discovery
+for campaign membership or aggregate-score evidence.
+
+After that review, obtain one real consumer outside the original analysis repository.
+Prefer a small integration that emits `eval-run.json`; use the built-in Harbor adapter
+as proof that the normalized contract is not tied to one framework. Record friction
+before adding a plugin system or more adapters.
 
 Only after a real consumer:
 

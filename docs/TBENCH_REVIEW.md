@@ -1,43 +1,115 @@
 # Terminal-Bench / Harbor review brief
 
-## What this adds
+## The five-minute version
 
-Eval Evidence is an offline post-run layer. It reads an existing Harbor trial, records
-instrument fields with explicit provenance and unavailable state, hashes the source
-artifacts, and emits a deterministic schema-validated bundle. It does not require a
-runner change and gives CI/reviewers one `check` command for content integrity,
-coverage, and Harbor-version drift.
+Eval Evidence is a post-run evidence envelope and integrity checker. It reads existing
+Harbor trial artifacts, records where normalized fields came from (or that they are
+unavailable), hashes the referenced bytes, and emits a deterministic JSON bundle.
+Later verification can detect whether those covered bytes differ from the baseline.
 
-## What it does not claim
+It does **not** determine whether a Terminal-Bench task is broken, whether a verifier is
+correct, or whether one agent/model is better. It carries supplied item-validity and
+verifier claims without upgrading them into facts.
 
-A digest is not a trusted-runner signature; a reward is not ground truth; configured
-network policy is not proof of enforcement. The tool neither executes a model nor
-copies trajectories into a bundle. Signing, hosted services, plugin loading, and new
-adapters are explicitly outside this review. See `TRUST_MODEL.md` for the complete
-boundary.
+This complements rather than replaces Harbor:
 
-## Evidence to review
+| Harbor capability | Eval Evidence boundary |
+|---|---|
+| Run tasks and agents | Never executes models, tasks, or verifiers |
+| `harbor view` job/trial exploration and comparison | Portable per-trial JSON for offline integrity and provenance checks |
+| `result.json`, `config.json`, ATIF, verifier outputs | Normalized cross-framework envelope plus hashes of selected source files |
+| Job statistics and retries | No job/campaign denominator manifest in v0.2 |
 
-The steps below require Eval Evidence 0.2.0 or a current `main` checkout; the older
-`v0.1.0` tag does not include the review commands or compatibility warnings.
+## Try the review checkout
 
-1. Follow the README path on a genuine multi-trial Harbor job.
-2. Red-line `HARBOR_MAPPING.md`, especially agent timeout, cache-token,
-   exception/termination, and ATIF `steps` mappings.
-3. Check that unavailable values correspond to genuinely absent source evidence.
-4. Change a referenced file and confirm `verify --run-root` names it.
-5. Try an unknown trajectory schema version and confirm `check` warns without failing.
-6. Use the paired-result decision record in `OWNER_WALKTHROUGH.md` on one surprising
-   comparison; classify integrity, comparability, and missing-evidence findings without
-   converting them into an unsupported model-quality verdict.
+Review pull request [#2](https://github.com/edward-lcl/eval-evidence/pull/2). Its
+description records the tested head SHA; confirm it matches `git rev-parse HEAD` before
+reproducing the evidence. From that checkout:
 
-The current readiness table intentionally marks real-Harbor validation unmet because
-only synthetic fixtures are available in this repository.
+```bash
+git rev-parse HEAD
+python -m pip install .
+eval-evidence check /path/to/jobs/job-name
+eval-evidence inspect /path/to/jobs/job-name --adapter harbor --explain
+eval-evidence bundle /path/to/jobs/job-name -o /separate/evidence/
+eval-evidence verify /separate/evidence/TRIAL_NAME.eval-evidence.json \
+  --run-root /path/to/jobs/job-name/TRIAL_DIRECTORY
+```
 
-## Specific ask
+`check` recursively discovers qualifying trial directories that contain the required
+result, config, and ATIF files. It does not compare that count with Harbor's job result,
+so a missing/non-ATIF trial can be absent from the report. `bundle` emits one bundle
+per trial; it does not seal the job-level `result.json` or establish which trials entered a
+reported aggregate. The bundle destination should be outside the run root so a later
+source mutation cannot silently replace both source and baseline together.
 
-Please review/correct the Harbor field mapping and provide a redacted structural
-fixture for regression tests. If the mapping is acceptable, consider having Harbor
-emit the framework-neutral `eval-run.json` contract natively. Native emission would
-make the heuristic Harbor adapter optional while preserving the same bundle and
-verification path.
+## What we have already learned
+
+A private seven-trial genuine Harbor job loaded and verified locally, including absent
+optional files. The review exposed and fixed null metric fallbacks and an effective
+agent-timeout fallback. A separate genuine three-group comparison found differing task
+checksums, denominators, and turn budgets and was classified **not comparable** rather
+than converted into a model ranking. Only redacted summaries are retained here.
+
+The reproducible CI gate remains `unmet`: this public repository does not contain an
+approved sanitized genuine structural fixture, and regular CI has no secure fixture
+access. That distinction is deliberate—local success is useful review evidence but not
+repeatable release evidence.
+
+## Current compatibility boundary
+
+| Input | v0.2 status |
+|---|---|
+| Single-step Harbor trial with `agent/trajectory.json` | Exercised on genuine retained data |
+| Trial without an ATIF trajectory | Not discovered by v0.2; Harbor documents agent-directory contents as implementation-dependent |
+| Job directory containing multiple trials | Deterministic discovery of qualifying children; no completeness check or job-level output |
+| ATIF v1.5, v1.6, v1.7 | Recognized for the fields this adapter reads |
+| Unknown ATIF version | Visible non-fatal compatibility warning |
+| Current Harbor multi-step `step_results` aggregation | Not yet validated or mapped |
+| Regraded trials and job-level retry/denominator semantics | Not yet validated or represented |
+| Provider-returned response-model identity | Unavailable unless Harbor records it in a mapped run artifact |
+| Claim-specific critical-field policy | Not implemented; `--min-coverage` is only a coarse fraction |
+
+See [`HARBOR_MAPPING.md`](HARBOR_MAPPING.md) for every source path and known gap.
+
+## Terms used in this review
+
+- **Job:** Harbor's campaign container and aggregate state. Eval Evidence does not seal
+  this layer in v0.2.
+- **Trial/run:** one task attempt and the unit of an evidence bundle.
+- **Configured model:** the name requested in Harbor configuration. It is not necessarily
+  the provider-returned response model.
+- **Reward:** verifier-reported outcome. It is not automatically independent evidence
+  that the task or solution is valid.
+- **Baseline:** the bundle and source hashes created after a stable trial. An unsigned
+  baseline detects later differences only while the baseline itself remains trusted.
+
+## Requested decisions
+
+The review is intentionally narrow. In priority order, please:
+
+1. **Correct or approve the field mapping.** Focus on configured versus effective agent
+   timeout, token/cache semantics, exception/termination, task identity, network
+   configuration, verifier evidence, and the ATIF fields used.
+2. **Choose a reproducible G2 route.** Either approve a minimal sanitized structural
+   fixture with no task content, prompts, trajectories, credentials, model names, or
+   identifiers, or provide secure read-only CI access. Until then G2 remains `unmet`.
+3. **Advise on the job-level boundary.** Before external adoption, we expect a
+   deterministic job/campaign index that links exact trial bundle digests and records
+   attempted, retried, failed, timed-out, cancelled, and excluded denominators. Please
+   confirm whether Harbor's job `result.json` should be the source of that contract.
+
+Native Harbor emission is a later option, not a condition of this review. If desired,
+the clean integration point is after each trial result and trajectory are finalized:
+Harbor would either invoke the same normalization/sealing library or emit the
+framework-neutral `eval-run.json`; evidence failure should report separately and must
+not rewrite the completed trial result. A job-level index would be finalized only after
+job status and retry counts stabilize.
+
+## What acceptance would mean
+
+Acceptance means the adapter accurately describes the evidence present in the reviewed
+Harbor layouts and fails honestly when evidence is missing. It would not endorse Eval
+Evidence as a leaderboard, certify Terminal-Bench tasks, validate model-quality claims,
+or make unsigned digests trustworthy against an actor who can replace both source and
+bundle.

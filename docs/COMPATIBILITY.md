@@ -9,8 +9,10 @@ The current contracts are `eval-evidence.run/v0.1`,
 `eval-evidence.instrument/v0.1`, and `eval-evidence.bundle/v0.1`. Breaking changes
 include removing or renaming a field, changing a required field or allowed type,
 changing evidence-status semantics, changing canonical digest scope, or changing the
-semantic interpretation of an adapter mapping. Additive optional data is
-non-breaking only when older readers can safely ignore it.
+contract-level meaning of a normalized field. Adapter source corrections, compatibility
+recognition, and safer redaction that preserve that meaning are package-level changes;
+they are documented and may change deterministic bundle bytes. Additive optional data
+is non-breaking only when older readers can safely ignore it.
 
 The project will keep verification support for v0.1 bundles for at least 12 months
 after a successor bundle contract is released. A planned removal receives at least 90
@@ -49,8 +51,8 @@ the bounds are best-effort and may exhaust time, memory, or I/O, as recorded in
 
 ## Distribution status
 
-The README intentionally installs the 0.2.0 candidate from `main` until a `v0.2.0` tag
-is created and validated; the older `v0.1.0` tag lacks the readiness features. After
-release, the tag becomes authoritative until the PyPI trusted publisher and project
-page are confirmed. Do not claim `pip install eval-evidence` availability based only
+While pull request #2 is open, the README intentionally installs the 0.2.0 candidate
+from `release/v0.2.0-readiness`; `main` and the older `v0.1.0` tag lack the readiness
+features. After review, pin the accepted commit or validated `v0.2.0` tag. The tag
+becomes authoritative until the PyPI trusted publisher and project page are confirmed. Do not claim `pip install eval-evidence` availability based only
 on the presence of the publishing workflow.

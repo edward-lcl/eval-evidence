@@ -52,7 +52,7 @@ the runs are comparable or that their rewards are correct.
 | System-prompt/policy identity | **Unknown** | Prompt hash and policy profile were unavailable throughout. |
 | Environment image digest | **Unknown** | Unavailable throughout. |
 | Verifier digest | **Unknown** | Unavailable throughout; reported reward is not reward-independent verifier evidence. |
-| Harbor trajectory compatibility | Warning | The selected runs declared ATIF-v1.5 or ATIF-v1.6. Both remain outside the ATIF-v1.7 recognized allowlist and emitted visible best-effort mapping warnings. |
+| Harbor trajectory compatibility | Matched after compatibility review | The selected runs declared ATIF-v1.5 or ATIF-v1.6. Both are now recognized for the stable root agent, steps, and final-metrics fields used by the adapter; this does not claim full ATIF validation. |
 | Bundle/source integrity | Matched/passed | Schema, bundle digest, and referenced-file checks passed for all six trials. |
 
 ## Cohort refinement

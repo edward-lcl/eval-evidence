@@ -15,22 +15,34 @@ A 2026-07-28 genuine-data run passed locally and its field-level review was comp
 G2 remains unmet because regular CI still lacks an approved sanitized fixture or secure
 fixture access. A source-checkout-only record is retained at `artifacts/g2-blocker.md`.
 A clean-wheel build, audit, installed-CLI dogfood, and tamper session is likewise retained
-at `artifacts/clean-wheel-session.txt`; it does not replace the required cross-platform
-CI run. These workspace evidence records are intentionally excluded from distributions.
+at `artifacts/clean-wheel-session.txt`. Linux, macOS, and Windows distribution jobs
+passed for pull request #2 after CI exposed and the branch fixed platform-dependent
+demo newlines. These workspace evidence records are intentionally excluded from
+distributions.
 
-## Sharing milestone: ready to show the Terminal-Bench team
+## Mapping-review milestone: ready to show the Terminal-Bench team
 
-G1 and G4 must remain met, G2 must move to met, and the cross-platform `distribution`
-job must pass its clean-wheel `scripts/dogfood.sh` run. Run the G2 protocol in
-[`DOGFOOD.md`](DOGFOOD.md), inspect coverage and unavailable values against the source
-JSON, and retain only an approved redacted transcript—not benchmark data. Before G2 is
-changed to `met`, regular CI must receive an approved sanitized structural fixture or
-secure fixture access so the named test runs without a skip. The owner should also
-complete the real-run and tamper sessions in
-[`OWNER_WALKTHROUGH.md`](OWNER_WALKTHROUGH.md). The pass criterion is: a new user
-following the README can produce and verify a bundle from a real Harbor job in under
-five minutes without undocumented corrections. Source-tree G1 alone does not establish
-that install/distribution criterion.
+A maintainer review is needed to close G2, so requiring G2 before showing the work would
+be circular. The candidate is ready for a narrow mapping and fixture review when G1,
+G3, and G4 remain met; cross-platform clean-wheel jobs pass; genuine local results are
+reported separately from reproducible CI evidence; and known unsupported Harbor
+layouts are visible. Those conditions are now satisfied. The focused entry point is
+[`TBENCH_REVIEW.md`](TBENCH_REVIEW.md).
+
+## Adoption/release-endorsement milestone
+
+Before asking Terminal-Bench/Harbor maintainers to endorse or depend on the adapter, G2
+must move to `met`. Run the protocol in [`DOGFOOD.md`](DOGFOOD.md), inspect coverage and
+unavailable values against source JSON, and retain only an approved redacted
+transcript—not benchmark data. Regular CI must receive an approved sanitized structural
+fixture or secure fixture access so the named test runs without a skip. The pass
+criterion is: a new user following the README can produce and verify a bundle from a
+real Harbor job in under five minutes without undocumented corrections.
+
+Current multi-step `step_results`, regrade lineage, and job-level denominators/retries
+are outside the validated Harbor surface. They must be mapped and tested, or explicitly
+excluded from the first supported compatibility
+statement, before broader Harbor adoption.
 
 ## Wider-use milestone
 

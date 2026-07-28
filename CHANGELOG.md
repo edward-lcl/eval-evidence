@@ -30,6 +30,17 @@ All notable package, wire-contract, and adapter-compatibility changes are record
   both configured agent timeout fields are absent or `null`, as found in genuine runs.
 - Synthetic demo files are written as explicit UTF-8/LF bytes so their pinned bundle
   digests are identical on Windows, macOS, and Linux.
+- The Harbor adapter now recognizes the observed `ATIF-v1.5` and `ATIF-v1.6` root
+  surfaces alongside `ATIF-v1.7`; unrelated versions still warn without failing.
+- The Terminal-Bench review brief now distinguishes Harbor's viewer/job semantics from
+  per-trial sealing and exposes unsupported multi-step, regrade, and campaign surfaces
+  before maintainer review.
+- Harbor network configuration now retains environment-baseline and agent-phase host
+  additions as separate configured layers; an unfinished result no longer defaults to
+  a `completed` termination reason without a non-null `finished_at`.
+- Harbor tool configuration is represented by counts and canonical hashes, and verifier
+  configuration is reduced to selected non-secret fields instead of copying tool paths,
+  URLs, environment values, kwargs, or import paths into the bundle.
 
 ### Security
 
