@@ -6,8 +6,8 @@ Successfully built eval_evidence-0.2.0-py3-none-any.whl and eval_evidence-0.2.0.
 exit code: 0
 
 $ sha256(wheel and sdist)
-995ac901fa72c4c83e7728acaa560f3ec417e9e141a7f0dcb85d59abd07d79e3 eval_evidence-0.2.0-py3-none-any.whl
-7e73fd3e58b13ea1fc826f4661f12a651b6d86c2d325102ad7169880e746dca4 eval_evidence-0.2.0.tar.gz
+fc042d844de8fa7c1fce9915960a860df8a7ed60c0f522a733f170b702b28338 eval_evidence-0.2.0-py3-none-any.whl
+e7596e6db0ed895e5486092a93e03d224ee65ad6da3263a13c0e9d8601006a32 eval_evidence-0.2.0.tar.gz
 exit code: 0
 
 $ python scripts/audit_distribution.py $SCRATCH/dist

@@ -28,6 +28,8 @@ All notable package, wire-contract, and adapter-compatibility changes are record
   `result.json` value is absent or explicitly `null`.
 - Harbor agent wall-time now falls back to `result.json:agent_result.timeout_sec` when
   both configured agent timeout fields are absent or `null`, as found in genuine runs.
+- Synthetic demo files are written as explicit UTF-8/LF bytes so their pinned bundle
+  digests are identical on Windows, macOS, and Linux.
 
 ### Security
 

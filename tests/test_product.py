@@ -41,6 +41,26 @@ class ProductTests(unittest.TestCase):
             self.assertIsNone(bundle["attestation"]["signature"])
             self.assertEqual(bundle["source"]["adapter"], "generic")
 
+    def test_demo_files_use_platform_independent_lf_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            generic = materialize_generic_demo(base / "generic")
+            harbor = materialize_harbor_demo(base / "harbor")
+            paths = (
+                generic / "eval-run.json",
+                generic / "outputs/scores.json",
+                generic / "logs/events.json",
+                harbor / "result.json",
+                harbor / "config.json",
+                harbor / "agent/trajectory.json",
+                harbor / "verifier/reward.txt",
+            )
+            for path in paths:
+                with self.subTest(path=path):
+                    payload = path.read_bytes()
+                    self.assertTrue(payload.endswith(b"\n"))
+                    self.assertNotIn(b"\r\n", payload)
+
     def test_harbor_is_first_class_adapter_not_canonical_format(self):
         with tempfile.TemporaryDirectory() as directory:
             root = materialize_harbor_demo(Path(directory) / "run")

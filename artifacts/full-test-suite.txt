@@ -5,6 +5,7 @@ test_bundle_tamper_matrix (test_product.ProductTests.test_bundle_tamper_matrix) 
 test_cli_plain_error_has_no_traceback (test_product.ProductTests.test_cli_plain_error_has_no_traceback) ... ok
 test_cli_quickstart_both_formats (test_product.ProductTests.test_cli_quickstart_both_formats) ... ok
 test_composite_action_rejects_escape_patterns_before_cli (test_product.ProductTests.test_composite_action_rejects_escape_patterns_before_cli) ... ok
+test_demo_files_use_platform_independent_lf_bytes (test_product.ProductTests.test_demo_files_use_platform_independent_lf_bytes) ... ok
 test_generic_demo_is_schema_valid_and_byte_deterministic (test_product.ProductTests.test_generic_demo_is_schema_valid_and_byte_deterministic) ... ok
 test_generic_manifest_validates_against_published_schema (test_product.ProductTests.test_generic_manifest_validates_against_published_schema) ... ok
 test_generic_manifest_wins_when_both_shapes_exist (test_product.ProductTests.test_generic_manifest_wins_when_both_shapes_exist) ... ok
@@ -25,7 +26,7 @@ test_every_gate_names_an_existing_test (test_readiness.ReadinessTests.test_every
 test_real_harbor_archive_when_supplied (test_readiness.ReadinessTests.test_real_harbor_archive_when_supplied) ... skipped 'set EVAL_EVIDENCE_REAL_HARBOR_ROOT to a redacted genuine Harbor job archive'
 
 ----------------------------------------------------------------------
-Ran 24 tests in 1.535s
+Ran 25 tests in 1.549s
 
 OK (skipped=1)
 exit code: 0
@@ -36,7 +37,7 @@ test_unknown_harbor_trajectory_version_warns_without_failing (tests.test_product
 test_bundle_tamper_matrix (tests.test_product.ProductTests.test_bundle_tamper_matrix) ... ok
 
 ----------------------------------------------------------------------
-Ran 3 tests in 0.578s
+Ran 3 tests in 0.593s
 
 OK
 exit code: 0

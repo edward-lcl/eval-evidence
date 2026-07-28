@@ -10,7 +10,8 @@ from .core import RUN_SCHEMA_VERSION
 
 def _write(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    payload = (json.dumps(value, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    path.write_bytes(payload)
 
 
 def materialize_generic_demo(root: Path) -> Path:
@@ -132,5 +133,5 @@ def materialize_harbor_demo(root: Path) -> Path:
         },
     )
     (root / "verifier").mkdir()
-    (root / "verifier" / "reward.txt").write_text("1\n", encoding="utf-8")
+    (root / "verifier" / "reward.txt").write_bytes(b"1\n")
     return root
