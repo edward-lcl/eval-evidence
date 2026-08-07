@@ -110,6 +110,8 @@ def materialize_harbor_demo(root: Path) -> Path:
         root / "config.json",
         {
             "task": {"path": "tasks/synthetic", "git_commit_id": "demo-v1"},
+            "timeout_multiplier": 1.0,
+            "agent_timeout_multiplier": 1.0,
             "agent": {
                 "name": "synthetic-agent",
                 "model_name": "example/synthetic-model",

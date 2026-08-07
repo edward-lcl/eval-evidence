@@ -5,6 +5,12 @@
 > A score should travel with a machine-checkable record of what was observed,
 > asserted, derived, and unavailable.
 
+![Eval Evidence lifecycle: a reported score is sealed with model, harness, budget, verifier, artifact, and field-provenance evidence; review distinguishes matched conditions, differences, unavailable evidence, and integrity failures.](figures/eval-evidence-lifecycle.png)
+
+The [static lifecycle figure](figures/README.md) is generated offline from a frozen,
+machine-readable brief. It describes review states, not model quality or a universal
+trust score.
+
 Eval Evidence produces a deterministic JSON bundle that carries three kinds of evidence
 without pretending to adjudicate them:
 
@@ -86,10 +92,10 @@ eval-evidence check /path/to/run
 eval-evidence bundle /path/to/run -o evidence.json
 ```
 
-For manually assembled manifests, add `provenance` entries rather than allowing a
-system-card claim or operator-entered value to look like a run-time observation. See
-the [owner walkthrough](docs/OWNER_WALKTHROUGH.md) for a complete application example
-and a paired-result investigation.
+For manually assembled manifests, values without `provenance` default to
+`operator_asserted`, never `observed`. Add explicit entries for observed, derived, or
+provider-asserted values. See the [owner walkthrough](docs/OWNER_WALKTHROUGH.md) for a
+complete application example and a paired-result investigation.
 
 ### Harbor
 

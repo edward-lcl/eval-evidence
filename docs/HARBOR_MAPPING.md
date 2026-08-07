@@ -52,7 +52,7 @@ it is not a substitute for executing each current layout.
 | `harness_commit` | not mapped | unavailable | real-trial |
 | `tools` | counts and canonical SHA-256 values of `config.json:agent.skills` and `.mcp_servers` lists | derived configured identities without copying paths, URLs, or names | mixed |
 | `max_turns` | `config.json:agent.kwargs.max_turns`, then `.max_steps` | observed when present | real-trial |
-| `max_wall_time_s` | `config.json:agent.override_timeout_sec`, then `.max_timeout_sec`, then `result.json:agent_result.timeout_sec` when configured values are absent or null | observed when present | real-trial |
+| `max_wall_time_s` | when `config.json:agent.override_timeout_sec` supplies the base, computes `min(base, agent.max_timeout_sec or infinity) * multiplier`, where a non-null top-level `agent_timeout_multiplier` takes precedence over top-level `timeout_multiplier` (default `1.0`); when that base is absent, uses legacy `result.json:agent_result.timeout_sec` without reapplying a multiplier; a cap alone is never treated as a budget | derived for a computed effective budget, observed for a legacy recorded effective budget, otherwise unavailable because the task-defined base is outside trial `config.json` | mixed |
 | `effort_or_thinking` | `config.json:agent.kwargs.effort`, `.thinking`, `.reasoning_effort`, then `.thinking_budget` | observed when present | real-trial |
 | `sampling_parameters` | selected sampling keys under `config.json:agent.kwargs` | observed when non-empty | real-trial |
 | `system_prompt_sha256` | not mapped | unavailable | real-trial |
@@ -71,6 +71,14 @@ The synthetic fixture deliberately places `override_timeout_sec` under `agent`, 
 `verifier`. A verifier timeout is retained separately in
 `verifier_evidence.claims.configured_verifier` and is not treated as an agent wall-time
 budget.
+
+`extensions.harbor.timeout` preserves the configured/resolution components without
+changing the standard instrument denominator: `base_sec`, `base_source`, `cap_sec`,
+`multiplier`, `multiplier_source`, `effective_sec`, and `resolution`. Resolution is
+`computed`, `legacy_recorded`, or `unresolved`; absent components are `null`, never
+infinity. The formula and top-level multiplier locations were source-reviewed against
+local Harbor commit `9073b960dd739e0c28464d135217baa17a8d217b`; maintainers still need
+to confirm the current-release contract and the task-config base source.
 
 ## Other review-sensitive mappings
 

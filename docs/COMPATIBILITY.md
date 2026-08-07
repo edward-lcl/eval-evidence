@@ -14,6 +14,21 @@ recognition, and safer redaction that preserve that meaning are package-level ch
 they are documented and may change deterministic bundle bytes. Additive optional data
 is non-breaking only when older readers can safely ignore it.
 
+### Pre-adoption semantic correction classification (0.2.0 candidate)
+
+The generic `eval-run.json` provenance-default correction (shifting unannotated instrument
+values and plain claims from implicit `observed` to `operator_asserted`) is explicitly
+classified as a **pre-adoption breaking evidence-status semantic correction**. This change
+alters emitted evidence status, serialized bundle bytes, and pinned digests for
+provenance-free input. Because it corrects an unreleased candidate defect before public
+adoption, it is released in 0.2.0 without bumping the `eval-evidence.run/v0.1`,
+`eval-evidence.instrument/v0.1`, or `eval-evidence.bundle/v0.1` wire identifiers.
+
+This classification is strictly limited to this pre-adoption release candidate. It
+requires explicit release-note and compatibility disclosure and must not be treated as a
+general exemption from the policy requiring a new wire version for post-adoption
+evidence-status semantic changes.
+
 The project will keep verification support for v0.1 bundles for at least 12 months
 after a successor bundle contract is released. A planned removal receives at least 90
 days' notice in `CHANGELOG.md` and the README. Security fixes may reject inputs that

@@ -84,8 +84,11 @@ statuses honestly:
 - `provider_asserted` for a provider document or system-card claim;
 - `unavailable` when the archive cannot establish it.
 
-Do not silently upgrade a release note, filename, directory label, or system card into
-run-time observation.
+For generic `eval-run.json` input, an instrument value without a matching `provenance`
+entry defaults to `operator_asserted`. Plain `item_validity` and `verifier_evidence`
+claims do the same; use a complete `{value, status, source}` claim object to declare a
+stronger provenance. Do not silently upgrade a release note, filename, directory label,
+or system card into run-time observation.
 
 ### Retrospective limitation
 

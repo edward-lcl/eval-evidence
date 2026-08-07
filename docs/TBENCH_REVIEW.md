@@ -88,9 +88,13 @@ See [`HARBOR_MAPPING.md`](HARBOR_MAPPING.md) for every source path and known gap
 
 The review is intentionally narrow. In priority order, please:
 
-1. **Correct or approve the field mapping.** Focus on configured versus effective agent
-   timeout, token/cache semantics, exception/termination, task identity, network
-   configuration, verifier evidence, and the ATIF fields used.
+1. **Correct or approve the field mapping.** The adapter now computes the effective
+   agent timeout as `min(override base, optional cap) * resolved multiplier`, preserves
+   those components in `extensions.harbor.timeout`, and leaves the field unavailable
+   when only the task definition contains the base. Please confirm that formula, the
+   top-level multiplier precedence, and the task-config base source. Also review
+   token/cache semantics, exception/termination, task identity, network configuration,
+   verifier evidence, and the ATIF fields used.
 2. **Choose a reproducible G2 route.** Either approve a minimal sanitized structural
    fixture with no task content, prompts, trajectories, credentials, model names, or
    identifiers, or provide secure read-only CI access. Until then G2 remains `unmet`.
@@ -98,6 +102,15 @@ The review is intentionally narrow. In priority order, please:
    deterministic job/campaign index that links exact trial bundle digests and records
    attempted, retried, failed, timed-out, cancelled, and excluded denominators. Please
    confirm whether Harbor's job `result.json` should be the source of that contract.
+4. **Confirm the capture-time field contract.** The Unknown entries in
+   [`artifacts/real-comparison-redacted.md`](../artifacts/real-comparison-redacted.md)
+   show that retained runs need standardized, machine-readable `response_model`,
+   `verifier_digest`, `environment_image_digest`, and `system_prompt_sha256` values.
+   Please confirm where Harbor can record each value at run close, and whether the task
+   digest already covers the verifier directory. We are not requesting a new
+   `harness_version`/commit capture field: current Harbor `lock.json` already records
+   its version and, when installation metadata establishes it, its Git commit; the
+   adapter instead needs a reviewed job-to-trial association for that existing record.
 
 Native Harbor emission is a later option, not a condition of this review. If desired,
 the clean integration point is after each trial result and trajectory are finalized:

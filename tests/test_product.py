@@ -24,8 +24,8 @@ from eval_evidence.demo import materialize_generic_demo, materialize_harbor_demo
 ROOT = Path(__file__).resolve().parents[1]
 BUNDLE_SCHEMA = ROOT / "eval_evidence/schemas/eval-evidence-bundle-v0.1.schema.json"
 RUN_SCHEMA = ROOT / "eval_evidence/schemas/eval-evidence-run-v0.1.schema.json"
-GENERIC_GOLDEN = "d60b0eaa1f9239eb57430a86b7831d893bb92111064c323671e2830325ba4cf9"
-HARBOR_GOLDEN = "d0fa648c9da2423157013d52d1446cafb9a77a0e7ba0061faec7d52a23229fea"
+GENERIC_GOLDEN = "13c06a8b06a90b4ae58c4fae6e36252f05105a9aac761a9834a4bd1e7d69c081"
+HARBOR_GOLDEN = "3322d9ec11f24be40fc1dcbcee1dc8d799e3e7da1920461755c093c483cad8a5"
 
 
 class ProductTests(unittest.TestCase):
@@ -40,6 +40,10 @@ class ProductTests(unittest.TestCase):
             self.assertEqual(verify_referenced_files(bundle, root), [])
             self.assertIsNone(bundle["attestation"]["signature"])
             self.assertEqual(bundle["source"]["adapter"], "generic")
+            coverage = bundle["instrument_manifest"]["coverage"]
+            self.assertEqual(coverage["available_fraction"], 0.3)
+            self.assertEqual(coverage["status_counts"]["observed"], 0)
+            self.assertEqual(coverage["status_counts"]["operator_asserted"], 6)
 
     def test_demo_files_use_platform_independent_lf_bytes(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -115,6 +119,98 @@ class ProductTests(unittest.TestCase):
             self.assertEqual(
                 field["source"], "Harbor result.json:agent_result.timeout_sec"
             )
+            self.assertIn("multiplier was not reapplied", field["note"])
+            timeout = bundle["extensions"]["harbor"]["timeout"]
+            self.assertEqual(timeout["resolution"], "legacy_recorded")
+            self.assertEqual(timeout["effective_sec"], 900)
+            self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
+            self.assertEqual(verify_referenced_files(bundle, root), [])
+
+    def test_harbor_override_only_uses_default_multiplier(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            config_path = root / "config.json"
+            config = json.loads(config_path.read_text())
+            config.pop("agent_timeout_multiplier")
+            config.pop("timeout_multiplier")
+            config["agent"].pop("max_timeout_sec", None)
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            bundle = build_bundle(discover_runs(root)[0].adapter.load(root))
+            field = bundle["instrument_manifest"]["fields"]["max_wall_time_s"]
+            timeout = bundle["extensions"]["harbor"]["timeout"]
+            self.assertEqual(field["value"], 60.0)
+            self.assertEqual(field["status"], "derived")
+            self.assertEqual(timeout["multiplier"], 1.0)
+            self.assertEqual(
+                timeout["multiplier_source"],
+                "Harbor TrialConfig default timeout_multiplier",
+            )
+            self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
+            self.assertEqual(verify_referenced_files(bundle, root), [])
+
+    def test_harbor_cap_only_does_not_become_effective_wall_time(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            config_path = root / "config.json"
+            config = json.loads(config_path.read_text())
+            config["agent"]["override_timeout_sec"] = None
+            config["agent"]["max_timeout_sec"] = 300
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            bundle = build_bundle(discover_runs(root)[0].adapter.load(root))
+            field = bundle["instrument_manifest"]["fields"]["max_wall_time_s"]
+            timeout = bundle["extensions"]["harbor"]["timeout"]
+            self.assertEqual(field["status"], "unavailable")
+            self.assertIn("task definition", field["note"])
+            self.assertEqual(timeout["cap_sec"], 300)
+            self.assertIsNone(timeout["effective_sec"])
+            self.assertEqual(timeout["resolution"], "unresolved")
+            self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
+            self.assertEqual(verify_referenced_files(bundle, root), [])
+
+    def test_harbor_agent_timeout_uses_cap_and_agent_multiplier(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            config_path = root / "config.json"
+            config = json.loads(config_path.read_text())
+            config["agent"]["override_timeout_sec"] = 600
+            config["agent"]["max_timeout_sec"] = 300
+            config["agent_timeout_multiplier"] = 2.0
+            config["timeout_multiplier"] = 1.5
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            bundle = build_bundle(discover_runs(root)[0].adapter.load(root))
+            field = bundle["instrument_manifest"]["fields"]["max_wall_time_s"]
+            timeout = bundle["extensions"]["harbor"]["timeout"]
+            self.assertEqual(field["value"], 600.0)
+            self.assertEqual(field["status"], "derived")
+            self.assertEqual(timeout["base_sec"], 600)
+            self.assertEqual(timeout["cap_sec"], 300)
+            self.assertEqual(timeout["multiplier"], 2.0)
+            self.assertEqual(timeout["resolution"], "computed")
+            self.assertIn("agent_timeout_multiplier", timeout["multiplier_source"])
+            self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
+            self.assertEqual(verify_referenced_files(bundle, root), [])
+
+    def test_harbor_agent_timeout_uses_global_multiplier(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            config_path = root / "config.json"
+            config = json.loads(config_path.read_text())
+            config["agent"]["override_timeout_sec"] = 100
+            config["agent"].pop("max_timeout_sec", None)
+            config["agent_timeout_multiplier"] = None
+            config["timeout_multiplier"] = 1.5
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            bundle = build_bundle(discover_runs(root)[0].adapter.load(root))
+            field = bundle["instrument_manifest"]["fields"]["max_wall_time_s"]
+            timeout = bundle["extensions"]["harbor"]["timeout"]
+            self.assertEqual(field["value"], 150.0)
+            self.assertEqual(field["status"], "derived")
+            self.assertEqual(timeout["multiplier"], 1.5)
+            self.assertEqual(
+                timeout["multiplier_source"], "Harbor config.json:timeout_multiplier"
+            )
+            self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
+            self.assertEqual(verify_referenced_files(bundle, root), [])
 
     def test_harbor_network_policy_keeps_environment_and_agent_layers(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -191,6 +287,31 @@ class ProductTests(unittest.TestCase):
             match = discover_runs(root)[0]
             self.assertEqual(match.adapter.name, "generic")
             self.assertEqual(match.confidence, 100)
+
+    def test_generic_values_without_provenance_are_operator_asserted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_generic_demo(Path(directory) / "run")
+            manifest_path = root / "eval-run.json"
+            document = json.loads(manifest_path.read_text())
+            document["provenance"]["model_id"] = {
+                "status": "observed",
+                "source": "responses/metadata.json:model",
+            }
+            document["item_validity"]["claims"]["operator_note"] = "reviewed"
+            manifest_path.write_text(json.dumps(document), encoding="utf-8")
+            bundle = build_bundle(GenericManifestAdapter().load(root))
+            fields = bundle["instrument_manifest"]["fields"]
+            self.assertEqual(fields["harness_name"]["status"], "operator_asserted")
+            self.assertEqual(fields["model_id"]["status"], "observed")
+            self.assertEqual(
+                fields["model_id"]["source"], "responses/metadata.json:model"
+            )
+            self.assertEqual(
+                bundle["item_validity"]["claims"]["operator_note"]["status"],
+                "operator_asserted",
+            )
+            self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
+            self.assertEqual(verify_referenced_files(bundle, root), [])
 
     def test_generic_manifest_validates_against_published_schema(self):
         with tempfile.TemporaryDirectory() as directory:

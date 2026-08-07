@@ -20,7 +20,7 @@ $ python3 -m eval_evidence check /tmp/ee-product-session/eval-run
   "runs": [
     {
       "adapter": "generic",
-      "bundle_digest": "d60b0eaa1f9239eb57430a86b7831d893bb92111064c323671e2830325ba4cf9",
+      "bundle_digest": "13c06a8b06a90b4ae58c4fae6e36252f05105a9aac761a9834a4bd1e7d69c081",
       "compat_warnings": [],
       "errors": [],
       "instrument_coverage": {
@@ -28,8 +28,8 @@ $ python3 -m eval_evidence check /tmp/ee-product-session/eval-run
         "field_count": 20,
         "status_counts": {
           "derived": 0,
-          "observed": 4,
-          "operator_asserted": 2,
+          "observed": 0,
+          "operator_asserted": 6,
           "provider_asserted": 0,
           "unavailable": 14
         }
@@ -62,7 +62,7 @@ $ python3 -m eval_evidence bundle /tmp/ee-product-session/eval-run -o /tmp/ee-pr
   "written": [
     {
       "adapter": "generic",
-      "bundle_digest": "d60b0eaa1f9239eb57430a86b7831d893bb92111064c323671e2830325ba4cf9",
+      "bundle_digest": "13c06a8b06a90b4ae58c4fae6e36252f05105a9aac761a9834a4bd1e7d69c081",
       "output": "/tmp/ee-product-session/eval-evidence.json",
       "root": "/private/tmp/ee-product-session/eval-run"
     }
@@ -75,7 +75,7 @@ $ python3 -m eval_evidence verify /tmp/ee-product-session/eval-evidence.json --r
   "bundle": "/tmp/ee-product-session/eval-evidence.json",
   "bundle_digest": {
     "algorithm": "sha256",
-    "value": "d60b0eaa1f9239eb57430a86b7831d893bb92111064c323671e2830325ba4cf9"
+    "value": "13c06a8b06a90b4ae58c4fae6e36252f05105a9aac761a9834a4bd1e7d69c081"
   },
   "errors": [],
   "referenced_files_checked": true,
@@ -102,7 +102,7 @@ $ python3 -m eval_evidence verify /tmp/ee-product-session/eval-evidence.json --r
   "bundle": "/tmp/ee-product-session/eval-evidence.json",
   "bundle_digest": {
     "algorithm": "sha256",
-    "value": "d60b0eaa1f9239eb57430a86b7831d893bb92111064c323671e2830325ba4cf9"
+    "value": "13c06a8b06a90b4ae58c4fae6e36252f05105a9aac761a9834a4bd1e7d69c081"
   },
   "errors": [
     "Referenced file digest mismatch for outputs/scores.json"

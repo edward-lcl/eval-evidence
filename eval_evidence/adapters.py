@@ -14,7 +14,15 @@ from .core import (
     safe_run_path,
     sha256_bytes,
 )
-from .models import EvidenceValue, FileReference, NormalizedRun, derived, observed, unavailable
+from .models import (
+    EvidenceValue,
+    FileReference,
+    NormalizedRun,
+    derived,
+    observed,
+    operator_asserted,
+    unavailable,
+)
 
 GENERIC_MANIFEST = "eval-run.json"
 RUN_SCHEMA_PATH = Path(__file__).resolve().parent / "schemas" / "eval-evidence-run-v0.1.schema.json"
@@ -63,7 +71,7 @@ def _evidence_claim(value: Any, default_source: str) -> EvidenceValue:
             str(value.get("source")),
             value.get("note"),
         )
-    return observed(value, default_source)
+    return operator_asserted(value, default_source)
 
 
 def _claims(document: Any, default_source: str) -> dict[str, dict[str, Any]]:
@@ -73,6 +81,81 @@ def _claims(document: Any, default_source: str) -> dict[str, dict[str, Any]]:
         str(name): _evidence_claim(value, f"{default_source}:{name}").as_dict()
         for name, value in sorted(document.items())
     }
+
+
+def _harbor_agent_timeout(
+    config: dict[str, Any],
+    agent_config: dict[str, Any],
+    agent_result: dict[str, Any],
+) -> tuple[EvidenceValue, dict[str, Any]]:
+    """Resolve Harbor's agent budget as ``min(base, cap) * multiplier``.
+
+    This mirrors Harbor ``Trial._compute_agent_timeout_sec`` and
+    ``Trial._resolve_timeout_sec``. The trial config only contains an agent timeout
+    base when ``agent.override_timeout_sec`` is set; the task-defined base is not
+    serialized into the per-trial ``config.json`` consumed by this adapter.
+    """
+    override_timeout_sec = agent_config.get("override_timeout_sec")
+    base_sec = override_timeout_sec or None
+    cap_sec = agent_config.get("max_timeout_sec")
+    agent_multiplier = config.get("agent_timeout_multiplier")
+    global_multiplier = config.get("timeout_multiplier")
+    if agent_multiplier is not None:
+        multiplier = agent_multiplier
+        multiplier_source = "Harbor config.json:agent_timeout_multiplier"
+    elif global_multiplier is not None:
+        multiplier = global_multiplier
+        multiplier_source = "Harbor config.json:timeout_multiplier"
+    else:
+        multiplier = 1.0
+        multiplier_source = "Harbor TrialConfig default timeout_multiplier"
+
+    timeout = {
+        "base_sec": base_sec,
+        "base_source": (
+            "Harbor config.json:agent.override_timeout_sec" if base_sec is not None else None
+        ),
+        "cap_sec": cap_sec,
+        "multiplier": multiplier,
+        "multiplier_source": multiplier_source,
+        "effective_sec": None,
+        "resolution": "unresolved",
+    }
+    if base_sec is not None:
+        capped_base = min(base_sec, cap_sec) if cap_sec else base_sec
+        effective_sec = capped_base * multiplier
+        timeout["effective_sec"] = effective_sec
+        timeout["resolution"] = "computed"
+        return (
+            derived(
+                effective_sec,
+                "Harbor config.json:agent.override_timeout_sec, "
+                "agent.max_timeout_sec, agent_timeout_multiplier/timeout_multiplier",
+                "Effective agent budget per Harbor min(base, cap) * multiplier",
+            ),
+            timeout,
+        )
+
+    legacy_timeout_sec = agent_result.get("timeout_sec")
+    if legacy_timeout_sec is not None:
+        timeout["effective_sec"] = legacy_timeout_sec
+        timeout["resolution"] = "legacy_recorded"
+        return (
+            observed(
+                legacy_timeout_sec,
+                "Harbor result.json:agent_result.timeout_sec",
+                "Legacy recorded effective budget; multiplier was not reapplied",
+            ),
+            timeout,
+        )
+
+    return (
+        unavailable(
+            "Agent timeout base lives in the task definition "
+            "(task config agent.timeout_sec), not the trial config.json"
+        ),
+        timeout,
+    )
 
 
 class GenericManifestAdapter:
@@ -147,7 +230,9 @@ class GenericManifestAdapter:
         for name, value in instrument_doc.items():
             declaration = provenance.get(name)
             if declaration is None:
-                instrument[name] = observed(value, f"{GENERIC_MANIFEST}:instrument.{name}")
+                instrument[name] = operator_asserted(
+                    value, f"{GENERIC_MANIFEST}:instrument.{name}"
+                )
             elif isinstance(declaration, dict):
                 instrument[name] = EvidenceValue(
                     value,
@@ -252,11 +337,9 @@ class HarborAdapter:
         verifier_config = config.get("verifier") if isinstance(config.get("verifier"), dict) else {}
         model_name = model_info.get("name") or agent_config.get("model_name") or _get(trajectory, "agent", "model_name")
         effort = _first(kwargs, "effort", "thinking", "reasoning_effort", "thinking_budget")
-        max_wall_time = _first(agent_config, "override_timeout_sec", "max_timeout_sec")
-        max_wall_time_source = "Harbor config.json:agent"
-        if max_wall_time is None:
-            max_wall_time = agent_result.get("timeout_sec")
-            max_wall_time_source = "Harbor result.json:agent_result.timeout_sec"
+        max_wall_time, timeout_components = _harbor_agent_timeout(
+            config, agent_config, agent_result
+        )
         sampling_names = (
             "temperature", "top_p", "top_k", "seed", "max_tokens",
             "frequency_penalty", "presence_penalty", "stop_sequences",
@@ -285,7 +368,7 @@ class HarborAdapter:
             "harness_name": derived("harbor", "recognized Harbor trial layout"),
             "tools": derived(tools, "Harbor config.json:agent", "Configured tools may omit provider-side effective definitions"),
             "max_turns": observed(_first(kwargs, "max_turns", "max_steps"), "Harbor config.json:agent.kwargs"),
-            "max_wall_time_s": observed(max_wall_time, max_wall_time_source),
+            "max_wall_time_s": max_wall_time,
             "effort_or_thinking": observed(effort, "Harbor config.json:agent.kwargs"),
             "sampling_parameters": observed(sampling or None, "Harbor config.json:agent.kwargs"),
             "task_checksum": observed(result.get("task_checksum"), "Harbor result.json:task_checksum"),
@@ -369,6 +452,7 @@ class HarborAdapter:
                         "recognized": trajectory_schema_recognized,
                         "tested_against": sorted(self.KNOWN_TRAJECTORY_SCHEMA_VERSIONS),
                     },
+                    "timeout": timeout_components,
                     "trajectory_schema_version": trajectory_schema_version,
                     "trajectory_session_id": trajectory.get("session_id") or trajectory.get("trajectory_id"),
                     "trajectory_step_count": len(trajectory.get("steps") or []) if isinstance(trajectory.get("steps"), list) else None,

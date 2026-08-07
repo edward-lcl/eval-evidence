@@ -16,8 +16,15 @@ All notable package, wire-contract, and adapter-compatibility changes are record
 
 ### Changed
 
-- The synthetic Harbor fixture now exercises the agent wall-time mapping; its pinned
-  demonstration-bundle digest changed with those fixture bytes.
+- Generic `eval-run.json` instrument values and plain claims without declared
+  provenance now default to `operator_asserted` rather than `observed`. Emitters must
+  declare provenance explicitly to make a stronger claim; this is a pre-adoption
+  breaking evidence-status semantic correction that alters emitted bundle bytes,
+  expectations, and pinned digests for provenance-free input while keeping wire versions
+  unchanged (see `docs/COMPATIBILITY.md`). Coverage fractions remain unchanged.
+- The synthetic Harbor fixture now exercises the resolved agent wall-time mapping and
+  top-level multipliers; its pinned demonstration-bundle digest changed with those
+  fixture bytes.
 - `check` reports tool and bundle-schema versions.
 - `check` now separates integrity results (`valid` and `errors`) from coverage-policy
   results (`policy_passed` and `policy_errors`).
@@ -26,8 +33,11 @@ All notable package, wire-contract, and adapter-compatibility changes are record
 
 - Harbor token and cost metrics now fall back to trajectory totals when the primary
   `result.json` value is absent or explicitly `null`.
-- Harbor agent wall-time now falls back to `result.json:agent_result.timeout_sec` when
-  both configured agent timeout fields are absent or `null`, as found in genuine runs.
+- Harbor agent wall-time now computes `min(override base, optional cap) * resolved
+  multiplier`, exposes the components under `extensions.harbor.timeout`, and never
+  mistakes `max_timeout_sec` alone for an effective budget. Legacy
+  `result.json:agent_result.timeout_sec` remains an observed fallback and is not
+  multiplied again.
 - Synthetic demo files are written as explicit UTF-8/LF bytes so their pinned bundle
   digests are identical on Windows, macOS, and Linux.
 - The Harbor adapter now recognizes the observed `ATIF-v1.5` and `ATIF-v1.6` root

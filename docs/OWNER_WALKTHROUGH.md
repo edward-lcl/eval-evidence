@@ -92,7 +92,8 @@ Prioritize these instrument fields for model comparisons:
 Use `provenance` honestly. A value copied from a system card is
 `provider_asserted`; a value typed by the operator is `operator_asserted`. Reserve
 `observed` for a value captured in a named run artifact, and name that artifact in
-`source`. For example:
+`source`. An instrument value omitted from `provenance` defaults to
+`operator_asserted`, never `observed`. For example:
 
 ```json
 {

@@ -8,3 +8,11 @@ dist/
 .coverage
 .DS_Store
 .pi/
+.fusion-private/
+.claude/worktrees/
+
+# sssf runtime
+adws/adw_data/sessions/
+adws/adw_data/sssf.db*
+.env
+*.pyc

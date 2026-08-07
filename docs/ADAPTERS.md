@@ -61,6 +61,10 @@ Wire-contract versioning follows these rules:
 - changing bundle shape, canonical digest scope, or the contract-level meaning of a
   normalized field moves `eval-evidence.bundle/v0.1`.
 
+These general new-wire-version rules remain authoritative after adoption;
+[`COMPATIBILITY.md`](COMPATIBILITY.md) documents the explicitly limited pre-adoption
+0.2.0 semantic correction.
+
 Source-harness recognition, fallback corrections, and safer adapter redaction that
 preserve the normalized field's contract-level meaning are tool compatibility updates.
 They are recorded in the package changelog and deterministic golden tests because they
