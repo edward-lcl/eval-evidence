@@ -1,5 +1,5 @@
 name: Eval Evidence Check
-description: Build and verify machine-checkable evidence for evaluation runs
+description: Check evaluation run structure, evidence coverage, and current referenced bytes
 branding:
   icon: shield
   color: blue
@@ -14,6 +14,10 @@ inputs:
     default: auto
   max-runs:
     description: Optional positive limit for deterministic archive checks
+    required: false
+    default: ""
+  min-coverage:
+    description: Optional minimum available instrument-field fraction (0 through 1)
     required: false
     default: ""
   python-version:
@@ -37,6 +41,7 @@ runs:
         EVAL_EVIDENCE_RUN_PATH: ${{ inputs.run-path }}
         EVAL_EVIDENCE_ADAPTER: ${{ inputs.adapter }}
         EVAL_EVIDENCE_MAX_RUNS: ${{ inputs.max-runs }}
+        EVAL_EVIDENCE_MIN_COVERAGE: ${{ inputs.min-coverage }}
       run: |
         resolved="$(python - <<'PY'
         import os
@@ -56,5 +61,8 @@ runs:
         args=("$resolved" --adapter "$EVAL_EVIDENCE_ADAPTER")
         if [[ -n "$EVAL_EVIDENCE_MAX_RUNS" ]]; then
           args+=(--max-runs "$EVAL_EVIDENCE_MAX_RUNS")
+        fi
+        if [[ -n "$EVAL_EVIDENCE_MIN_COVERAGE" ]]; then
+          args+=(--min-coverage "$EVAL_EVIDENCE_MIN_COVERAGE")
         fi
         eval-evidence check "${args[@]}"

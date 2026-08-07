@@ -6,8 +6,23 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
-from .core import IntegrityError, RUN_SCHEMA_VERSION, load_json, safe_run_path
-from .models import EvidenceValue, FileReference, NormalizedRun, derived, observed, unavailable
+from .core import (
+    IntegrityError,
+    RUN_SCHEMA_VERSION,
+    canonical_json_bytes,
+    load_json,
+    safe_run_path,
+    sha256_bytes,
+)
+from .models import (
+    EvidenceValue,
+    FileReference,
+    NormalizedRun,
+    derived,
+    observed,
+    operator_asserted,
+    unavailable,
+)
 
 GENERIC_MANIFEST = "eval-run.json"
 RUN_SCHEMA_PATH = Path(__file__).resolve().parent / "schemas" / "eval-evidence-run-v0.1.schema.json"
@@ -37,6 +52,10 @@ def _first(mapping: dict[str, Any], *names: str) -> Any:
     return None
 
 
+def _coalesce(*values: Any) -> Any:
+    return next((value for value in values if value is not None), None)
+
+
 def _reward(result: dict[str, Any]) -> Any:
     rewards = _get(result, "verifier_result", "rewards")
     if not isinstance(rewards, dict):
@@ -52,7 +71,7 @@ def _evidence_claim(value: Any, default_source: str) -> EvidenceValue:
             str(value.get("source")),
             value.get("note"),
         )
-    return observed(value, default_source)
+    return operator_asserted(value, default_source)
 
 
 def _claims(document: Any, default_source: str) -> dict[str, dict[str, Any]]:
@@ -62,6 +81,81 @@ def _claims(document: Any, default_source: str) -> dict[str, dict[str, Any]]:
         str(name): _evidence_claim(value, f"{default_source}:{name}").as_dict()
         for name, value in sorted(document.items())
     }
+
+
+def _harbor_agent_timeout(
+    config: dict[str, Any],
+    agent_config: dict[str, Any],
+    agent_result: dict[str, Any],
+) -> tuple[EvidenceValue, dict[str, Any]]:
+    """Resolve Harbor's agent budget as ``min(base, cap) * multiplier``.
+
+    This mirrors Harbor ``Trial._compute_agent_timeout_sec`` and
+    ``Trial._resolve_timeout_sec``. The trial config only contains an agent timeout
+    base when ``agent.override_timeout_sec`` is set; the task-defined base is not
+    serialized into the per-trial ``config.json`` consumed by this adapter.
+    """
+    override_timeout_sec = agent_config.get("override_timeout_sec")
+    base_sec = override_timeout_sec or None
+    cap_sec = agent_config.get("max_timeout_sec")
+    agent_multiplier = config.get("agent_timeout_multiplier")
+    global_multiplier = config.get("timeout_multiplier")
+    if agent_multiplier is not None:
+        multiplier = agent_multiplier
+        multiplier_source = "Harbor config.json:agent_timeout_multiplier"
+    elif global_multiplier is not None:
+        multiplier = global_multiplier
+        multiplier_source = "Harbor config.json:timeout_multiplier"
+    else:
+        multiplier = 1.0
+        multiplier_source = "Harbor TrialConfig default timeout_multiplier"
+
+    timeout = {
+        "base_sec": base_sec,
+        "base_source": (
+            "Harbor config.json:agent.override_timeout_sec" if base_sec is not None else None
+        ),
+        "cap_sec": cap_sec,
+        "multiplier": multiplier,
+        "multiplier_source": multiplier_source,
+        "effective_sec": None,
+        "resolution": "unresolved",
+    }
+    if base_sec is not None:
+        capped_base = min(base_sec, cap_sec) if cap_sec else base_sec
+        effective_sec = capped_base * multiplier
+        timeout["effective_sec"] = effective_sec
+        timeout["resolution"] = "computed"
+        return (
+            derived(
+                effective_sec,
+                "Harbor config.json:agent.override_timeout_sec, "
+                "agent.max_timeout_sec, agent_timeout_multiplier/timeout_multiplier",
+                "Effective agent budget per Harbor min(base, cap) * multiplier",
+            ),
+            timeout,
+        )
+
+    legacy_timeout_sec = agent_result.get("timeout_sec")
+    if legacy_timeout_sec is not None:
+        timeout["effective_sec"] = legacy_timeout_sec
+        timeout["resolution"] = "legacy_recorded"
+        return (
+            observed(
+                legacy_timeout_sec,
+                "Harbor result.json:agent_result.timeout_sec",
+                "Legacy recorded effective budget; multiplier was not reapplied",
+            ),
+            timeout,
+        )
+
+    return (
+        unavailable(
+            "Agent timeout base lives in the task definition "
+            "(task config agent.timeout_sec), not the trial config.json"
+        ),
+        timeout,
+    )
 
 
 class GenericManifestAdapter:
@@ -136,7 +230,9 @@ class GenericManifestAdapter:
         for name, value in instrument_doc.items():
             declaration = provenance.get(name)
             if declaration is None:
-                instrument[name] = observed(value, f"{GENERIC_MANIFEST}:instrument.{name}")
+                instrument[name] = operator_asserted(
+                    value, f"{GENERIC_MANIFEST}:instrument.{name}"
+                )
             elif isinstance(declaration, dict):
                 instrument[name] = EvidenceValue(
                     value,
@@ -196,6 +292,9 @@ class HarborAdapter:
 
     name = "harbor"
     required = ("result.json", "config.json", "agent/trajectory.json")
+    KNOWN_TRAJECTORY_SCHEMA_VERSIONS: frozenset[str] = frozenset(
+        {"ATIF-v1.5", "ATIF-v1.6", "ATIF-v1.7"}
+    )
 
     def detect(self, path: Path) -> int:
         return 80 if all((path / relative).is_file() for relative in self.required) else 0
@@ -231,20 +330,35 @@ class HarborAdapter:
         agent_info = result.get("agent_info") if isinstance(result.get("agent_info"), dict) else {}
         model_info = agent_info.get("model_info") if isinstance(agent_info.get("model_info"), dict) else {}
         agent_config = config.get("agent") if isinstance(config.get("agent"), dict) else {}
+        agent_result = result.get("agent_result") if isinstance(result.get("agent_result"), dict) else {}
         kwargs = agent_config.get("kwargs") if isinstance(agent_config.get("kwargs"), dict) else {}
         environment = config.get("environment") if isinstance(config.get("environment"), dict) else {}
         task_config = config.get("task") if isinstance(config.get("task"), dict) else {}
         verifier_config = config.get("verifier") if isinstance(config.get("verifier"), dict) else {}
         model_name = model_info.get("name") or agent_config.get("model_name") or _get(trajectory, "agent", "model_name")
         effort = _first(kwargs, "effort", "thinking", "reasoning_effort", "thinking_budget")
+        max_wall_time, timeout_components = _harbor_agent_timeout(
+            config, agent_config, agent_result
+        )
         sampling_names = (
             "temperature", "top_p", "top_k", "seed", "max_tokens",
             "frequency_penalty", "presence_penalty", "stop_sequences",
         )
         sampling = {name: kwargs[name] for name in sampling_names if kwargs.get(name) is not None}
+        configured_skills = agent_config.get("skills") or []
+        configured_mcp_servers = agent_config.get("mcp_servers") or []
         tools = {
-            "skills": agent_config.get("skills") or [],
-            "mcp_servers": agent_config.get("mcp_servers") or [],
+            "skill_count": len(configured_skills),
+            "skills_sha256": sha256_bytes(canonical_json_bytes(configured_skills)),
+            "mcp_server_count": len(configured_mcp_servers),
+            "mcp_servers_sha256": sha256_bytes(
+                canonical_json_bytes(configured_mcp_servers)
+            ),
+        }
+        safe_verifier_config = {
+            name: verifier_config[name]
+            for name in ("disable", "override_timeout_sec", "max_timeout_sec")
+            if verifier_config.get(name) is not None
         }
         instrument = {
             "model_id": observed(model_name, "Harbor result/config/trajectory"),
@@ -254,14 +368,17 @@ class HarborAdapter:
             "harness_name": derived("harbor", "recognized Harbor trial layout"),
             "tools": derived(tools, "Harbor config.json:agent", "Configured tools may omit provider-side effective definitions"),
             "max_turns": observed(_first(kwargs, "max_turns", "max_steps"), "Harbor config.json:agent.kwargs"),
-            "max_wall_time_s": observed(_first(agent_config, "override_timeout_sec", "max_timeout_sec"), "Harbor config.json:agent"),
+            "max_wall_time_s": max_wall_time,
             "effort_or_thinking": observed(effort, "Harbor config.json:agent.kwargs"),
             "sampling_parameters": observed(sampling or None, "Harbor config.json:agent.kwargs"),
             "task_checksum": observed(result.get("task_checksum"), "Harbor result.json:task_checksum"),
             "network_policy": derived(
-                {"extra_allowed_hosts": environment.get("extra_allowed_hosts") or []},
-                "Harbor config.json:environment.extra_allowed_hosts",
-                "Configuration is not proof of effective enforcement",
+                {
+                    "extra_allowed_hosts": environment.get("extra_allowed_hosts") or [],
+                    "agent_extra_allowed_hosts": agent_config.get("extra_allowed_hosts") or [],
+                },
+                "Harbor config.json:environment/agent.extra_allowed_hosts",
+                "Configured layers are not proof of effective enforcement",
             ),
         }
         references = [
@@ -273,17 +390,25 @@ class HarborAdapter:
             FileReference("verifier/test-stdout.txt", "verifier-output", False),
             FileReference("artifacts/manifest.json", "artifact-manifest", False),
         ]
-        agent_result = result.get("agent_result") if isinstance(result.get("agent_result"), dict) else {}
         final_metrics = trajectory.get("final_metrics") if isinstance(trajectory.get("final_metrics"), dict) else {}
         rewards = _get(result, "verifier_result", "rewards")
         verifier_evidence = {
             "status": "run_outputs_only",
             "claims": {
                 "raw_reward": observed(_reward(result), "Harbor result.json:verifier_result.rewards").as_dict(),
-                "configured_verifier": observed(verifier_config or None, "Harbor config.json:verifier").as_dict(),
+                "configured_verifier": observed(
+                    safe_verifier_config or None,
+                    "selected non-secret Harbor config.json:verifier fields",
+                    "Environment, kwargs, import paths, and log filters are not copied",
+                ).as_dict(),
             },
             "note": "Reward is a reported outcome, not reward-independent proof of correctness.",
         }
+        trajectory_schema_version = trajectory.get("schema_version")
+        trajectory_schema_recognized = (
+            isinstance(trajectory_schema_version, str)
+            and trajectory_schema_version in self.KNOWN_TRAJECTORY_SCHEMA_VERSIONS
+        )
         return NormalizedRun(
             root=root,
             adapter=self.name,
@@ -296,18 +421,39 @@ class HarborAdapter:
             started_at=result.get("started_at"),
             finished_at=result.get("finished_at"),
             metrics={
-                "input_tokens": agent_result.get("n_input_tokens", final_metrics.get("total_prompt_tokens")),
-                "cache_tokens": agent_result.get("n_cache_tokens", final_metrics.get("total_cached_tokens")),
-                "output_tokens": agent_result.get("n_output_tokens", final_metrics.get("total_completion_tokens")),
-                "cost_usd": agent_result.get("cost_usd", final_metrics.get("total_cost_usd")),
+                "input_tokens": _coalesce(
+                    agent_result.get("n_input_tokens"),
+                    final_metrics.get("total_prompt_tokens"),
+                ),
+                "cache_tokens": _coalesce(
+                    agent_result.get("n_cache_tokens"),
+                    final_metrics.get("total_cached_tokens"),
+                ),
+                "output_tokens": _coalesce(
+                    agent_result.get("n_output_tokens"),
+                    final_metrics.get("total_completion_tokens"),
+                ),
+                "cost_usd": _coalesce(
+                    agent_result.get("cost_usd"),
+                    final_metrics.get("total_cost_usd"),
+                ),
             },
             reward=_reward(result),
             scores=rewards,
-            termination_reason=str(_get(result, "exception_info", "exception_type") or "completed"),
+            termination_reason=str(
+                _get(result, "exception_info", "exception_type")
+                or ("completed" if result.get("finished_at") is not None else "unavailable")
+            ),
             verifier_evidence=verifier_evidence,
             extensions={
                 "harbor": {
-                    "trajectory_schema_version": trajectory.get("schema_version"),
+                    "adapter_compat": {
+                        "trajectory_schema_version": trajectory_schema_version,
+                        "recognized": trajectory_schema_recognized,
+                        "tested_against": sorted(self.KNOWN_TRAJECTORY_SCHEMA_VERSIONS),
+                    },
+                    "timeout": timeout_components,
+                    "trajectory_schema_version": trajectory_schema_version,
                     "trajectory_session_id": trajectory.get("session_id") or trajectory.get("trajectory_id"),
                     "trajectory_step_count": len(trajectory.get("steps") or []) if isinstance(trajectory.get("steps"), list) else None,
                 }

@@ -73,5 +73,11 @@ def derived(value: Any, source: str, note: str | None = None) -> EvidenceValue:
     return EvidenceValue(value, "derived", source, note)
 
 
+def operator_asserted(value: Any, source: str, note: str | None = None) -> EvidenceValue:
+    if value is None:
+        return EvidenceValue(None, "unavailable", "not captured", note or f"{source} was absent")
+    return EvidenceValue(value, "operator_asserted", source, note)
+
+
 def unavailable(note: str) -> EvidenceValue:
     return EvidenceValue(None, "unavailable", "not captured", note)

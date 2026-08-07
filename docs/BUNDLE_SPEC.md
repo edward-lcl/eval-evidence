@@ -26,10 +26,16 @@ whitespace, no NaN values, and a trailing newline when written by the CLI.
 
 `observed`, `derived`, `operator_asserted`, `provider_asserted`, and `unavailable` are
 not interchangeable. Adapters must not upgrade assertions to observations. A transport
-mapping must preserve unavailable state.
+mapping must preserve unavailable state. An `eval-run.json` instrument value without a
+matching `provenance` entry, or a plain claim without an inline evidence object,
+defaults to `operator_asserted`. To make a stronger claim, an emitter must supply the
+instrument's `provenance` entry or a complete `{value, status, source}` claim object.
 
 ## Compatibility
 
 The wire contract is `eval-evidence.bundle/v0.1`. Additive integration data belongs in
 `extensions`. A breaking core change requires a new wire version and migration guide.
+This general new-wire-version rule remains authoritative after adoption;
+[`COMPATIBILITY.md`](COMPATIBILITY.md) documents the explicitly limited pre-adoption
+0.2.0 semantic correction.
 The schema `$id` is the document identity, not the wire-version value.

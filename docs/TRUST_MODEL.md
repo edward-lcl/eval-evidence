@@ -20,6 +20,8 @@ Threats not addressed:
 - compromised runner or operating system;
 - concurrent time-of-check/time-of-use mutation;
 - fabricated source artifacts hashed consistently by an attacker;
+- bundle claims edited and then re-digested by an attacker (the result is internally
+  valid because a content digest is not an authenticated signature);
 - key compromise, reviewer impersonation, or physical sensor fraud;
 - confidentiality of the source files (the bundle hashes them but does not encrypt them);
 - resource exhaustion from extremely large but syntactically valid JSON or referenced files.

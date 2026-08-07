@@ -10,7 +10,8 @@ from .core import RUN_SCHEMA_VERSION
 
 def _write(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    payload = (json.dumps(value, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    path.write_bytes(payload)
 
 
 def materialize_generic_demo(root: Path) -> Path:
@@ -109,9 +110,12 @@ def materialize_harbor_demo(root: Path) -> Path:
         root / "config.json",
         {
             "task": {"path": "tasks/synthetic", "git_commit_id": "demo-v1"},
+            "timeout_multiplier": 1.0,
+            "agent_timeout_multiplier": 1.0,
             "agent": {
                 "name": "synthetic-agent",
                 "model_name": "example/synthetic-model",
+                "override_timeout_sec": 60,
                 "skills": [],
                 "mcp_servers": [],
                 "kwargs": {"max_turns": 8, "temperature": 0, "seed": 7},
@@ -131,5 +135,5 @@ def materialize_harbor_demo(root: Path) -> Path:
         },
     )
     (root / "verifier").mkdir()
-    (root / "verifier" / "reward.txt").write_text("1\n", encoding="utf-8")
+    (root / "verifier" / "reward.txt").write_bytes(b"1\n")
     return root

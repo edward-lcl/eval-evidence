@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import subprocess
@@ -14,6 +15,7 @@ from eval_evidence.core import (
     IntegrityError,
     build_bundle,
     canonical_json_bytes,
+    sha256_bytes,
     verify_bundle,
     verify_referenced_files,
 )
@@ -22,8 +24,8 @@ from eval_evidence.demo import materialize_generic_demo, materialize_harbor_demo
 ROOT = Path(__file__).resolve().parents[1]
 BUNDLE_SCHEMA = ROOT / "eval_evidence/schemas/eval-evidence-bundle-v0.1.schema.json"
 RUN_SCHEMA = ROOT / "eval_evidence/schemas/eval-evidence-run-v0.1.schema.json"
-GENERIC_GOLDEN = "d60b0eaa1f9239eb57430a86b7831d893bb92111064c323671e2830325ba4cf9"
-HARBOR_GOLDEN = "b17e1b6788a40e4cb0731714a5fcf5b080bba204bc1c12f09c148c120da07e1f"
+GENERIC_GOLDEN = "13c06a8b06a90b4ae58c4fae6e36252f05105a9aac761a9834a4bd1e7d69c081"
+HARBOR_GOLDEN = "3322d9ec11f24be40fc1dcbcee1dc8d799e3e7da1920461755c093c483cad8a5"
 
 
 class ProductTests(unittest.TestCase):
@@ -38,6 +40,30 @@ class ProductTests(unittest.TestCase):
             self.assertEqual(verify_referenced_files(bundle, root), [])
             self.assertIsNone(bundle["attestation"]["signature"])
             self.assertEqual(bundle["source"]["adapter"], "generic")
+            coverage = bundle["instrument_manifest"]["coverage"]
+            self.assertEqual(coverage["available_fraction"], 0.3)
+            self.assertEqual(coverage["status_counts"]["observed"], 0)
+            self.assertEqual(coverage["status_counts"]["operator_asserted"], 6)
+
+    def test_demo_files_use_platform_independent_lf_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            generic = materialize_generic_demo(base / "generic")
+            harbor = materialize_harbor_demo(base / "harbor")
+            paths = (
+                generic / "eval-run.json",
+                generic / "outputs/scores.json",
+                generic / "logs/events.json",
+                harbor / "result.json",
+                harbor / "config.json",
+                harbor / "agent/trajectory.json",
+                harbor / "verifier/reward.txt",
+            )
+            for path in paths:
+                with self.subTest(path=path):
+                    payload = path.read_bytes()
+                    self.assertTrue(payload.endswith(b"\n"))
+                    self.assertNotIn(b"\r\n", payload)
 
     def test_harbor_is_first_class_adapter_not_canonical_format(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -50,6 +76,206 @@ class ProductTests(unittest.TestCase):
             self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
             self.assertEqual(verify_referenced_files(bundle, root), [])
             self.assertEqual(bundle["item_validity"]["status"], "unavailable")
+            self.assertNotEqual(
+                bundle["instrument_manifest"]["fields"]["max_wall_time_s"]["status"],
+                "unavailable",
+            )
+            self.assertTrue(
+                bundle["extensions"]["harbor"]["adapter_compat"]["recognized"]
+            )
+
+    def test_harbor_metrics_fall_back_when_primary_value_is_null(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            result_path = root / "result.json"
+            result = json.loads(result_path.read_text())
+            result["agent_result"]["n_cache_tokens"] = None
+            result_path.write_text(json.dumps(result), encoding="utf-8")
+            trajectory_path = root / "agent/trajectory.json"
+            trajectory = json.loads(trajectory_path.read_text())
+            trajectory["final_metrics"]["total_cached_tokens"] = 3
+            trajectory_path.write_text(json.dumps(trajectory), encoding="utf-8")
+            match = discover_runs(root)[0]
+            bundle = build_bundle(match.adapter.load(root))
+            self.assertEqual(bundle["execution"]["metrics"]["cache_tokens"], 3)
+
+    def test_harbor_wall_time_falls_back_to_result_timeout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            config_path = root / "config.json"
+            config = json.loads(config_path.read_text())
+            config["agent"]["override_timeout_sec"] = None
+            config["agent"]["max_timeout_sec"] = None
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            result_path = root / "result.json"
+            result = json.loads(result_path.read_text())
+            result["agent_result"]["timeout_sec"] = 900
+            result_path.write_text(json.dumps(result), encoding="utf-8")
+            match = discover_runs(root)[0]
+            bundle = build_bundle(match.adapter.load(root))
+            field = bundle["instrument_manifest"]["fields"]["max_wall_time_s"]
+            self.assertEqual(field["value"], 900)
+            self.assertEqual(field["status"], "observed")
+            self.assertEqual(
+                field["source"], "Harbor result.json:agent_result.timeout_sec"
+            )
+            self.assertIn("multiplier was not reapplied", field["note"])
+            timeout = bundle["extensions"]["harbor"]["timeout"]
+            self.assertEqual(timeout["resolution"], "legacy_recorded")
+            self.assertEqual(timeout["effective_sec"], 900)
+            self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
+            self.assertEqual(verify_referenced_files(bundle, root), [])
+
+    def test_harbor_override_only_uses_default_multiplier(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            config_path = root / "config.json"
+            config = json.loads(config_path.read_text())
+            config.pop("agent_timeout_multiplier")
+            config.pop("timeout_multiplier")
+            config["agent"].pop("max_timeout_sec", None)
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            bundle = build_bundle(discover_runs(root)[0].adapter.load(root))
+            field = bundle["instrument_manifest"]["fields"]["max_wall_time_s"]
+            timeout = bundle["extensions"]["harbor"]["timeout"]
+            self.assertEqual(field["value"], 60.0)
+            self.assertEqual(field["status"], "derived")
+            self.assertEqual(timeout["multiplier"], 1.0)
+            self.assertEqual(
+                timeout["multiplier_source"],
+                "Harbor TrialConfig default timeout_multiplier",
+            )
+            self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
+            self.assertEqual(verify_referenced_files(bundle, root), [])
+
+    def test_harbor_cap_only_does_not_become_effective_wall_time(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            config_path = root / "config.json"
+            config = json.loads(config_path.read_text())
+            config["agent"]["override_timeout_sec"] = None
+            config["agent"]["max_timeout_sec"] = 300
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            bundle = build_bundle(discover_runs(root)[0].adapter.load(root))
+            field = bundle["instrument_manifest"]["fields"]["max_wall_time_s"]
+            timeout = bundle["extensions"]["harbor"]["timeout"]
+            self.assertEqual(field["status"], "unavailable")
+            self.assertIn("task definition", field["note"])
+            self.assertEqual(timeout["cap_sec"], 300)
+            self.assertIsNone(timeout["effective_sec"])
+            self.assertEqual(timeout["resolution"], "unresolved")
+            self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
+            self.assertEqual(verify_referenced_files(bundle, root), [])
+
+    def test_harbor_agent_timeout_uses_cap_and_agent_multiplier(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            config_path = root / "config.json"
+            config = json.loads(config_path.read_text())
+            config["agent"]["override_timeout_sec"] = 600
+            config["agent"]["max_timeout_sec"] = 300
+            config["agent_timeout_multiplier"] = 2.0
+            config["timeout_multiplier"] = 1.5
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            bundle = build_bundle(discover_runs(root)[0].adapter.load(root))
+            field = bundle["instrument_manifest"]["fields"]["max_wall_time_s"]
+            timeout = bundle["extensions"]["harbor"]["timeout"]
+            self.assertEqual(field["value"], 600.0)
+            self.assertEqual(field["status"], "derived")
+            self.assertEqual(timeout["base_sec"], 600)
+            self.assertEqual(timeout["cap_sec"], 300)
+            self.assertEqual(timeout["multiplier"], 2.0)
+            self.assertEqual(timeout["resolution"], "computed")
+            self.assertIn("agent_timeout_multiplier", timeout["multiplier_source"])
+            self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
+            self.assertEqual(verify_referenced_files(bundle, root), [])
+
+    def test_harbor_agent_timeout_uses_global_multiplier(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            config_path = root / "config.json"
+            config = json.loads(config_path.read_text())
+            config["agent"]["override_timeout_sec"] = 100
+            config["agent"].pop("max_timeout_sec", None)
+            config["agent_timeout_multiplier"] = None
+            config["timeout_multiplier"] = 1.5
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            bundle = build_bundle(discover_runs(root)[0].adapter.load(root))
+            field = bundle["instrument_manifest"]["fields"]["max_wall_time_s"]
+            timeout = bundle["extensions"]["harbor"]["timeout"]
+            self.assertEqual(field["value"], 150.0)
+            self.assertEqual(field["status"], "derived")
+            self.assertEqual(timeout["multiplier"], 1.5)
+            self.assertEqual(
+                timeout["multiplier_source"], "Harbor config.json:timeout_multiplier"
+            )
+            self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
+            self.assertEqual(verify_referenced_files(bundle, root), [])
+
+    def test_harbor_network_policy_keeps_environment_and_agent_layers(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            config_path = root / "config.json"
+            config = json.loads(config_path.read_text())
+            config["environment"]["extra_allowed_hosts"] = ["baseline.example"]
+            config["agent"]["extra_allowed_hosts"] = ["agent-phase.example"]
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            match = discover_runs(root)[0]
+            bundle = build_bundle(match.adapter.load(root))
+            field = bundle["instrument_manifest"]["fields"]["network_policy"]
+            self.assertEqual(
+                field["value"],
+                {
+                    "extra_allowed_hosts": ["baseline.example"],
+                    "agent_extra_allowed_hosts": ["agent-phase.example"],
+                },
+            )
+            self.assertEqual(field["status"], "derived")
+            self.assertIn("environment/agent.extra_allowed_hosts", field["source"])
+
+    def test_harbor_bundle_does_not_copy_tool_or_verifier_secrets(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            config_path = root / "config.json"
+            config = json.loads(config_path.read_text())
+            config["agent"]["skills"] = ["SENSITIVE_SKILL_PATH"]
+            config["agent"]["mcp_servers"] = [
+                {"name": "SENSITIVE_MCP_NAME", "url": "https://example.test/?token=SENSITIVE_TOKEN"}
+            ]
+            config["verifier"].update(
+                {
+                    "env": {"API_KEY": "SENSITIVE_TOKEN"},
+                    "kwargs": {"password": "SENSITIVE_PASSWORD"},
+                    "import_path": "SENSITIVE_IMPORT_PATH",
+                }
+            )
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            match = discover_runs(root)[0]
+            bundle = build_bundle(match.adapter.load(root))
+            serialized = json.dumps(bundle, sort_keys=True)
+            for secret in (
+                "SENSITIVE_SKILL_PATH",
+                "SENSITIVE_MCP_NAME",
+                "SENSITIVE_TOKEN",
+                "SENSITIVE_PASSWORD",
+                "SENSITIVE_IMPORT_PATH",
+            ):
+                self.assertNotIn(secret, serialized)
+            tools = bundle["instrument_manifest"]["fields"]["tools"]["value"]
+            self.assertEqual(tools["skill_count"], 1)
+            self.assertEqual(tools["mcp_server_count"], 1)
+
+    def test_harbor_does_not_infer_completion_without_finished_at(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            result_path = root / "result.json"
+            result = json.loads(result_path.read_text())
+            result["finished_at"] = None
+            result["exception_info"] = None
+            result_path.write_text(json.dumps(result), encoding="utf-8")
+            match = discover_runs(root)[0]
+            bundle = build_bundle(match.adapter.load(root))
+            self.assertEqual(bundle["outcome"]["termination_reason"], "unavailable")
 
     def test_generic_manifest_wins_when_both_shapes_exist(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -61,6 +287,31 @@ class ProductTests(unittest.TestCase):
             match = discover_runs(root)[0]
             self.assertEqual(match.adapter.name, "generic")
             self.assertEqual(match.confidence, 100)
+
+    def test_generic_values_without_provenance_are_operator_asserted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_generic_demo(Path(directory) / "run")
+            manifest_path = root / "eval-run.json"
+            document = json.loads(manifest_path.read_text())
+            document["provenance"]["model_id"] = {
+                "status": "observed",
+                "source": "responses/metadata.json:model",
+            }
+            document["item_validity"]["claims"]["operator_note"] = "reviewed"
+            manifest_path.write_text(json.dumps(document), encoding="utf-8")
+            bundle = build_bundle(GenericManifestAdapter().load(root))
+            fields = bundle["instrument_manifest"]["fields"]
+            self.assertEqual(fields["harness_name"]["status"], "operator_asserted")
+            self.assertEqual(fields["model_id"]["status"], "observed")
+            self.assertEqual(
+                fields["model_id"]["source"], "responses/metadata.json:model"
+            )
+            self.assertEqual(
+                bundle["item_validity"]["claims"]["operator_note"]["status"],
+                "operator_asserted",
+            )
+            self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
+            self.assertEqual(verify_referenced_files(bundle, root), [])
 
     def test_generic_manifest_validates_against_published_schema(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -119,28 +370,164 @@ class ProductTests(unittest.TestCase):
             with self.assertRaisesRegex(IntegrityError, "escapes root through symlink"):
                 build_bundle(GenericManifestAdapter().load(root))
 
-    def test_cli_two_command_path_and_advanced_verify(self):
+    def test_cli_quickstart_both_formats(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            root = base / "run"
-            bundle = base / "bundle.json"
-            commands = [
-                [sys.executable, "-m", "eval_evidence", "demo", "-o", str(root)],
-                [sys.executable, "-m", "eval_evidence", "check", str(root)],
-                [sys.executable, "-m", "eval_evidence", "bundle", str(root), "-o", str(bundle)],
-                [sys.executable, "-m", "eval_evidence", "verify", str(bundle), "--run-root", str(root)],
-            ]
-            outputs = []
-            for command in commands:
-                result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True)
-                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-                outputs.append(json.loads(result.stdout))
-            self.assertTrue(outputs[1]["valid"])
-            self.assertTrue(outputs[3]["valid"])
-            self.assertEqual(
-                bundle.read_bytes(),
-                canonical_json_bytes(json.loads(bundle.read_text())) + b"\n",
+            for format_name in ("generic", "harbor"):
+                root = base / format_name
+                bundle = base / f"{format_name}.json"
+                commands = [
+                    [
+                        sys.executable,
+                        "-m",
+                        "eval_evidence",
+                        "demo",
+                        "--format",
+                        format_name,
+                        "-o",
+                        str(root),
+                    ],
+                    [sys.executable, "-m", "eval_evidence", "check", str(root)],
+                    [
+                        sys.executable,
+                        "-m",
+                        "eval_evidence",
+                        "bundle",
+                        str(root),
+                        "-o",
+                        str(bundle),
+                    ],
+                    [
+                        sys.executable,
+                        "-m",
+                        "eval_evidence",
+                        "verify",
+                        str(bundle),
+                        "--run-root",
+                        str(root),
+                    ],
+                ]
+                outputs = []
+                for command in commands:
+                    result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    outputs.append(json.loads(result.stdout))
+                self.assertTrue(outputs[1]["valid"])
+                self.assertEqual(outputs[1]["tool_version"], "0.2.0")
+                self.assertEqual(outputs[1]["bundle_schema_version"], BUNDLE_SCHEMA_VERSION)
+                self.assertTrue(outputs[3]["valid"])
+                self.assertEqual(
+                    bundle.read_bytes(),
+                    canonical_json_bytes(json.loads(bundle.read_text())) + b"\n",
+                )
+
+    def test_bundle_tamper_matrix(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_generic_demo(Path(directory) / "run")
+            original = build_bundle(GenericManifestAdapter().load(root))
+            mutations = (
+                lambda bundle: bundle["outcome"].__setitem__("reward", 0.125),
+                lambda bundle: bundle["inputs"][0].__setitem__("sha256", "0" * 64),
+                lambda bundle: bundle["instrument_manifest"]["fields"]["model_id"].__setitem__(
+                    "status", "derived"
+                ),
+                lambda bundle: bundle.__setitem__("schema_version", "eval-evidence.bundle/v9.9"),
             )
+            for mutate in mutations:
+                with self.subTest(mutate=mutate):
+                    tampered = copy.deepcopy(original)
+                    mutate(tampered)
+                    errors = verify_bundle(tampered, schema_path=BUNDLE_SCHEMA)
+                    self.assertTrue(
+                        any("Bundle digest mismatch" in error for error in errors), errors
+                    )
+
+    def test_redigested_bundle_is_internally_valid_not_authentic(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_generic_demo(Path(directory) / "run")
+            bundle = build_bundle(GenericManifestAdapter().load(root))
+            bundle["outcome"]["reward"] = 0.125
+            payload = dict(bundle)
+            payload.pop("bundle_digest")
+            bundle["bundle_digest"]["value"] = sha256_bytes(canonical_json_bytes(payload))
+            self.assertEqual(verify_bundle(bundle, schema_path=BUNDLE_SCHEMA), [])
+
+    def test_observed_harbor_trajectory_versions_are_recognized(self):
+        for version in ("ATIF-v1.5", "ATIF-v1.6", "ATIF-v1.7"):
+            with self.subTest(version=version), tempfile.TemporaryDirectory() as directory:
+                root = materialize_harbor_demo(Path(directory) / "run")
+                trajectory_path = root / "agent/trajectory.json"
+                trajectory = json.loads(trajectory_path.read_text())
+                trajectory["schema_version"] = version
+                trajectory_path.write_text(json.dumps(trajectory), encoding="utf-8")
+                match = discover_runs(root)[0]
+                bundle = build_bundle(match.adapter.load(root))
+                compat = bundle["extensions"]["harbor"]["adapter_compat"]
+                self.assertTrue(compat["recognized"])
+                self.assertIn(version, compat["tested_against"])
+
+    def test_unknown_harbor_trajectory_version_warns_without_failing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            trajectory_path = root / "agent/trajectory.json"
+            trajectory = json.loads(trajectory_path.read_text())
+            trajectory["schema_version"] = "ATIF-v9.9"
+            trajectory_path.write_text(json.dumps(trajectory), encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, "-m", "eval_evidence", "check", str(root)],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            report = json.loads(result.stdout)
+            self.assertTrue(report["valid"])
+            self.assertEqual(report["summary"]["compat_warnings"], 1)
+            self.assertIn("ATIF-v9.9", report["runs"][0]["compat_warnings"][0])
+
+    def test_inspect_explain_and_minimum_coverage_gate(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = materialize_harbor_demo(Path(directory) / "run")
+            inspect_result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "eval_evidence",
+                    "inspect",
+                    str(root),
+                    "--explain",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+            )
+            self.assertEqual(inspect_result.returncode, 0, inspect_result.stderr)
+            sources = json.loads(inspect_result.stdout)["runs"][0]["field_sources"]
+            self.assertIn("max_wall_time_s", sources)
+            self.assertIn("config.json:agent", sources["max_wall_time_s"])
+
+            check_result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "eval_evidence",
+                    "check",
+                    str(root),
+                    "--min-coverage",
+                    "1",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+            )
+            self.assertEqual(check_result.returncode, 1, check_result.stderr)
+            report = json.loads(check_result.stdout)
+            self.assertTrue(report["valid"])
+            self.assertFalse(report["policy_passed"])
+            self.assertEqual(report["summary"]["failed"], 0)
+            self.assertEqual(report["summary"]["policy_failed"], 1)
+            self.assertEqual(report["runs"][0]["errors"], [])
+            self.assertIn("below --min-coverage", report["runs"][0]["policy_errors"][0])
 
     def test_multi_run_output_collision_fails_before_writing(self):
         with tempfile.TemporaryDirectory() as directory:

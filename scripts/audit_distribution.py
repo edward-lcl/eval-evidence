@@ -11,14 +11,23 @@ import zipfile
 from pathlib import Path, PurePosixPath
 
 PACKAGE = "eval-evidence"
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 EXPECTED_SCHEMAS = {
     "eval-evidence-bundle-v0.1.schema.json",
     "eval-evidence-instrument-v0.1.schema.json",
     "eval-evidence-run-v0.1.schema.json",
     "otel-genai-crosswalk-v0.1.json",
 }
-FORBIDDEN_PARTS = {"paper", "derived", "sources", "trajectories", "prs", "site", ".git"}
+FORBIDDEN_PARTS = {
+    "artifacts",
+    "paper",
+    "derived",
+    "sources",
+    "trajectories",
+    "prs",
+    "site",
+    ".git",
+}
 FORBIDDEN_SUFFIXES = {".parquet", ".csv", ".jsonl", ".pdf", ".tex"}
 
 
@@ -79,7 +88,17 @@ def audit(dist: Path) -> dict:
     }
     if wheel_schemas != EXPECTED_SCHEMAS:
         errors.append(f"wheel schema mismatch: {sorted(wheel_schemas ^ EXPECTED_SCHEMAS)}")
-    required_sdist = {"LICENSE", "NOTICE", "SECURITY.md", "README.md", "action.yml", "pyproject.toml"}
+    required_sdist = {
+        "CHANGELOG.md",
+        "CONTRIBUTING.md",
+        "LICENSE",
+        "NOTICE",
+        "README.md",
+        "SECURITY.md",
+        "action.yml",
+        "pyproject.toml",
+        "scripts/dogfood.sh",
+    }
     missing = required_sdist.difference(sdist_items)
     if missing:
         errors.append(f"sdist missing release files: {sorted(missing)}")

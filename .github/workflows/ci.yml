@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -26,7 +26,11 @@ jobs:
       - run: python -m unittest discover -s tests -v
 
   distribution:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -36,10 +40,38 @@ jobs:
       - run: python -m pip install --upgrade pip build
       - run: python -m build --wheel --sdist --outdir dist
       - run: python scripts/audit_distribution.py dist
-      - run: python -m venv /tmp/eval-evidence-venv
-      - run: /tmp/eval-evidence-venv/bin/pip install dist/*.whl
-      - run: /tmp/eval-evidence-venv/bin/eval-evidence demo -o /tmp/demo
-      - run: /tmp/eval-evidence-venv/bin/eval-evidence check /tmp/demo
+      - run: python -m venv .venv-dist
+      - name: Install wheel and run distribution dogfood
+        shell: bash
+        run: |
+          if [[ -x .venv-dist/bin/python ]]; then
+            venv_python=.venv-dist/bin/python
+          else
+            venv_python=.venv-dist/Scripts/python.exe
+          fi
+          "$venv_python" -m pip install dist/*.whl
+          "$venv_python" -m unittest discover -s tests -v
+          rm -rf "$RUNNER_TEMP/eval-evidence-dogfood"
+          bash scripts/dogfood.sh "$venv_python" "$RUNNER_TEMP/eval-evidence-dogfood"
+
+  advertised-ref-install:
+    if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - run: python -m venv .venv-tag
+      - name: Install README git ref and run dogfood
+        shell: bash
+        run: |
+          ref="${{ github.ref_type == 'tag' && github.ref_name || 'main' }}"
+          .venv-tag/bin/python -m pip install \
+            "eval-evidence @ git+https://github.com/edward-lcl/eval-evidence@$ref"
+          rm -rf "$RUNNER_TEMP/eval-evidence-tag-dogfood"
+          bash scripts/dogfood.sh .venv-tag/bin/python \
+            "$RUNNER_TEMP/eval-evidence-tag-dogfood"
 
   action-smoke:
     runs-on: ubuntu-latest
