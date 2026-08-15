@@ -17,9 +17,11 @@ rows/cards. Both inputs are content-addressed after checkout line-ending normali
 in the SVG comment and checked together, so the human render cannot silently drift
 from the agent-readable contract or appear stale only because Git used CRLF on Windows.
 
-The SVG is canonical and keeps its text selectable; the PNG is a 2x raster rendition
-for contexts that require one. Exact labels and topology are generated deterministically
-rather than delegated to an image model.
+Each story has two layouts generated from the same semantic brief: a wide overview and
+a `-mobile` portrait sequence. The SVG is canonical and keeps its text selectable; the
+PNG is a 2x raster rendition for contexts that require one. The portrait layout changes
+the reading order, not the evidence or claims. Exact labels and topology are generated
+deterministically rather than delegated to an image model.
 
 All five figures share one high-contrast dark canvas, panel vocabulary, coral/teal/
 yellow teaching palette, arrow treatment, and proof-boundary footer. Color is always
@@ -31,6 +33,7 @@ From the repository root, rebuild and validate deterministically:
 python3 scripts/build_figure.py
 python3 scripts/build_command_figure.py
 python3 scripts/build_story_figures.py
+python3 scripts/build_mobile_figures.py
 python3 scripts/render_figure.py
 python3 scripts/verify_figure.py
 ```

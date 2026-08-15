@@ -1,5 +1,22 @@
 # Project agent orchestration
 
+## Project state and semantic authority
+
+Before selecting work, load `PROJECT_HANDOFF.json`, `docs/START_HERE.md`, and
+`docs/ARCHITECTURE.md`. Treat `PROJECT_HANDOFF.json.next_work` as the machine-readable
+queue: choose only work whose status and dependencies permit it. A blocked item is not
+permission to improvise around its owner, data, release, paper, or upstream-approval
+boundary.
+
+The latest protected `main` commit is the development authority; a release tag becomes
+distribution authority only after its release checklist passes. Preserve the distinctions
+between configured, synthetic/lab-verified, regular-CI verified, owner-approved,
+published, and independently reviewed. Never upgrade one state to another by wording.
+
+Definition of done: satisfy the scoped acceptance criteria; run focused and full
+checks; update code, contracts, docs, figures, and handoff state together where
+applicable; list changed paths and exact receipts; and keep remaining gaps explicit.
+
 ## Control-plane stack
 
 - **Herdr is the visible execution substrate:** project workspaces, panes, worktrees, terminals, and lifecycle state.

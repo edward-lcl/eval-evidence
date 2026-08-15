@@ -54,9 +54,13 @@ comparability, and unavailable-evidence questions hidden by a score. G2 neverthe
 remains `unmet` until regular CI can run the genuine/sanitized fixture without a skip,
 as required by [READINESS.md](READINESS.md).
 
-## Section 8 acceptance-contract backlog
+## Acceptance-contract backlog
 
-The paper's Section 8 questions are the machine-checkable backlog for future `check` policies. They should produce explicit evidence, failure, or unavailable states rather than a universal fairness score. In order:
+The research paper's eight acceptance-contract questions are the machine-checkable
+backlog for future `check` policies. The canonical manuscript revision is not frozen in
+this repository, so [`PAPER_ALIGNMENT.md`](PAPER_ALIGNMENT.md) is the authority boundary
+for this directional crosswalk. The policies should produce explicit evidence, failure,
+or unavailable states rather than a universal fairness score. In order:
 
 1. **Does the reference pass repeatedly?** Add repeatable reference-control evidence.
 2. **Does an empty solution fail?** Add a null-control policy and retained outcome.

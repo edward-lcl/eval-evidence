@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "project": "eval-evidence",
+  "phase": "development",
+  "authority": {
+    "repository": "https://github.com/edward-lcl/eval-evidence",
+    "branch": "main",
+    "released_tag": "v0.1.0",
+    "candidate_version": "0.2.0",
+    "rule": "The latest protected main commit is the development authority. A release tag becomes the distribution authority only after its release checklist passes.",
+    "verify_commands": [
+      "git status --short --branch",
+      "git rev-parse HEAD",
+      "git rev-list --left-right --count main...origin/main"
+    ]
+  },
+  "current_decision": {
+    "status": "mapping-review-candidate",
+    "safe_claim": "A narrow per-trial post-run evidence envelope and integrity checker with generic and Harbor adapters.",
+    "not_yet_claimed": [
+      "current-Harbor adoption readiness",
+      "job or campaign completeness",
+      "general availability",
+      "PyPI availability for 0.2.0",
+      "trusted-runner authenticity",
+      "model-quality or leaderboard correctness"
+    ]
+  },
+  "entrypoints": {
+    "first_read": "docs/START_HERE.md",
+    "product": "README.md",
+    "architecture": "docs/ARCHITECTURE.md",
+    "contribution": "CONTRIBUTING.md",
+    "owner_release": "docs/MAINTAINER_HANDOFF.md",
+    "upstream_review": "docs/TBENCH_REVIEW.md",
+    "paper_review": "docs/PAPER_ALIGNMENT.md",
+    "agent_instructions": "AGENTS.md",
+    "readiness": "docs/READINESS.md"
+  },
+  "gates": [
+    {
+      "id": "G1",
+      "name": "CLI path",
+      "status": "met",
+      "evidence": "tests.test_product.ProductTests.test_cli_quickstart_both_formats"
+    },
+    {
+      "id": "G2",
+      "name": "Real Harbor evidence in regular CI",
+      "status": "unmet",
+      "evidence": "tests.test_readiness.ReadinessTests.test_real_harbor_archive_when_supplied",
+      "blocked_by": "Data-owner approval for a sanitized structural fixture or secure read-only CI fixture access."
+    },
+    {
+      "id": "G3",
+      "name": "Harbor release drift warning",
+      "status": "met",
+      "evidence": "tests.test_product.ProductTests.test_unknown_harbor_trajectory_version_warns_without_failing"
+    },
+    {
+      "id": "G4",
+      "name": "Tamper boundary",
+      "status": "met",
+      "evidence": "tests.test_product.ProductTests.test_bundle_tamper_matrix"
+    }
+  ],
+  "next_work": [
+    {
+      "id": "EE-01",
+      "title": "Close the reproducible real-Harbor gate",
+      "priority": 1,
+      "status": "blocked-owner-input",
+      "owner": "repository owner plus Harbor data owner",
+      "start_at": "docs/DOGFOOD.md",
+      "acceptance": [
+        "G2 runs in regular CI without a skip",
+        "the fixture contains no benchmark content, prompts, trajectories, credentials, model names, or private identifiers",
+        "a reviewer spot-checks the resulting mapping and unavailable fields"
+      ]
+    },
+    {
+      "id": "EE-02",
+      "title": "Obtain Terminal-Bench and Harbor mapping decisions",
+      "priority": 2,
+      "status": "ready-for-review",
+      "owner": "upstream liaison",
+      "start_at": "docs/TBENCH_REVIEW.md",
+      "acceptance": [
+        "field mapping corrections or approvals are recorded",
+        "the G2 fixture route is chosen",
+        "the job-level denominator source is decided",
+        "capture-time field locations are decided"
+      ]
+    },
+    {
+      "id": "EE-03",
+      "title": "Freeze the paper authority and claim crosswalk",
+      "priority": 3,
+      "status": "blocked-owner-input",
+      "owner": "paper owners",
+      "start_at": "docs/PAPER_ALIGNMENT.md",
+      "acceptance": [
+        "one canonical manuscript repository, path, and revision are named",
+        "all eight acceptance-contract questions link to that revision",
+        "each question is labeled shipped, partially supported, or deferred",
+        "paper numbers and claims remain governed by the paper repository"
+      ]
+    },
+    {
+      "id": "EE-04",
+      "title": "Prove independent pickup",
+      "priority": 4,
+      "status": "ready",
+      "owner": "teammate who did not author the implementation",
+      "start_at": "docs/START_HERE.md",
+      "acceptance": [
+        "a new teammate identifies the authority and next task without oral context",
+        "the teammate completes the public quickstart without undocumented corrections",
+        "the teammate records friction as an issue without sharing private evaluation data"
+      ]
+    },
+    {
+      "id": "EE-05",
+      "title": "Validate the framework-neutral contract with a second evaluator",
+      "priority": 5,
+      "status": "blocked-by-sequence",
+      "owner": "adapter contributor",
+      "start_at": "docs/ADAPTERS.md",
+      "blocked_by": "EE-01 must close first.",
+      "acceptance": [
+        "one external evaluator emits eval-run.json from public documentation alone",
+        "friction is recorded before any plugin system is designed",
+        "the generic wire contract remains evaluator-neutral"
+      ]
+    }
+  ],
+  "authority_boundaries": {
+    "contributors_may": [
+      "improve documentation, tests, diagnostics, generic integration examples, and reviewed adapter mappings",
+      "open synthetic reproductions and redacted structural fixtures",
+      "run all local and public CI checks"
+    ],
+    "owner_or_external_approval_required": [
+      "sharing any genuine evaluation fixture",
+      "marking G2 met",
+      "naming a canonical paper revision",
+      "publishing a GitHub release or PyPI package",
+      "claiming upstream endorsement or general availability"
+    ]
+  },
+  "definition_of_done": [
+    "the scoped acceptance criteria pass",
+    "the relevant tests and documentation are updated together",
+    "known gaps remain explicit",
+    "no private benchmark data or credentials enter the repository",
+    "the exact commit and command receipts are recorded before release"
+  ]
+}

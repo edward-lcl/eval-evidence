@@ -3,6 +3,10 @@
 These are release gates, not aspirations. A gate is a falsifiable claim tied to an
 executable test. `met` means the repository currently carries passing evidence;
 `unmet` remains deliberately visible until its external prerequisite is supplied.
+The same states are exposed to agents and tooling in
+[`PROJECT_HANDOFF.json`](../PROJECT_HANDOFF.json). If the two disagree, treat the
+optimistic state as invalid and correct both artifacts with the named executable
+evidence.
 
 | gate | claim | test | status(met/unmet) |
 |---|---|---|---|
