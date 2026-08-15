@@ -19,6 +19,8 @@ FIGURE_IDS = (
     "eval-evidence-check-story",
     "eval-evidence-tamper-story",
 )
+MOBILE_PNG_WIDTH = 1800
+MOBILE_PNG_HEIGHT = 3200
 
 
 def require_local_provenance(config: dict) -> str:
@@ -68,6 +70,11 @@ def main() -> int:
         subprocess.run([
             executable, "--width", str(canvas["png_width"]), "--height", str(canvas["png_height"]),
             "--output", str(FIGURES / f"{figure_id}.png"), str(FIGURES / f"{figure_id}.svg"),
+        ], check=True)
+        subprocess.run([
+            executable, "--width", str(MOBILE_PNG_WIDTH), "--height", str(MOBILE_PNG_HEIGHT),
+            "--output", str(FIGURES / f"{figure_id}-mobile.png"),
+            str(FIGURES / f"{figure_id}-mobile.svg"),
         ], check=True)
     return 0
 

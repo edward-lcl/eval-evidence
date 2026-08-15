@@ -16,6 +16,7 @@ class FigurePipelineTests(unittest.TestCase):
             "scripts/build_figure.py",
             "scripts/build_command_figure.py",
             "scripts/build_story_figures.py",
+            "scripts/build_mobile_figures.py",
         ):
             with self.subTest(script=script):
                 result = subprocess.run(

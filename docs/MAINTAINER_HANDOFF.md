@@ -1,5 +1,9 @@
 # Maintainer handoff
 
+This is the owner-only continuation of the shared [handoff router](START_HERE.md).
+Machine-readable gate status, work ownership, and approval boundaries live in
+[`PROJECT_HANDOFF.json`](../PROJECT_HANDOFF.json); keep this page and that file aligned.
+
 ## Product identity
 
 - Project: **Eval Evidence**
@@ -36,6 +40,10 @@ uv build --offline --wheel --sdist --out-dir dist
 python scripts/audit_distribution.py dist
 ```
 
+The distribution audit proves archive scope and metadata eligibility. It deliberately
+reports `authorized_for_distribution: false`: no local script can substitute for the
+owner's release decision, protected CI, tag, and published-hash verification.
+
 Then install the wheel into a clean virtual environment and run:
 
 ```bash
@@ -47,9 +55,9 @@ eval-evidence verify /tmp/evidence.json --run-root /tmp/demo
 
 ## Release state
 
-Pull request #2 merged the reviewed 0.2.0 candidate into `main` on 2026-08-07; its
-deleted review branch is no longer an installation or release authority. No `v0.2.0`
-tag or PyPI release exists yet.
+Protected `main` is the current development authority for the reviewed 0.2.0 candidate.
+Historical pull requests document review history but are not installation or release
+authorities. No `v0.2.0` tag or PyPI release exists yet.
 
 The GitHub repository and CI are public. GitHub CI covers Python 3.11–3.14, distribution
 scope, installed-wheel dogfood on Linux/macOS/Windows, and the composite action. The repository-side PyPI Trusted

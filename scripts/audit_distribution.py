@@ -73,6 +73,7 @@ def audit(dist: Path) -> dict:
         return {
             "technical_valid": False,
             "authorized_for_distribution": False,
+            "release_artifact_eligible": False,
             "errors": [f"expected one wheel and one sdist; found {len(wheels)} and {len(sdists)}"],
         }
     wheel, sdist = wheels[0], sdists[0]
@@ -93,6 +94,7 @@ def audit(dist: Path) -> dict:
         "CONTRIBUTING.md",
         "LICENSE",
         "NOTICE",
+        "PROJECT_HANDOFF.json",
         "README.md",
         "SECURITY.md",
         "action.yml",
@@ -123,10 +125,20 @@ def audit(dist: Path) -> dict:
         "scripts/build_command_figure.py",
         "scripts/build_figure.py",
         "scripts/build_story_figures.py",
+        "scripts/build_mobile_figures.py",
         "scripts/dogfood.sh",
         "scripts/render_figure.py",
         "scripts/verify_figure.py",
     }
+    for figure_id in (
+        "eval-evidence-lifecycle",
+        "eval-evidence-command-path",
+        "eval-evidence-envelope-anatomy",
+        "eval-evidence-check-story",
+        "eval-evidence-tamper-story",
+    ):
+        required_sdist.add(f"figures/{figure_id}-mobile.svg")
+        required_sdist.add(f"figures/{figure_id}-mobile.png")
     missing = required_sdist.difference(sdist_items)
     if missing:
         errors.append(f"sdist missing release files: {sorted(missing)}")
@@ -139,12 +151,14 @@ def audit(dist: Path) -> dict:
     source_urls = parsed.get_all("Project-URL") or []
     if not any(value.startswith("Source, https://github.com/edward-lcl/eval-evidence") for value in source_urls):
         errors.append("source URL does not identify the approved repository")
-    authorized = not errors and license_expression == "Apache-2.0"
+    eligible = not errors and license_expression == "Apache-2.0"
     return {
         "package": PACKAGE,
         "version": VERSION,
         "technical_valid": not errors,
-        "authorized_for_distribution": authorized,
+        "authorized_for_distribution": False,
+        "release_artifact_eligible": eligible,
+        "owner_authorization_required": True,
         "wheel": str(wheel),
         "wheel_file_count": len(wheel_items),
         "sdist": str(sdist),
@@ -153,7 +167,7 @@ def audit(dist: Path) -> dict:
         "forbidden_member_count": len(bad),
         "license_expression": license_expression,
         "errors": errors,
-        "claim_boundary": "archive and metadata audit only; not trusted execution or rights beyond LICENSE/NOTICE",
+        "claim_boundary": "archive and metadata audit only; release and publication still require the named owner workflow",
     }
 
 

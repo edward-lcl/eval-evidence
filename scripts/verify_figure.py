@@ -29,6 +29,12 @@ STORY_IDS = (
     "eval-evidence-check-story",
     "eval-evidence-tamper-story",
 )
+ALL_IDS = (
+    "eval-evidence-lifecycle",
+    "eval-evidence-command-path",
+    *STORY_IDS,
+)
+MOBILE_DIMENSIONS = (1800, 3200)
 BRIEF_SCHEMA = FIGURES / "figure-brief.schema.json"
 RENDER = ROOT / "scripts" / "render_figure.py"
 OUTCOME_CARD_WIDTH = 340
@@ -121,6 +127,7 @@ def verify_common(
     svg_path: Path,
     png_path: Path,
     builder: Path,
+    expected_dimensions: tuple[int, int] | None = None,
 ) -> tuple[str, str, str, str]:
     """Verify source linkage, accessibility, labels, claims, and dimensions."""
     schema = json.loads(BRIEF_SCHEMA.read_text(encoding="utf-8"))
@@ -176,7 +183,7 @@ def verify_common(
     else:
         try:
             dimensions = png_dimensions(png_path.read_bytes())
-            expected = (render["canvas"]["png_width"], render["canvas"]["png_height"])
+            expected = expected_dimensions or (render["canvas"]["png_width"], render["canvas"]["png_height"])
             if dimensions != expected:
                 fail(errors, f"{png_path.name} dimensions {dimensions} != {expected}")
         except ValueError as exc:
@@ -244,6 +251,23 @@ def main() -> int:
             FIGURES / f"{figure_id}.png",
             ROOT / "scripts" / "build_story_figures.py",
         )
+    mobile_hashes = {}
+    for figure_id in ALL_IDS:
+        mobile_source_path = FIGURES / f"{figure_id}.figure.json"
+        mobile_render_path = FIGURES / f"{figure_id}.render.json"
+        mobile_source_bytes = mobile_source_path.read_text(encoding="utf-8").encode("utf-8")
+        mobile_render_bytes = mobile_render_path.read_text(encoding="utf-8").encode("utf-8")
+        mobile_hashes[figure_id] = verify_common(
+            errors,
+            json.loads(mobile_source_bytes),
+            mobile_source_bytes,
+            json.loads(mobile_render_bytes),
+            mobile_render_bytes,
+            FIGURES / f"{figure_id}-mobile.svg",
+            FIGURES / f"{figure_id}-mobile.png",
+            ROOT / "scripts" / "build_mobile_figures.py",
+            MOBILE_DIMENSIONS,
+        )
     for outcome in render["outcomes"]:
         if "detail_lines" not in outcome or " ".join(outcome["detail_lines"]) != outcome["detail"]:
             fail(errors, f'{outcome["label"]} detail_lines must preserve the single-line detail')
@@ -275,6 +299,9 @@ def main() -> int:
         print(f"{figure_id}_render_sha256={hashes[1]}")
         print(f"{figure_id}_svg_sha256={hashes[2]}")
         print(f"{figure_id}_png_sha256={hashes[3]}")
+    for figure_id, hashes in mobile_hashes.items():
+        print(f"{figure_id}_mobile_svg_sha256={hashes[2]}")
+        print(f"{figure_id}_mobile_png_sha256={hashes[3]}")
     return 0
 
 if __name__ == "__main__":

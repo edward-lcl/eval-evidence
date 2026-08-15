@@ -5,7 +5,15 @@
 > A score should travel with a machine-checkable record of what was observed,
 > asserted, derived, and unavailable.
 
-![Eval Evidence lifecycle: a reported score is sealed with model, harness, budget, verifier, artifact, and field-provenance evidence; review distinguishes matched conditions, differences, unavailable evidence, and integrity failures.](figures/eval-evidence-lifecycle.png)
+**Development status:** narrow mapping-review candidate; real-Harbor gate G2 is
+unmet; version 0.2.0 is not on PyPI. Start with the [handoff router](docs/START_HERE.md)
+or inspect the same state in [`PROJECT_HANDOFF.json`](PROJECT_HANDOFF.json). Pin an
+exact commit rather than treating mutable `main` as a release.
+
+<picture>
+  <source media="(max-width: 600px)" srcset="figures/eval-evidence-lifecycle-mobile.png">
+  <img src="figures/eval-evidence-lifecycle.png" alt="Eval Evidence lifecycle: a reported score is sealed with model, harness, budget, verifier, artifact, and field-provenance evidence; review distinguishes matched conditions, differences, unavailable evidence, and integrity failures.">
+</picture>
 
 The [static lifecycle figure](figures/README.md) is generated offline from a frozen,
 machine-readable brief. It describes review states, not model quality or a universal
@@ -14,7 +22,10 @@ trust score.
 Eval Evidence produces a deterministic JSON bundle that carries three kinds of evidence
 without pretending to adjudicate them:
 
-![Three retained Harbor run files become one reviewable evidence JSON record: the adapter labels what happened, how the run was configured, and which source bytes can be checked again.](figures/eval-evidence-envelope-anatomy.png)
+<picture>
+  <source media="(max-width: 600px)" srcset="figures/eval-evidence-envelope-anatomy-mobile.png">
+  <img src="figures/eval-evidence-envelope-anatomy.png" alt="Three retained Harbor run files become one reviewable evidence JSON record: the adapter labels what happened, how the run was configured, and which source bytes can be checked again.">
+</picture>
 
 This is what “build a bundle” means in concrete terms. The adapter reads retained run
 files, labels where values came from, records missing fields as `unavailable`, and adds
@@ -42,12 +53,18 @@ eval-evidence bundle /tmp/eval-run -o /tmp/eval-evidence.json
 eval-evidence verify /tmp/eval-evidence.json --run-root /tmp/eval-run
 ```
 
-![Eval Evidence command index: make a safe example with demo, inspect a run now with check, save today's file fingerprints with bundle, or compare later files with verify and run root.](figures/eval-evidence-command-path.png)
+<picture>
+  <source media="(max-width: 600px)" srcset="figures/eval-evidence-command-path-mobile.png">
+  <img src="figures/eval-evidence-command-path.png" alt="Eval Evidence command index: make a safe example with demo, inspect a run now with check, save today's file fingerprints with bundle, or compare later files with verify and run root.">
+</picture>
 
 The [command switchboard brief and editable SVG](figures/README.md) keep each command's
 output beside its proof boundary. It is an index into the story, not the whole story:
 
-![Eval Evidence check shown as six explicit tests: find the run, read files, label each field, test the record, re-hash local files, and name a pass or failure with its reason.](figures/eval-evidence-check-story.png)
+<picture>
+  <source media="(max-width: 600px)" srcset="figures/eval-evidence-check-story-mobile.png">
+  <img src="figures/eval-evidence-check-story.png" alt="Eval Evidence check shown as six explicit tests: find the run, read files, label each field, test the record, re-hash local files, and name a pass or failure with its reason.">
+</picture>
 
 The diagram is a teaching layer; the command help and JSON output remain authoritative
 for automation.
@@ -138,16 +155,19 @@ Terminal-Bench and Harbor maintainers should start with the focused
 
 | Audience | Start here | Benefit |
 |---|---|---|
-| Benchmark maintainers | `eval-evidence check ./runs` in CI | Reject malformed or evidence-poor records; seal bundles separately for later mutation checks |
-| Frontier labs and eval teams | Emit `eval-run.json` | Carry instrument settings and unavailable state across harness boundaries |
-| Reviewers and auditors | `verify` offline | Check schema, digest, and referenced bytes without executing the evaluation |
-| Runtime and physical-verification teams | Populate future attestation profiles | Reuse the evidence format while adding a separately scoped trust layer |
+| New teammate | [`docs/START_HERE.md`](docs/START_HERE.md) | Identify authority, a safe next task, its owner, and completion evidence without oral context |
+| Developer | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Find the adapter/core boundary, wire contracts, tests, and review surface |
+| Repository owner | [`docs/MAINTAINER_HANDOFF.md`](docs/MAINTAINER_HANDOFF.md) | Resolve owner-only gates and release decisions without confusing them with technical readiness |
+| Terminal-Bench / Harbor maintainer | [`docs/TBENCH_REVIEW.md`](docs/TBENCH_REVIEW.md) | Red-line the mapping and choose the real-fixture and denominator routes |
+| Paper author or reviewer | [`docs/PAPER_ALIGNMENT.md`](docs/PAPER_ALIGNMENT.md) | Separate shipped evidence support from the paper's empirical authority |
+| Agent | [`AGENTS.md`](AGENTS.md) and [`PROJECT_HANDOFF.json`](PROJECT_HANDOFF.json) | Select bounded, dependency-ready work and return reproducible receipts |
+| Security reviewer | [`SECURITY.md`](SECURITY.md) and [`docs/TRUST_MODEL.md`](docs/TRUST_MODEL.md) | Test the declared trust boundary with synthetic inputs |
 
 ## Check-only GitHub Action
 
-Pull request #2 has merged, so `main` is the current 0.2.0 pre-release authority. For
-reproducible or production use, replace the mutable branch with the reviewed commit SHA
-or `v0.2.0` after that tag exists:
+Protected `main` is the development authority for the 0.2.0 candidate. For reproducible
+or production use, replace the mutable branch with a reviewed commit SHA or `v0.2.0`
+after that tag exists:
 
 ```yaml
 - uses: edward-lcl/eval-evidence@main
@@ -157,9 +177,10 @@ or `v0.2.0` after that tag exists:
 ```
 
 The pre-release `main` reference is intentionally easy to try but remains mutable.
-Pull request #2 records the reviewed candidate history; record the exact installed SHA
-for reproduction, and pin an accepted commit or release tag before relying on it in
-production. The older `v0.1.0` tag does not provide `--min-coverage`, `inspect
+Historical pull requests record how the candidate evolved; they are not installation
+authorities. Record the exact installed SHA for reproduction, and pin an accepted
+commit or release tag before relying on it in production. The older `v0.1.0` tag does
+not provide `--min-coverage`, `inspect
 --explain`, or Harbor schema compatibility warnings.
 
 The Action runs `check` in memory. It does not write or upload a baseline bundle, so it
@@ -181,7 +202,10 @@ claims match its embedded digest. It does **not** re-hash source files. Add
 `--run-root PATH` to compare referenced files with local bytes. Neither mode proves who
 created the bundle: anyone who edits an unsigned bundle can recompute its digest.
 
-![A three-act tamper story: save the baseline fingerprint for result.json, change the retained file, then verify later bytes and receive a referenced-file digest mismatch with exit 1.](figures/eval-evidence-tamper-story.png)
+<picture>
+  <source media="(max-width: 600px)" srcset="figures/eval-evidence-tamper-story-mobile.png">
+  <img src="figures/eval-evidence-tamper-story.png" alt="A three-act tamper story: save the baseline fingerprint for result.json, change the retained file, then verify later bytes and receive a referenced-file digest mismatch with exit 1.">
+</picture>
 
 ## What a bundle does not prove
 
@@ -224,7 +248,8 @@ python -m build --wheel --sdist --outdir dist
 python scripts/audit_distribution.py dist
 ```
 
-See the [readiness gates](docs/READINESS.md),
+See the [handoff router](docs/START_HERE.md), [architecture map](docs/ARCHITECTURE.md),
+[readiness gates](docs/READINESS.md),
 [product lifecycle](docs/LIFECYCLE.md),
 [owner walkthrough](docs/OWNER_WALKTHROUGH.md),
 [Terminal-Bench review brief](docs/TBENCH_REVIEW.md),
