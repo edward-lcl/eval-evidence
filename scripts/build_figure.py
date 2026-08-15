@@ -12,7 +12,11 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "figures" / "eval-evidence-lifecycle.figure.json"
 RENDER_SPEC = ROOT / "figures" / "eval-evidence-lifecycle.render.json"
 OUTPUT = ROOT / "figures" / "eval-evidence-lifecycle.svg"
-GENERATOR_VERSION = "2"
+GENERATOR_VERSION = "3"
+BG = "#090E16"
+PANEL = "#111827"
+INK = "#F8FAFC"
+MUTED = "#A7B0C0"
 
 
 def text(value: str) -> str:
@@ -34,47 +38,48 @@ def svg(brief: dict, render: dict, brief_digest: str, render_digest: str) -> str
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="figure-title figure-desc">',
         '<title id="figure-title">' + text(brief["title"]) + '</title>',
         '<desc id="figure-desc">' + text(desc) + '</desc>',
-        '<defs><pattern id="unknown-pattern" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="14" height="14" fill="#F8FAFC"/><line x1="0" y1="0" x2="0" y2="14" stroke="#CBD5E1" stroke-width="2"/></pattern><pattern id="failure-pattern" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#FEF2F2"/><path d="M0 0L14 14M14 0L0 14" stroke="#FCA5A5" stroke-width="1.5"/></pattern></defs>',
-        '<rect width="1600" height="1000" fill="#FFFFFF"/>',
-        f'<text x="80" y="92" fill="#0F172A" font-family="Arial, sans-serif" font-size="52" font-weight="700">{text(title)}</text>',
-        f'<text x="80" y="136" fill="#334155" font-family="Arial, sans-serif" font-size="25">{text(subtitle)}</text>',
-        '<text x="80" y="190" fill="#475569" font-family="Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="2">POST-RUN, OFFLINE EVIDENCE LIFECYCLE</text>',
+        '<defs><pattern id="unknown-pattern" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="14" height="14" fill="#111827"/><line x1="0" y1="0" x2="0" y2="14" stroke="#64748B" stroke-width="2"/></pattern><pattern id="failure-pattern" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#261416"/><path d="M0 0L14 14M14 0L0 14" stroke="#7F1D1D" stroke-width="1.5"/></pattern></defs>',
+        f'<rect width="1600" height="1000" fill="{BG}"/>',
+        f'<text x="80" y="92" fill="{INK}" font-family="Arial, sans-serif" font-size="48" font-weight="700">{text(title)}</text>',
+        f'<text x="80" y="136" fill="{MUTED}" font-family="Arial, sans-serif" font-size="24">{text(subtitle)}</text>',
+        f'<text x="80" y="190" fill="{MUTED}" font-family="Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="2">POST-RUN, OFFLINE EVIDENCE LIFECYCLE</text>',
     ]
     x_positions = [80, 565, 1050]
     for index, (stage, x) in enumerate(zip(stages, x_positions)):
         color = stage["color"]
         parts.extend([
-            f'<rect x="{x}" y="240" width="390" height="240" rx="20" fill="#FFFFFF" stroke="{color}" stroke-width="6"/>',
+            f'<rect x="{x}" y="240" width="390" height="240" rx="20" fill="{PANEL}" stroke="{color}" stroke-width="4"/>',
             f'<circle cx="{x + 48}" cy="292" r="25" fill="{color}"/>',
-            f'<text x="{x + 48}" y="300" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="22" font-weight="700">{index + 1}</text>',
-            f'<text x="{x + 88}" y="300" fill="#0F172A" font-family="Arial, sans-serif" font-size="30" font-weight="700">{text(stage["label"])}</text>',
+            f'<text x="{x + 48}" y="300" text-anchor="middle" fill="{BG}" font-family="Arial, sans-serif" font-size="22" font-weight="700">{index + 1}</text>',
+            f'<text x="{x + 88}" y="300" fill="{INK}" font-family="Arial, sans-serif" font-size="30" font-weight="700">{text(stage["label"])}</text>',
         ])
         for line_index, detail_line in enumerate(stage["detail_lines"]):
-            parts.append(f'<text x="{x + 32}" y="{354 + line_index * 34}" fill="#334155" font-family="Arial, sans-serif" font-size="23">{text(detail_line)}</text>')
+            parts.append(f'<text x="{x + 32}" y="{354 + line_index * 34}" fill="#DCE3ED" font-family="Arial, sans-serif" font-size="23">{text(detail_line)}</text>')
         if index < 2:
             parts.append(f'<path d="M{x + 405} 360 H{x + 465}" stroke="#64748B" stroke-width="8" marker-end="url(#arrow)"/>')
     # SVG marker is emitted after paths but referenced by ID by conforming renderers.
-    parts.insert(5, '<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64748B"/></marker></defs>')
+    parts.insert(5, '<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#CBD5E1"/></marker></defs>')
     for index, label in enumerate(labels):
         x = 95 + index * 238
         parts.extend([
-            f'<rect x="{x}" y="534" width="210" height="58" rx="29" fill="#E2E8F0" stroke="#64748B" stroke-width="2"/>',
-            f'<text x="{x + 105}" y="571" text-anchor="middle" fill="#0F172A" font-family="Arial, sans-serif" font-size="22" font-weight="700">{text(label)}</text>',
+            f'<rect x="{x}" y="534" width="210" height="58" rx="29" fill="#0B1220" stroke="#64748B" stroke-width="2"/>',
+            f'<text x="{x + 105}" y="571" text-anchor="middle" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="22" font-weight="700">{text(label)}</text>',
         ])
-    parts.append('<text x="80" y="662" fill="#0F172A" font-family="Arial, sans-serif" font-size="30" font-weight="700">Review output makes evidence state explicit</text>')
+    parts.append(f'<text x="80" y="662" fill="{INK}" font-family="Arial, sans-serif" font-size="30" font-weight="700">Review output makes evidence state explicit</text>')
     outcome_x = [80, 445, 810, 1175]
     for item, x in zip(outcomes, outcome_x):
-        fill = 'url(#unknown-pattern)' if item["label"].startswith("UNKNOWN") else 'url(#failure-pattern)' if item["label"].startswith("INTEGRITY") else '#FFFFFF'
-        parts.append(f'<g aria-label="{text(item["label"])}"><title>{text(item["label"])}</title><rect x="{x}" y="700" width="340" height="165" rx="16" fill="{fill}" stroke="{item["color"]}" stroke-width="6"/>')
+        fill = 'url(#unknown-pattern)' if item["label"].startswith("UNKNOWN") else 'url(#failure-pattern)' if item["label"].startswith("INTEGRITY") else PANEL
+        parts.append(f'<g aria-label="{text(item["label"])}"><title>{text(item["label"])}</title><rect x="{x}" y="700" width="340" height="165" rx="16" fill="{fill}" stroke="{item["color"]}" stroke-width="4"/>')
         for line_index, label_line in enumerate(item["label_lines"]):
             parts.append(f'<text x="{x + 20}" y="{748 + line_index * 28}" fill="{item["color"]}" font-family="Arial, sans-serif" font-size="22" font-weight="700">{text(label_line)}</text>')
-        detail_y = 796 if len(item["label_lines"]) == 1 else 828
+        detail_y = 796 if len(item["label_lines"]) == 1 else 819
         for line_index, detail_line in enumerate(item["detail_lines"]):
-            parts.append(f'<text x="{x + 20}" y="{detail_y + line_index * 28}" fill="#0F172A" font-family="Arial, sans-serif" font-size="22">{text(detail_line)}</text>')
+            parts.append(f'<text x="{x + 20}" y="{detail_y + line_index * 28}" fill="{INK}" font-family="Arial, sans-serif" font-size="22">{text(detail_line)}</text>')
         parts.append('</g>')
-    parts.append('<line x1="80" y1="895" x2="1520" y2="895" stroke="#CBD5E1" stroke-width="2"/>')
-    parts.append('<text x="80" y="937" fill="#475569" font-family="Arial, sans-serif" font-size="22" font-weight="700">BOUNDARY</text>')
-    parts.append(f'<text x="230" y="937" fill="#334155" font-family="Arial, sans-serif" font-size="22">{text(" • ".join(boundaries))}</text>')
+    parts.append('<rect x="80" y="895" width="1440" height="72" rx="16" fill="#151A13" stroke="#F7D73A" stroke-width="3"/>')
+    parts.append('<text x="105" y="938" fill="#F7D73A" font-family="Arial, sans-serif" font-size="22" font-weight="700">BOUNDARY</text>')
+    parts.append(f'<text x="255" y="924" fill="{INK}" font-family="Arial, sans-serif" font-size="22">{text(" • ".join(boundaries[:2]))}</text>')
+    parts.append(f'<text x="255" y="953" fill="{INK}" font-family="Arial, sans-serif" font-size="22">{text(boundaries[2])}</text>')
     parts.append('</svg>')
     return "\n".join(parts) + "\n"
 

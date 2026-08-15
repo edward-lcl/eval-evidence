@@ -94,7 +94,7 @@ def command_text_bound_errors(commands: list[dict]) -> list[str]:
     return errors
 
 
-def contrast(hex_color: str, background: str = "#FFFFFF") -> float:
+def contrast(hex_color: str, background: str = "#090E16") -> float:
     def luminance(value: str) -> float:
         values = [int(value[i:i + 2], 16) / 255 for i in (1, 3, 5)]
         linear = [v / 12.92 if v <= .04045 else ((v + .055) / 1.055) ** 2.4 for v in values]

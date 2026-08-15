@@ -19,7 +19,7 @@ All notable package, wire-contract, and adapter-compatibility changes are record
 - Three source-mapped visual stories that show retained files becoming an evidence
   envelope, open `check` into six concrete gates, and demonstrate a later byte mismatch;
   the command switchboard is now a plain-language index rather than an implementation
-  summary.
+  summary. The complete figure set now uses one high-contrast visual system.
 
 ### Changed
 

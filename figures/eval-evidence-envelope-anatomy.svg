@@ -50,17 +50,17 @@
 <rect x="910" y="320" width="12" height="108" rx="6" fill="#FF7A59"/>
 <text x="950" y="354" text-anchor="start" fill="#FF7A59" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="1">WHAT HAPPENED</text>
 <text x="950" y="388" text-anchor="start" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="21" font-weight="400" letter-spacing="0">run + task identity</text>
-<text x="1240" y="388" text-anchor="start" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="21" font-weight="400" letter-spacing="0">timing + reward + scores</text>
+<text x="1210" y="388" text-anchor="start" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="21" font-weight="400" letter-spacing="0">timing + reward + scores</text>
 <rect x="910" y="452" width="570" height="108" rx="16" fill="#111827" stroke="#39D0C3" stroke-width="3"/>
 <rect x="910" y="452" width="12" height="108" rx="6" fill="#39D0C3"/>
 <text x="950" y="486" text-anchor="start" fill="#39D0C3" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="1">HOW IT RAN</text>
 <text x="950" y="520" text-anchor="start" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="21" font-weight="400" letter-spacing="0">model + agent + harness</text>
-<text x="1240" y="520" text-anchor="start" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="21" font-weight="400" letter-spacing="0">budgets + field provenance</text>
+<text x="1210" y="520" text-anchor="start" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="21" font-weight="400" letter-spacing="0">budgets + field provenance</text>
 <rect x="910" y="584" width="570" height="108" rx="16" fill="#111827" stroke="#F7D73A" stroke-width="3"/>
 <rect x="910" y="584" width="12" height="108" rx="6" fill="#F7D73A"/>
 <text x="950" y="618" text-anchor="start" fill="#F7D73A" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="1">WHAT CAN BE RECHECKED</text>
 <text x="950" y="652" text-anchor="start" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="21" font-weight="400" letter-spacing="0">file path + byte count</text>
-<text x="1240" y="652" text-anchor="start" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="21" font-weight="400" letter-spacing="0">SHA-256 of retained bytes</text>
+<text x="1210" y="652" text-anchor="start" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="21" font-weight="400" letter-spacing="0">SHA-256 of retained bytes</text>
 <rect x="70" y="770" width="1460" height="82" rx="18" fill="#151A13" stroke="#F7D73A" stroke-width="3"/>
 <path d="M105 795 L119 820 L91 820 Z" fill="none" stroke="#F7D73A" stroke-width="3"/>
 <text x="144" y="809" text-anchor="start" fill="#F7D73A" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="0">UNAVAILABLE stays visible</text>

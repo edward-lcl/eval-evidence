@@ -21,6 +21,10 @@ The SVG is canonical and keeps its text selectable; the PNG is a 2x raster rendi
 for contexts that require one. Exact labels and topology are generated deterministically
 rather than delegated to an image model.
 
+All five figures share one high-contrast dark canvas, panel vocabulary, coral/teal/
+yellow teaching palette, arrow treatment, and proof-boundary footer. Color is always
+paired with numbering, geometry, labels, or patterns.
+
 From the repository root, rebuild and validate deterministically:
 
 ```bash

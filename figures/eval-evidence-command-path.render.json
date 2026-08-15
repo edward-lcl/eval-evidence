@@ -11,7 +11,7 @@
       "output_lines": ["PRACTICE", "FOLDER"],
       "proof": "Practice files repeat",
       "limit": "Not real-run evidence",
-      "color": "#2563EB"
+      "color": "#69A7FF"
     },
     {
       "step": "CHECK",
@@ -20,7 +20,7 @@
       "output_lines": ["NOW", "REPORT"],
       "proof": "Problems are named now",
       "limit": "No stored baseline",
-      "color": "#0F766E"
+      "color": "#39D0C3"
     },
     {
       "step": "SEAL",
@@ -29,7 +29,7 @@
       "output_lines": ["EVIDENCE.JSON"],
       "proof": "Today's baseline is saved",
       "limit": "Not signer authenticity",
-      "color": "#7C3AED"
+      "color": "#B18CFF"
     },
     {
       "step": "RECHECK",
@@ -38,7 +38,7 @@
       "output_lines": ["MATCH /", "MISMATCH"],
       "proof": "Later bytes match or differ",
       "limit": "Not physical truth",
-      "color": "#B42318"
+      "color": "#FF6F59"
     }
   ],
   "edge_semantics": "Solid arrows mean produces; the dotted vertical spine means recommended learning order, not a runtime dependency.",

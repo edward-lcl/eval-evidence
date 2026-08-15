@@ -94,7 +94,7 @@ def envelope_svg(brief: dict, render: dict, bd: str, rd: str) -> str:
         parts.append(f'<rect x="910" y="{y}" width="12" height="108" rx="6" fill="{item["color"]}"/>')
         label(parts, 950, y + 34, item["title"], 21, item["color"], 700, spacing=1)
         label(parts, 950, y + 68, item["lines"][0], 21, INK)
-        label(parts, 1240, y + 68, item["lines"][1], 21, INK)
+        label(parts, 1210, y + 68, item["lines"][1], 21, INK)
     parts.extend([
         '<rect x="70" y="770" width="1460" height="82" rx="18" fill="#151A13" stroke="#F7D73A" stroke-width="3"/>',
         '<path d="M105 795 L119 820 L91 820 Z" fill="none" stroke="#F7D73A" stroke-width="3"/>',

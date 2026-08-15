@@ -13,7 +13,11 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "figures" / "eval-evidence-command-path.figure.json"
 RENDER_SPEC = ROOT / "figures" / "eval-evidence-command-path.render.json"
 OUTPUT = ROOT / "figures" / "eval-evidence-command-path.svg"
-GENERATOR_VERSION = "1"
+GENERATOR_VERSION = "2"
+BG = "#090E16"
+PANEL = "#111827"
+INK = "#F8FAFC"
+MUTED = "#A7B0C0"
 
 
 def text(value: str) -> str:
@@ -24,16 +28,16 @@ def output_shape(index: int, color: str, label_lines: list[str]) -> list[str]:
     """Return deliberately distinct, color-independent output geometry."""
     x, y, width, height = 875, 0, 285, 124
     if index == 0:
-        shape = f'<rect x="{x}" y="{{y}}" width="{width}" height="{height}" rx="18" fill="#FFFFFF" stroke="{color}" stroke-width="5" stroke-dasharray="14 9"/>'
+        shape = f'<rect x="{x}" y="{{y}}" width="{width}" height="{height}" rx="18" fill="{PANEL}" stroke="{color}" stroke-width="5" stroke-dasharray="14 9"/>'
     elif index == 1:
-        shape = f'<rect x="{x}" y="{{y}}" width="{width}" height="{height}" rx="62" fill="#FFFFFF" stroke="{color}" stroke-width="5"/>'
+        shape = f'<rect x="{x}" y="{{y}}" width="{width}" height="{height}" rx="62" fill="{PANEL}" stroke="{color}" stroke-width="5"/>'
     elif index == 2:
         shape = (
-            f'<rect x="{x}" y="{{y}}" width="{width}" height="{height}" rx="16" fill="#FFFFFF" stroke="{color}" stroke-width="5"/>'
+            f'<rect x="{x}" y="{{y}}" width="{width}" height="{height}" rx="16" fill="{PANEL}" stroke="{color}" stroke-width="5"/>'
             f'<rect x="{x + 10}" y="{{y2}}" width="{width - 20}" height="{height - 20}" rx="10" fill="none" stroke="{color}" stroke-width="2"/>'
         )
     else:
-        shape = f'<path d="M{x + 28} {{y}} H{x + width - 28} L{x + width} {{ym}} L{x + width - 28} {{yb}} H{x + 28} L{x} {{ym}} Z" fill="#FFFFFF" stroke="{color}" stroke-width="5"/>'
+        shape = f'<path d="M{x + 28} {{y}} H{x + width - 28} L{x + width} {{ym}} L{x + width - 28} {{yb}} H{x + 28} L{x} {{ym}} Z" fill="{PANEL}" stroke="{color}" stroke-width="5"/>'
     return [shape, *label_lines]
 
 
@@ -45,45 +49,45 @@ def svg(brief: dict, render: dict, brief_digest: str, render_digest: str) -> str
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="figure-title figure-desc">',
         f'<title id="figure-title">{text(brief["title"])}</title>',
         f'<desc id="figure-desc">{text(brief["accessibility"]["long_description"])}</desc>',
-        '<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64748B"/></marker></defs>',
-        f'<rect width="{width}" height="{height}" fill="#F8FAFC"/>',
-        f'<text x="70" y="82" fill="#0F172A" font-family="Arial, sans-serif" font-size="48" font-weight="700" letter-spacing="1">{text(brief["title"])}</text>',
-        f'<text x="70" y="126" fill="#334155" font-family="Arial, sans-serif" font-size="25">{text(render["subtitle"])}</text>',
-        '<text x="70" y="178" fill="#64748B" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">COMMAND</text>',
-        '<text x="450" y="178" fill="#64748B" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">YOUR NEXT MOVE</text>',
-        '<text x="875" y="178" fill="#64748B" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">VISIBLE RESULT</text>',
-        '<text x="1200" y="178" fill="#64748B" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">PROOF BOUNDARY</text>',
-        '<path d="M42 235 V900" stroke="#94A3B8" stroke-width="3" stroke-dasharray="7 10"/>',
+        '<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#CBD5E1"/></marker></defs>',
+        f'<rect width="{width}" height="{height}" fill="{BG}"/>',
+        f'<text x="70" y="82" fill="{INK}" font-family="Arial, sans-serif" font-size="46" font-weight="700" letter-spacing="1">{text(brief["title"])}</text>',
+        f'<text x="70" y="126" fill="{MUTED}" font-family="Arial, sans-serif" font-size="24">{text(render["subtitle"])}</text>',
+        f'<text x="70" y="178" fill="{MUTED}" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">COMMAND</text>',
+        f'<text x="450" y="178" fill="{MUTED}" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">YOUR NEXT MOVE</text>',
+        f'<text x="875" y="178" fill="{MUTED}" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">VISIBLE RESULT</text>',
+        f'<text x="1200" y="178" fill="{MUTED}" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">PROOF BOUNDARY</text>',
+        '<path d="M42 235 V900" stroke="#64748B" stroke-width="3" stroke-dasharray="7 10"/>',
     ]
     row_y = [205, 400, 595, 790]
     for index, (item, y) in enumerate(zip(render["commands"], row_y), start=1):
         color = item["color"]
         parts.extend([
-            f'<circle cx="42" cy="{y + 64}" r="18" fill="#F8FAFC" stroke="{color}" stroke-width="5"/>',
-            f'<rect x="70" y="{y}" width="330" height="128" rx="20" fill="#FFFFFF" stroke="{color}" stroke-width="5"/>',
+            f'<circle cx="42" cy="{y + 64}" r="18" fill="{BG}" stroke="{color}" stroke-width="5"/>',
+            f'<rect x="70" y="{y}" width="330" height="128" rx="20" fill="{PANEL}" stroke="{color}" stroke-width="4"/>',
             f'<text x="92" y="{y + 36}" fill="{color}" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">{text(item["step"])} · {index}</text>',
-            f'<text x="92" y="{y + 86}" fill="#0F172A" font-family="Arial, sans-serif" font-size="34" font-weight="700">{text(item["command"])}</text>',
-            f'<path d="M410 {y + 64} H438" stroke="#64748B" stroke-width="7" marker-end="url(#arrow)"/>',
-            f'<rect x="450" y="{y}" width="340" height="128" rx="18" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="3"/>',
+            f'<text x="92" y="{y + 86}" fill="{INK}" font-family="Arial, sans-serif" font-size="34" font-weight="700">{text(item["command"])}</text>',
+            f'<path d="M410 {y + 64} H438" stroke="#CBD5E1" stroke-width="7" marker-end="url(#arrow)"/>',
+            f'<rect x="450" y="{y}" width="340" height="128" rx="18" fill="{PANEL}" stroke="#475569" stroke-width="3"/>',
         ])
         for line_index, line in enumerate(item["action_lines"]):
-            parts.append(f'<text x="475" y="{y + 49 + line_index * 35}" fill="#0F172A" font-family="Arial, sans-serif" font-size="25" font-weight="{700 if line_index == 0 else 400}">{text(line)}</text>')
-        parts.append(f'<path d="M800 {y + 64} H858" stroke="#64748B" stroke-width="7" marker-end="url(#arrow)"/>')
+            parts.append(f'<text x="475" y="{y + 49 + line_index * 35}" fill="{INK if line_index == 0 else MUTED}" font-family="Arial, sans-serif" font-size="25" font-weight="{700 if line_index == 0 else 400}">{text(line)}</text>')
+        parts.append(f'<path d="M800 {y + 64} H858" stroke="#CBD5E1" stroke-width="7" marker-end="url(#arrow)"/>')
         shape, *unused = output_shape(index - 1, color, [])
         parts.append(shape.format(y=y + 2, y2=y + 12, ym=y + 64, yb=y + 126))
         for line_index, line in enumerate(item["output_lines"]):
             parts.append(f'<text x="1017" y="{y + 52 + line_index * 34}" text-anchor="middle" fill="{color}" font-family="Arial, sans-serif" font-size="24" font-weight="700">{text(line)}</text>')
         parts.extend([
-            f'<rect x="1200" y="{y}" width="330" height="128" rx="14" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>',
-            f'<text x="1222" y="{y + 32}" fill="#166534" font-family="Arial, sans-serif" font-size="21" font-weight="700">PROVES</text>',
-            f'<text x="1222" y="{y + 58}" fill="#0F172A" font-family="Arial, sans-serif" font-size="21">{text(item["proof"])}</text>',
-            f'<text x="1222" y="{y + 89}" fill="#B42318" font-family="Arial, sans-serif" font-size="21" font-weight="700">DOES NOT PROVE</text>',
-            f'<text x="1222" y="{y + 115}" fill="#0F172A" font-family="Arial, sans-serif" font-size="21">{text(item["limit"])}</text>',
+            f'<rect x="1200" y="{y}" width="330" height="128" rx="14" fill="{PANEL}" stroke="#475569" stroke-width="2"/>',
+            f'<text x="1222" y="{y + 32}" fill="#20D66B" font-family="Arial, sans-serif" font-size="21" font-weight="700">PROVES</text>',
+            f'<text x="1222" y="{y + 58}" fill="{INK}" font-family="Arial, sans-serif" font-size="21">{text(item["proof"])}</text>',
+            f'<text x="1222" y="{y + 89}" fill="#FF6F59" font-family="Arial, sans-serif" font-size="21" font-weight="700">DOES NOT PROVE</text>',
+            f'<text x="1222" y="{y + 115}" fill="{INK}" font-family="Arial, sans-serif" font-size="21">{text(item["limit"])}</text>',
         ])
     parts.extend([
-        '<rect x="70" y="970" width="1460" height="105" rx="16" fill="#0F172A"/>',
-        '<text x="95" y="1006" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22" font-weight="700">KEEP THE BOUNDARY VISIBLE</text>',
-        f'<text x="95" y="1043" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="21">{text("  •  ".join(render["boundaries"]))}</text>',
+        '<rect x="70" y="970" width="1460" height="105" rx="16" fill="#151A13" stroke="#F7D73A" stroke-width="3"/>',
+        '<text x="95" y="1006" fill="#F7D73A" font-family="Arial, sans-serif" font-size="22" font-weight="700">KEEP THE BOUNDARY VISIBLE</text>',
+        f'<text x="95" y="1043" fill="{INK}" font-family="Arial, sans-serif" font-size="21">{text("  •  ".join(render["boundaries"]))}</text>',
         '</svg>',
     ])
     return "\n".join(parts) + "\n"
