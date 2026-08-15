@@ -2,7 +2,16 @@
 
 All notable package, wire-contract, and adapter-compatibility changes are recorded here.
 
-## 0.2.0 (unreleased candidate, 2026-07-27)
+## 0.2.0rc1 (unreleased candidate, 2026-08-15)
+
+- Reject partial or contradictory generic provenance declarations instead of allowing
+  them to acquire stronger evidence semantics through defaults.
+- Preserve contradictory Harbor source values as structured conflicts and make the
+  normalized value unavailable rather than silently selecting by precedence.
+- Recompute coverage during verification and reject internally inconsistent metadata.
+- Distinguish absent Harbor list configuration from explicitly serialized empty lists.
+- Give schema documents immutable, versioned URN identities and reserve `0.2.0`
+  for a future frozen release.
 
 ### Added
 

@@ -48,7 +48,8 @@ eval-evidence inspect "$EVAL_EVIDENCE_REAL_HARBOR_ROOT" --explain \
   | tee /tmp/harbor-inspect.json
 ```
 
-Before marking G2 met:
+G2 is currently met by the checked-in sanitized structural fixture. Before re-marking
+it met after any fixture/mapping redesign, or before claiming a broader Harbor surface:
 
 - compare every available instrument source/value with the redacted source JSON;
 - confirm `unavailable` values really are absent rather than missed by the adapter;
@@ -58,14 +59,12 @@ Before marking G2 met:
 - redact roots, run IDs, task IDs, and any sensitive values from the transcript;
 - update `HARBOR_MAPPING.md` rows supported by the review from `inferred` to
   `real-trial`;
-- give regular CI an approved sanitized structural fixture or a secure fixture source
-  so the named G2 test runs without a skip; only then change G2 in `READINESS.md` to
-  `met`.
+- confirm regular CI still runs the named sanitized structural test without a skip.
 
-A manually redacted transcript is review evidence, but by itself it cannot make the
-machine-enforced gate `met`: `tests/test_readiness.py` deliberately rejects a skipped
-`met` test. If the data owner cannot approve either a sanitized fixture or secure CI
-access, keep G2 `unmet` and describe the external manual result separately.
+A manually redacted transcript is review evidence, but by itself cannot replace the
+machine-enforced gate: `tests/test_readiness.py` deliberately rejects a skipped `met`
+test. If the checked-in fixture must be removed, G2 returns to `unmet` unless an
+equivalent secure CI path exists.
 
 The automated test proves structural loading and integrity only. The source/value
 spot-check is a required human review because an internally consistent wrong mapping

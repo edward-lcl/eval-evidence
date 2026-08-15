@@ -284,6 +284,47 @@ def verify_bundle(bundle: dict[str, Any], *, schema_path: Path | None = None) ->
                 or not item.get("source")
             ):
                 errors.append(f"Invalid evidence field: instrument_manifest.fields.{name}")
+        coverage = bundle.get("instrument_manifest", {}).get("coverage")
+        expected_counts = {status: 0 for status in sorted(EVIDENCE_STATUSES)}
+        for item in fields.values():
+            if isinstance(item, dict) and item.get("status") in EVIDENCE_STATUSES:
+                expected_counts[item["status"]] += 1
+        expected_available = sum(
+            count
+            for status, count in expected_counts.items()
+            if status != "unavailable"
+        )
+        expected_fraction = expected_available / len(fields) if fields else 0
+        if not isinstance(coverage, dict):
+            errors.append("instrument_manifest.coverage must be an object")
+        else:
+            recorded_field_count = coverage.get("field_count")
+            if (
+                not isinstance(recorded_field_count, int)
+                or isinstance(recorded_field_count, bool)
+                or recorded_field_count != len(fields)
+            ):
+                errors.append(
+                    "Instrument coverage field_count mismatch: "
+                    f"recorded={recorded_field_count!r}, computed={len(fields)}"
+                )
+            if coverage.get("status_counts") != expected_counts:
+                errors.append(
+                    "Instrument coverage status_counts mismatch: "
+                    f"recorded={coverage.get('status_counts')!r}, "
+                    f"computed={expected_counts!r}"
+                )
+            recorded_fraction = coverage.get("available_fraction")
+            if (
+                not isinstance(recorded_fraction, (int, float))
+                or isinstance(recorded_fraction, bool)
+                or recorded_fraction != expected_fraction
+            ):
+                errors.append(
+                    "Instrument coverage available_fraction mismatch: "
+                    f"recorded={recorded_fraction!r}, "
+                    f"computed={expected_fraction!r}"
+                )
     if schema_path is not None:
         try:
             import jsonschema

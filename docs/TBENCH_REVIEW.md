@@ -51,10 +51,11 @@ agent-timeout fallback. A separate genuine three-group comparison found differin
 checksums, denominators, and turn budgets and was classified **not comparable** rather
 than converted into a model ranking. Only redacted summaries are retained here.
 
-The reproducible CI gate remains `unmet`: this public repository does not contain an
-approved sanitized genuine structural fixture, and regular CI has no secure fixture
-access. That distinction is deliberate—local success is useful review evidence but not
-repeatable release evidence.
+The reproducible structural CI gate is now `met` with a two-trial fixture derived from
+the genuine retained layout. All scalar values and trajectory content were replaced;
+one trial was then modified to contain explicit source conflicts. This is repeatable
+adapter-structure evidence, not proof that the synthetic values are representative or
+that every Harbor layout is supported.
 
 ## Current compatibility boundary
 
@@ -95,9 +96,9 @@ The review is intentionally narrow. In priority order, please:
    top-level multiplier precedence, and the task-config base source. Also review
    token/cache semantics, exception/termination, task identity, network configuration,
    verifier evidence, and the ATIF fields used.
-2. **Choose a reproducible G2 route.** Either approve a minimal sanitized structural
-   fixture with no task content, prompts, trajectories, credentials, model names, or
-   identifiers, or provide secure read-only CI access. Until then G2 remains `unmet`.
+2. **Review the reproducible G2 fixture.** Confirm that its retained structure is useful
+   for compatibility testing, its sanitization boundary is sufficient, and its
+   deliberately adversarial conflict trial matches the semantics maintainers expect.
 3. **Advise on the job-level boundary.** Before external adoption, we expect a
    deterministic job/campaign index that links exact trial bundle digests and records
    attempted, retried, failed, timed-out, cancelled, and excluded denominators. Please

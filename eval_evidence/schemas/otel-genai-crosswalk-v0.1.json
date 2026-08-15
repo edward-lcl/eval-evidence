@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/edward-lcl/eval-evidence/main/eval_evidence/schemas/otel-genai-crosswalk-v0.1.json",
+  "$id": "urn:eval-evidence:crosswalk:otel-genai:v0.1",
   "title": "Eval Evidence to OpenTelemetry GenAI crosswalk v0.1",
   "status": "informative-partial-mapping",
   "policy": {

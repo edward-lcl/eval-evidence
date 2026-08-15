@@ -2,5 +2,5 @@ include LICENSE NOTICE SECURITY.md README.md CHANGELOG.md CONTRIBUTING.md PROJEC
 recursive-include eval_evidence/schemas *.json
 recursive-include docs *.md
 recursive-include figures *.json *.svg *.png *.lock *.md
-recursive-include tests *.py
+recursive-include tests *.py *.json *.md *.txt
 include scripts/audit_distribution.py scripts/dogfood.sh scripts/build_figure.py scripts/build_command_figure.py scripts/build_story_figures.py scripts/build_mobile_figures.py scripts/render_figure.py scripts/verify_figure.py

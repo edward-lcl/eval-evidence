@@ -1,5 +1,9 @@
 # G2 remaining blocker record
 
+> **Historical record, superseded 2026-08-15.** G2 now has a checked-in sanitized
+> structural fixture and a non-skipping CI test. This file preserves why the gate was
+> previously unmet; it is not the current readiness authority. See `docs/READINESS.md`.
+
 Recorded 2026-07-28. Genuine multi-trial Harbor data **is** locally reachable and was exercised successfully. G2 nevertheless remains **unmet** because regular CI has neither an approved sanitized structural fixture nor secure fixture access, so the named readiness test still skips in an ordinary checkout.
 
 ## Corrected local findings

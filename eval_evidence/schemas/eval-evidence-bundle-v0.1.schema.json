@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/edward-lcl/eval-evidence/main/eval_evidence/schemas/eval-evidence-bundle-v0.1.schema.json",
+  "$id": "urn:eval-evidence:schema:bundle:v0.1",
   "title": "Eval Evidence bundle v0.1",
   "type": "object",
   "required": [

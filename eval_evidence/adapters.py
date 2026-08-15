@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
@@ -15,6 +16,7 @@ from .core import (
     sha256_bytes,
 )
 from .models import (
+    EVIDENCE_STATUSES,
     EvidenceValue,
     FileReference,
     NormalizedRun,
@@ -52,8 +54,88 @@ def _first(mapping: dict[str, Any], *names: str) -> Any:
     return None
 
 
-def _coalesce(*values: Any) -> Any:
-    return next((value for value in values if value is not None), None)
+def _declared_evidence(
+    value: Any,
+    status: Any,
+    source: Any,
+    note: Any = None,
+    *,
+    location: str,
+) -> EvidenceValue:
+    """Validate the value/status boundary shared by declared evidence inputs."""
+    normalized_status = str(status)
+    if normalized_status not in EVIDENCE_STATUSES:
+        raise IntegrityError(f"Invalid evidence status at {location}: {status!r}")
+    if not isinstance(source, str) or not source:
+        raise IntegrityError(f"Evidence source must be non-empty at {location}")
+    if (normalized_status == "unavailable") != (value is None):
+        raise IntegrityError(
+            f"Contradictory provenance at {location}: status {normalized_status!r} "
+            f"requires value {'null' if normalized_status == 'unavailable' else 'non-null'}"
+        )
+    return EvidenceValue(value, normalized_status, source, note)
+
+
+def _candidate(source: str, value: Any) -> dict[str, Any] | None:
+    if value is None:
+        return None
+    return {"source": source, "value": value}
+
+
+def _task_identity_candidate(source: str, value: Any) -> dict[str, Any] | None:
+    """Represent a Harbor task identity without copying private local paths."""
+    if not isinstance(value, dict):
+        return None
+    if isinstance(value.get("name"), str):
+        kind = "package"
+        name = (
+            f"{value['org']}/{value['name']}"
+            if isinstance(value.get("org"), str)
+            else value["name"]
+        )
+        identity = {"name": name, "ref": value.get("ref")}
+    elif isinstance(value.get("path"), str):
+        kind = "git" if value.get("git_url") else "local"
+        name = Path(value["path"]).name
+        identity = {
+            key: value.get(key)
+            for key in ("path", "git_url", "git_commit_id")
+            if value.get(key) is not None
+        }
+    else:
+        return None
+    return {
+        "source": source,
+        "value": {
+            "kind": kind,
+            "name": name,
+            "identity_sha256": sha256_bytes(canonical_json_bytes(identity)),
+        },
+    }
+
+
+def _resolve_candidates(
+    candidates: list[dict[str, Any] | None],
+    *,
+    field: str,
+    normalize: Callable[[Any], Any] | None = None,
+) -> tuple[Any, dict[str, Any] | None]:
+    """Return one value or a structured conflict without silently choosing."""
+    present = [candidate for candidate in candidates if candidate is not None]
+    if not present:
+        return None, None
+    normalize = normalize or (lambda value: value)
+    distinct = {
+        canonical_json_bytes(normalize(candidate["value"])) for candidate in present
+    }
+    if len(distinct) == 1:
+        return present[0]["value"], None
+    return None, {
+        "field": field,
+        "resolution": "unavailable",
+        "candidates": present,
+        "note": "Retained Harbor sources disagree; no precedence winner was selected.",
+    }
 
 
 def _reward(result: dict[str, Any]) -> Any:
@@ -65,11 +147,12 @@ def _reward(result: dict[str, Any]) -> Any:
 
 def _evidence_claim(value: Any, default_source: str) -> EvidenceValue:
     if isinstance(value, dict) and {"value", "status", "source"}.issubset(value):
-        return EvidenceValue(
+        return _declared_evidence(
             value.get("value"),
-            str(value.get("status")),
-            str(value.get("source")),
+            value.get("status"),
+            value.get("source"),
             value.get("note"),
+            location=default_source,
         )
     return operator_asserted(value, default_source)
 
@@ -234,11 +317,12 @@ class GenericManifestAdapter:
                     value, f"{GENERIC_MANIFEST}:instrument.{name}"
                 )
             elif isinstance(declaration, dict):
-                instrument[name] = EvidenceValue(
+                instrument[name] = _declared_evidence(
                     value,
-                    str(declaration.get("status", "observed")),
-                    str(declaration.get("source", f"{GENERIC_MANIFEST}:instrument.{name}")),
+                    declaration.get("status"),
+                    declaration.get("source"),
                     declaration.get("note"),
+                    location=f"provenance.{name}",
                 )
             else:
                 raise IntegrityError(f"provenance.{name} must be an object")
@@ -331,11 +415,151 @@ class HarborAdapter:
         model_info = agent_info.get("model_info") if isinstance(agent_info.get("model_info"), dict) else {}
         agent_config = config.get("agent") if isinstance(config.get("agent"), dict) else {}
         agent_result = result.get("agent_result") if isinstance(result.get("agent_result"), dict) else {}
+        result_config = result.get("config") if isinstance(result.get("config"), dict) else {}
+        result_agent_config = (
+            result_config.get("agent")
+            if isinstance(result_config.get("agent"), dict)
+            else {}
+        )
         kwargs = agent_config.get("kwargs") if isinstance(agent_config.get("kwargs"), dict) else {}
         environment = config.get("environment") if isinstance(config.get("environment"), dict) else {}
         task_config = config.get("task") if isinstance(config.get("task"), dict) else {}
         verifier_config = config.get("verifier") if isinstance(config.get("verifier"), dict) else {}
-        model_name = model_info.get("name") or agent_config.get("model_name") or _get(trajectory, "agent", "model_name")
+        source_conflicts: dict[str, dict[str, Any]] = {}
+
+        def resolve(
+            field: str,
+            candidates: list[dict[str, Any] | None],
+            *,
+            normalize: Callable[[Any], Any] | None = None,
+        ) -> Any:
+            value, conflict = _resolve_candidates(
+                candidates, field=field, normalize=normalize
+            )
+            if conflict is not None:
+                source_conflicts[field] = conflict
+            return value
+
+        result_model_name = model_info.get("name")
+        config_model_name = agent_config.get("model_name")
+        trajectory_model_name = _get(trajectory, "agent", "model_name")
+        model_name = resolve(
+            "instrument.model_id",
+            [
+                _candidate(
+                    "Harbor result.json:agent_info.model_info.name",
+                    result_model_name,
+                ),
+                _candidate("Harbor config.json:agent.model_name", config_model_name),
+                _candidate(
+                    "Harbor result.json:config.agent.model_name",
+                    result_agent_config.get("model_name"),
+                ),
+                _candidate(
+                    "Harbor agent/trajectory.json:agent.model_name",
+                    trajectory_model_name,
+                ),
+            ],
+            normalize=lambda value: value.split("/", 1)[-1]
+            if isinstance(value, str)
+            else value,
+        )
+        config_model_provider = (
+            config_model_name.split("/", 1)[0]
+            if isinstance(config_model_name, str) and "/" in config_model_name
+            else None
+        )
+        result_config_model_name = result_agent_config.get("model_name")
+        result_config_model_provider = (
+            result_config_model_name.split("/", 1)[0]
+            if isinstance(result_config_model_name, str)
+            and "/" in result_config_model_name
+            else None
+        )
+        model_provider = resolve(
+            "instrument.model_provider",
+            [
+                _candidate(
+                    "Harbor result.json:agent_info.model_info.provider",
+                    model_info.get("provider"),
+                ),
+                _candidate(
+                    "Harbor config.json:agent.model_name provider prefix",
+                    config_model_provider,
+                ),
+                _candidate(
+                    "Harbor result.json:config.agent.model_name provider prefix",
+                    result_config_model_provider,
+                ),
+            ],
+        )
+        agent_name = resolve(
+            "instrument.agent_name",
+            [
+                _candidate("Harbor result.json:agent_info.name", agent_info.get("name")),
+                _candidate(
+                    "Harbor result.json:config.agent.name",
+                    result_agent_config.get("name"),
+                ),
+                _candidate(
+                    "Harbor agent/trajectory.json:agent.name",
+                    _get(trajectory, "agent", "name"),
+                ),
+            ],
+        )
+        agent_version = resolve(
+            "instrument.agent_version",
+            [
+                _candidate(
+                    "Harbor result.json:agent_info.version", agent_info.get("version")
+                ),
+                _candidate(
+                    "Harbor agent/trajectory.json:agent.version",
+                    _get(trajectory, "agent", "version"),
+                ),
+            ],
+        )
+        task_identity_candidates = [
+            _task_identity_candidate(
+                "Harbor result.json:task_id", result.get("task_id")
+            ),
+            _task_identity_candidate("Harbor config.json:task", task_config),
+            _task_identity_candidate(
+                "Harbor result.json:config.task", result_config.get("task")
+            ),
+        ]
+        _, task_identity_conflict = _resolve_candidates(
+            task_identity_candidates, field="source.task_identity"
+        )
+        if task_identity_conflict is not None:
+            task_identity_conflict["resolution"] = "primary_retained_for_bundle_addressing"
+            task_identity_conflict["note"] = (
+                "Retained Harbor task identities disagree. result.json:task_name is "
+                "retained only as the bundle address; comparison readiness is unresolved."
+            )
+            source_conflicts["source.task_identity"] = task_identity_conflict
+        result_task_id = result.get("task_id") if isinstance(result.get("task_id"), dict) else {}
+        result_task_revision = result_task_id.get("git_commit_id") or result_task_id.get("ref")
+        result_config_task = (
+            result_config.get("task")
+            if isinstance(result_config.get("task"), dict)
+            else {}
+        )
+        task_revision = resolve(
+            "source.task_revision",
+            [
+                _candidate("Harbor result.json:task_id revision", result_task_revision),
+                _candidate(
+                    "Harbor config.json:task revision",
+                    task_config.get("git_commit_id") or task_config.get("ref"),
+                ),
+                _candidate(
+                    "Harbor result.json:config.task revision",
+                    result_config_task.get("git_commit_id")
+                    or result_config_task.get("ref"),
+                ),
+            ],
+        )
         effort = _first(kwargs, "effort", "thinking", "reasoning_effort", "thinking_budget")
         max_wall_time, timeout_components = _harbor_agent_timeout(
             config, agent_config, agent_result
@@ -345,40 +569,70 @@ class HarborAdapter:
             "frequency_penalty", "presence_penalty", "stop_sequences",
         )
         sampling = {name: kwargs[name] for name in sampling_names if kwargs.get(name) is not None}
-        configured_skills = agent_config.get("skills") or []
-        configured_mcp_servers = agent_config.get("mcp_servers") or []
-        tools = {
-            "skill_count": len(configured_skills),
-            "skills_sha256": sha256_bytes(canonical_json_bytes(configured_skills)),
-            "mcp_server_count": len(configured_mcp_servers),
-            "mcp_servers_sha256": sha256_bytes(
-                canonical_json_bytes(configured_mcp_servers)
-            ),
-        }
+        tools_config_present = "skills" in agent_config and "mcp_servers" in agent_config
+        configured_skills = agent_config.get("skills")
+        configured_mcp_servers = agent_config.get("mcp_servers")
+        tools = None
+        if (
+            tools_config_present
+            and isinstance(configured_skills, list)
+            and isinstance(configured_mcp_servers, list)
+        ):
+            tools = {
+                "skill_count": len(configured_skills),
+                "skills_sha256": sha256_bytes(canonical_json_bytes(configured_skills)),
+                "mcp_server_count": len(configured_mcp_servers),
+                "mcp_servers_sha256": sha256_bytes(
+                    canonical_json_bytes(configured_mcp_servers)
+                ),
+            }
+        network_config_present = (
+            "extra_allowed_hosts" in environment
+            and "extra_allowed_hosts" in agent_config
+        )
+        network_policy = None
+        if (
+            network_config_present
+            and isinstance(environment.get("extra_allowed_hosts"), list)
+            and isinstance(agent_config.get("extra_allowed_hosts"), list)
+        ):
+            network_policy = {
+                "extra_allowed_hosts": environment["extra_allowed_hosts"],
+                "agent_extra_allowed_hosts": agent_config["extra_allowed_hosts"],
+            }
         safe_verifier_config = {
             name: verifier_config[name]
             for name in ("disable", "override_timeout_sec", "max_timeout_sec")
             if verifier_config.get(name) is not None
         }
         instrument = {
-            "model_id": observed(model_name, "Harbor result/config/trajectory"),
-            "model_provider": observed(model_info.get("provider"), "Harbor result.json:agent_info.model_info.provider"),
-            "agent_name": observed(agent_info.get("name") or _get(trajectory, "agent", "name"), "Harbor result/trajectory"),
-            "agent_version": observed(agent_info.get("version") or _get(trajectory, "agent", "version"), "Harbor result/trajectory"),
+            "model_id": observed(model_name, "consistent Harbor result/config/trajectory candidates"),
+            "model_provider": observed(model_provider, "consistent Harbor result/config candidates"),
+            "agent_name": observed(agent_name, "consistent Harbor result/trajectory candidates"),
+            "agent_version": observed(agent_version, "consistent Harbor result/trajectory candidates"),
             "harness_name": derived("harbor", "recognized Harbor trial layout"),
-            "tools": derived(tools, "Harbor config.json:agent", "Configured tools may omit provider-side effective definitions"),
+            "tools": derived(
+                tools,
+                "Harbor config.json:agent.skills/mcp_servers",
+                (
+                    "Configured tools may omit provider-side effective definitions"
+                    if tools is not None
+                    else "One or both list keys were absent; producer version/default serialization cannot be established"
+                ),
+            ),
             "max_turns": observed(_first(kwargs, "max_turns", "max_steps"), "Harbor config.json:agent.kwargs"),
             "max_wall_time_s": max_wall_time,
             "effort_or_thinking": observed(effort, "Harbor config.json:agent.kwargs"),
             "sampling_parameters": observed(sampling or None, "Harbor config.json:agent.kwargs"),
             "task_checksum": observed(result.get("task_checksum"), "Harbor result.json:task_checksum"),
             "network_policy": derived(
-                {
-                    "extra_allowed_hosts": environment.get("extra_allowed_hosts") or [],
-                    "agent_extra_allowed_hosts": agent_config.get("extra_allowed_hosts") or [],
-                },
+                network_policy,
                 "Harbor config.json:environment/agent.extra_allowed_hosts",
-                "Configured layers are not proof of effective enforcement",
+                (
+                    "Configured layers are not proof of effective enforcement"
+                    if network_policy is not None
+                    else "One or both list keys were absent; producer version/default serialization cannot be established"
+                ),
             ),
         }
         references = [
@@ -409,35 +663,65 @@ class HarborAdapter:
             isinstance(trajectory_schema_version, str)
             and trajectory_schema_version in self.KNOWN_TRAJECTORY_SCHEMA_VERSIONS
         )
+        metric_candidates = {
+            "input_tokens": (
+                agent_result.get("n_input_tokens"),
+                final_metrics.get("total_prompt_tokens"),
+            ),
+            "cache_tokens": (
+                agent_result.get("n_cache_tokens"),
+                final_metrics.get("total_cached_tokens"),
+            ),
+            "output_tokens": (
+                agent_result.get("n_output_tokens"),
+                final_metrics.get("total_completion_tokens"),
+            ),
+            "cost_usd": (
+                agent_result.get("cost_usd"),
+                final_metrics.get("total_cost_usd"),
+            ),
+        }
+        metric_sources = {
+            "input_tokens": (
+                "Harbor result.json:agent_result.n_input_tokens",
+                "Harbor agent/trajectory.json:final_metrics.total_prompt_tokens",
+            ),
+            "cache_tokens": (
+                "Harbor result.json:agent_result.n_cache_tokens",
+                "Harbor agent/trajectory.json:final_metrics.total_cached_tokens",
+            ),
+            "output_tokens": (
+                "Harbor result.json:agent_result.n_output_tokens",
+                "Harbor agent/trajectory.json:final_metrics.total_completion_tokens",
+            ),
+            "cost_usd": (
+                "Harbor result.json:agent_result.cost_usd",
+                "Harbor agent/trajectory.json:final_metrics.total_cost_usd",
+            ),
+        }
+        metrics = {
+            name: resolve(
+                f"execution.metrics.{name}",
+                [
+                    _candidate(metric_sources[name][0], values[0]),
+                    _candidate(metric_sources[name][1], values[1]),
+                ],
+            )
+            for name, values in metric_candidates.items()
+        }
+
         return NormalizedRun(
             root=root,
             adapter=self.name,
             source_format="harbor-trial-directory",
             run_id=str(run_id),
             task_id=task_id,
-            task_revision=task_config.get("git_commit_id") or task_config.get("ref"),
+            task_revision=task_revision,
             references=references,
             instrument=instrument,
             started_at=result.get("started_at"),
             finished_at=result.get("finished_at"),
-            metrics={
-                "input_tokens": _coalesce(
-                    agent_result.get("n_input_tokens"),
-                    final_metrics.get("total_prompt_tokens"),
-                ),
-                "cache_tokens": _coalesce(
-                    agent_result.get("n_cache_tokens"),
-                    final_metrics.get("total_cached_tokens"),
-                ),
-                "output_tokens": _coalesce(
-                    agent_result.get("n_output_tokens"),
-                    final_metrics.get("total_completion_tokens"),
-                ),
-                "cost_usd": _coalesce(
-                    agent_result.get("cost_usd"),
-                    final_metrics.get("total_cost_usd"),
-                ),
-            },
+            metrics=metrics,
             reward=_reward(result),
             scores=rewards,
             termination_reason=str(
@@ -456,6 +740,7 @@ class HarborAdapter:
                     "trajectory_schema_version": trajectory_schema_version,
                     "trajectory_session_id": trajectory.get("session_id") or trajectory.get("trajectory_id"),
                     "trajectory_step_count": len(trajectory.get("steps") or []) if isinstance(trajectory.get("steps"), list) else None,
+                    "source_conflicts": source_conflicts,
                 }
             },
         )

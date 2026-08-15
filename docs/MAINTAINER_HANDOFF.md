@@ -16,7 +16,7 @@ Machine-readable gate status, work ownership, and approval boundaries live in
 The initially considered PyPI name `eval-integrity` is owned by an unrelated project.
 `eval-evidence` was the recorded fallback and is the only identity used here.
 
-## What the 0.2.0 candidate contains
+## What the 0.2.0rc1 candidate contains
 
 - generic `eval-run.json` adapter;
 - Harbor trial adapter;
@@ -55,7 +55,7 @@ eval-evidence verify /tmp/evidence.json --run-root /tmp/demo
 
 ## Release state
 
-Protected `main` is the current development authority for the reviewed 0.2.0 candidate.
+Protected `main` is the current development authority for the reviewed 0.2.0rc1 candidate.
 Historical pull requests document review history but are not installation or release
 authorities. No `v0.2.0` tag or PyPI release exists yet.
 
@@ -65,9 +65,9 @@ Publishing path is configured without a stored token: `.github/workflows/publish
 downloads the exact audited GitHub release assets, verifies `SHA256SUMS`, and publishes
 from the protected `pypi` environment using a short-lived OIDC credential.
 
-Publication is not the only remaining readiness step. The genuine-Harbor G2 gate still
-needs an approved sanitized fixture or secure CI access, and the Terminal-Bench/Harbor
-mapping review is pending. Separately, the remaining PyPI infrastructure step is to
+Publication is not the only remaining readiness step. The sanitized Harbor structural
+gate is included in regular CI, but Terminal-Bench/Harbor mapping review remains
+pending. Separately, the remaining PyPI infrastructure step is to
 register this pending publisher while logged into PyPI:
 
 - PyPI project: `eval-evidence`
@@ -84,7 +84,7 @@ project page exists and the published hashes match the audited release.
 ## Next highest-value milestone
 
 Complete the narrow Harbor maintainer review in [`TBENCH_REVIEW.md`](TBENCH_REVIEW.md):
-correct the mapping, choose a reproducible G2 fixture route, and decide the source of a
+correct the mapping, review the reproducible G2 fixture, and decide the source of a
 future job-level denominator/index contract. Do not mistake per-trial bundle discovery
 for campaign membership or aggregate-score evidence.
 

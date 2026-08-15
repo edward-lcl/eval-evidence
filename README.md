@@ -5,8 +5,9 @@
 > A score should travel with a machine-checkable record of what was observed,
 > asserted, derived, and unavailable.
 
-**Development status:** narrow mapping-review candidate; real-Harbor gate G2 is
-unmet; version 0.2.0 is not on PyPI. Start with the [handoff router](docs/START_HERE.md)
+**Development status:** narrow mapping-review candidate; sanitized Harbor structural
+gate G2 is met, while genuine-value mapping review and campaign completeness remain
+open; the source tree identifies as `0.2.0rc1`, and `0.2.0` is not on PyPI. Start with the [handoff router](docs/START_HERE.md)
 or inspect the same state in [`PROJECT_HANDOFF.json`](PROJECT_HANDOFF.json). Pin an
 exact commit rather than treating mutable `main` as a release.
 
@@ -127,7 +128,9 @@ eval-evidence bundle /path/to/run -o evidence.json
 
 For manually assembled manifests, values without `provenance` default to
 `operator_asserted`, never `observed`. Add explicit entries for observed, derived, or
-provider-asserted values. See the [owner walkthrough](docs/OWNER_WALKTHROUGH.md) for a
+provider-asserted values. A provenance entry must contain both `status` and `source`,
+and its null/non-null value must agree with `unavailable`; partial or contradictory
+declarations fail closed. See the [owner walkthrough](docs/OWNER_WALKTHROUGH.md) for a
 complete application example and a paired-result investigation.
 
 ### Harbor
@@ -144,7 +147,10 @@ Harbor is the first adapter, not the canonical format. This complements `harbor 
 the viewer explores jobs and compares results, while Eval Evidence creates portable
 per-trial evidence envelopes for offline integrity and provenance checks. Version 0.2
 does not create a job-level denominator/index manifest or decide whether trials are
-comparable.
+comparable. When retained Harbor sources disagree, the adapter preserves all safe
+candidates under `extensions.harbor.source_conflicts` and makes the normalized value
+unavailable where the core field supports that state; it does not silently choose a
+precedence winner.
 
 Terminal-Bench and Harbor maintainers should start with the focused
 [`review brief`](docs/TBENCH_REVIEW.md), then red-line the reviewable
@@ -158,14 +164,15 @@ Terminal-Bench and Harbor maintainers should start with the focused
 | New teammate | [`docs/START_HERE.md`](docs/START_HERE.md) | Identify authority, a safe next task, its owner, and completion evidence without oral context |
 | Developer | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Find the adapter/core boundary, wire contracts, tests, and review surface |
 | Repository owner | [`docs/MAINTAINER_HANDOFF.md`](docs/MAINTAINER_HANDOFF.md) | Resolve owner-only gates and release decisions without confusing them with technical readiness |
-| Terminal-Bench / Harbor maintainer | [`docs/TBENCH_REVIEW.md`](docs/TBENCH_REVIEW.md) | Red-line the mapping and choose the real-fixture and denominator routes |
+| Terminal-Bench / Harbor maintainer | [`docs/TBENCH_REVIEW.md`](docs/TBENCH_REVIEW.md) | Red-line the mapping, review the sanitized fixture, and identify the native denominator route |
 | Paper author or reviewer | [`docs/PAPER_ALIGNMENT.md`](docs/PAPER_ALIGNMENT.md) | Separate shipped evidence support from the paper's empirical authority |
+| Research lead or capital allocator | [`docs/research/DECISION_GATE_2026-08-15.md`](docs/research/DECISION_GATE_2026-08-15.md) | See the strongest evidence for/against the thesis, stop conditions, and next information-producing experiments |
 | Agent | [`AGENTS.md`](AGENTS.md) and [`PROJECT_HANDOFF.json`](PROJECT_HANDOFF.json) | Select bounded, dependency-ready work and return reproducible receipts |
 | Security reviewer | [`SECURITY.md`](SECURITY.md) and [`docs/TRUST_MODEL.md`](docs/TRUST_MODEL.md) | Test the declared trust boundary with synthetic inputs |
 
 ## Check-only GitHub Action
 
-Protected `main` is the development authority for the 0.2.0 candidate. For reproducible
+Protected `main` is the development authority for the 0.2.0rc1 candidate. For reproducible
 or production use, replace the mutable branch with a reviewed commit SHA or `v0.2.0`
 after that tag exists:
 
@@ -235,7 +242,7 @@ The distribution includes four contracts/crosswalks under `eval_evidence/schemas
 - instrument manifest: `eval-evidence.instrument/v0.1`;
 - informative OpenTelemetry GenAI crosswalk.
 
-A schema's HTTPS `$id` identifies its published document. The `schema_version` string
+A schema's immutable, versioned URN `$id` identifies its contract. The `schema_version` string
 inside a run or bundle is the wire contract. The package/CLI name is `eval-evidence`,
 and the Python import is `eval_evidence`; these are deliberately distinct layers.
 

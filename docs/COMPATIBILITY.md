@@ -14,7 +14,7 @@ recognition, and safer redaction that preserve that meaning are package-level ch
 they are documented and may change deterministic bundle bytes. Additive optional data
 is non-breaking only when older readers can safely ignore it.
 
-### Pre-adoption semantic correction classification (0.2.0 candidate)
+### Pre-adoption semantic correction classification (0.2.0rc1 candidate)
 
 The generic `eval-run.json` provenance-default correction (shifting unannotated instrument
 values and plain claims from implicit `observed` to `operator_asserted`) is explicitly
@@ -66,7 +66,8 @@ the bounds are best-effort and may exhaust time, memory, or I/O, as recorded in
 
 ## Distribution status
 
-Pull request #2 merged the 0.2.0 candidate into `main`; the deleted review branch is no
+Pull request #2 merged an earlier 0.2.0 candidate into `main`; current development code
+identifies as `0.2.0rc1`, and the deleted review branch is no
 longer an authority. Until a validated `v0.2.0` tag exists, the README uses mutable
 `main` for evaluation and tells reproducible consumers to pin an accepted commit. The
 older `v0.1.0` tag lacks the readiness features. A validated tag becomes authoritative

@@ -13,7 +13,14 @@ prospective, post-run, and retrospective modes from features v0.2 does not yet s
 
 ## 1. Harbor first; Inspect AI exporter second
 
-The Inspect AI exporter is the second integration, sequenced **after G2 passes** against genuine Harbor data. Harbor comes first because it can invalidate inferred mappings and is the anchor readiness dependency in [READINESS.md](READINESS.md). An Inspect post-run exporter should then test whether the framework-neutral input is genuinely portable; a plugin system remains deferred until a third evaluator justifies it, as specified in [ADAPTERS.md](ADAPTERS.md).
+The Inspect AI exporter is the second integration, sequenced after Harbor denominator
+and recoverability studies establish the smallest useful contract. G2 now supplies
+reproducible sanitized structural coverage, while the private genuine review remains a
+stronger local check. Harbor comes first because it can invalidate inferred mappings
+and already owns richer job/lock semantics. An Inspect post-run exporter should then
+test whether the surviving framework-neutral input is genuinely portable; a plugin
+system remains deferred until a third evaluator justifies it, as specified in
+[ADAPTERS.md](ADAPTERS.md).
 
 ## 2. Live monitoring is rejected
 
@@ -50,9 +57,10 @@ Those results are retained only as redacted workspace evidence in
 `artifacts/harbor-readiness-redacted.txt` and
 `artifacts/real-comparison-redacted.md`; neither is shipped. They do not rank models.
 They demonstrate the product's near-term job: expose the exact integrity,
-comparability, and unavailable-evidence questions hidden by a score. G2 nevertheless
-remains `unmet` until regular CI can run the genuine/sanitized fixture without a skip,
-as required by [READINESS.md](READINESS.md).
+comparability, and unavailable-evidence questions hidden by a score. G2 now runs a
+sanitized derivative of that genuine structure without a skip; this closes structural
+CI coverage, not the campaign, prevalence, or portability questions in the research
+plan.
 
 ## Acceptance-contract backlog
 
