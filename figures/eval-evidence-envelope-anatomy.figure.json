@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "title": "THREE RUN FILES BECOME ONE REVIEWABLE RECORD",
+  "question": "What does Eval Evidence actually build from a Harbor run?",
+  "takeaway": "It reads retained run files, preserves where each value came from, hashes the referenced bytes, and writes one portable evidence envelope.",
+  "readers": ["engineer", "team", "agent-ci"],
+  "reading_speeds": {
+    "at_2_seconds": "Three familiar run files flow into one evidence envelope.",
+    "at_20_seconds": "The envelope separates what happened, how the run was configured, and which retained bytes can be checked again.",
+    "at_2_minutes": "Every visible field family and boundary is sourced to adapter and bundle-construction code; unavailable fields remain explicit rather than inferred."
+  },
+  "archetype": "lifecycle-evidence-path",
+  "medium": {"kind": "svg", "rationale": "Exact filenames, evidence categories, and proof boundaries need deterministic text and reviewable topology."},
+  "evidence_sources": [
+    {"id": "harbor-adapter", "path": "eval_evidence/adapters.py", "authority": "source-of-truth"},
+    {"id": "bundle-core", "path": "eval_evidence/core.py", "authority": "source-of-truth"},
+    {"id": "bundle-spec", "path": "docs/BUNDLE_SPEC.md", "authority": "source-of-truth"},
+    {"id": "readme", "path": "README.md", "authority": "source-of-truth"}
+  ],
+  "labels": [
+    {"text": "result.json", "claim": "A required Harbor input containing result and related metadata.", "source_ids": ["harbor-adapter"]},
+    {"text": "config.json", "claim": "A required Harbor input containing selected run configuration.", "source_ids": ["harbor-adapter"]},
+    {"text": "agent/trajectory.json", "claim": "A required Harbor input containing trajectory and final-metric data.", "source_ids": ["harbor-adapter"]},
+    {"text": "READ + LABEL", "claim": "The adapter normalizes source values and assigns explicit evidence provenance/status.", "source_ids": ["harbor-adapter", "bundle-core"]},
+    {"text": "WHAT HAPPENED", "claim": "The bundle records run/task identity, execution metadata, and outcome values.", "source_ids": ["bundle-core", "bundle-spec"]},
+    {"text": "HOW IT RAN", "claim": "The instrument manifest records model, agent, harness, budgets, and other fields with provenance.", "source_ids": ["bundle-core", "bundle-spec"]},
+    {"text": "WHAT CAN BE RECHECKED", "claim": "Input records carry path, presence, byte count, role, and SHA-256 identity.", "source_ids": ["bundle-core", "bundle-spec"]},
+    {"text": "evidence.json", "claim": "Bundle writes produce canonical evidence JSON.", "source_ids": ["bundle-core", "readme"]},
+    {"text": "UNAVAILABLE stays visible", "claim": "Missing evidence is represented explicitly and is not guessed.", "source_ids": ["bundle-core", "readme"]}
+  ],
+  "boundaries": [
+    "The Harbor adapter selects identifiers and configured values; it does not copy full prompts, trajectories, credentials, or environment variables into the bundle.",
+    "A digest identifies bytes and serialized claims; it does not authenticate the runner or establish physical truth.",
+    "Missing evidence remains unavailable rather than inferred."
+  ],
+  "forbidden_claims": ["FULL TRAJECTORY COPIED", "TRUSTED RUN", "GROUND TRUTH", "CERTIFIED RESULT", "AUTHENTICATED RUNNER"],
+  "accessibility": {
+    "alt_text": "Harbor result, config, and trajectory files pass through an adapter into an evidence JSON envelope containing run outcome, instrument settings with provenance, and recheckable file hashes.",
+    "long_description": "On the left, result.json, config.json, and agent/trajectory.json appear as retained run files. An arrow sends them through a Read and Label adapter. On the right, one evidence.json envelope opens into three compartments: what happened, how it ran, and what can be rechecked. A footer states that unavailable evidence stays visible and is never invented.",
+    "color_independent_cues": ["numbered input files", "left-to-right arrows", "three named envelope compartments", "explicit unavailable footer"],
+    "minimum_text_px": 20
+  },
+  "provenance": {"repository": "https://github.com/edward-lcl/eval-evidence", "revision": "content-addressed semantic and render inputs", "brief_path": "figures/eval-evidence-envelope-anatomy.figure.json", "method": "deterministic SVG from validated semantic brief and paired render manifest", "generated_image_used": false},
+  "output": {"path": "figures/eval-evidence-envelope-anatomy.svg", "embed_location": "README product explanation", "format": "svg"}
+}

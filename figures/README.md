@@ -1,10 +1,13 @@
 # Static figures
 
-This directory contains two figures designed to be read at three speeds:
+This directory contains five figures designed to be read at three speeds:
 
 - `eval-evidence-lifecycle` answers what happens to a reported result after a run;
-- `eval-evidence-command-path` answers which command to run, what it produces, and
-  what its result does and does not prove.
+- `eval-evidence-command-path` is the plain-language index for choosing a command;
+- `eval-evidence-envelope-anatomy` shows concrete run files becoming a reviewable
+  evidence envelope;
+- `eval-evidence-check-story` opens the word “check” into six inspectable operations;
+- `eval-evidence-tamper-story` tells the baseline/edit/mismatch story in three acts.
 
 Each `.figure.json` file is the frozen, portable semantic brief and source map. It
 validates against `figure-brief.schema.json`, the same contract used by the global
@@ -23,6 +26,7 @@ From the repository root, rebuild and validate deterministically:
 ```bash
 python3 scripts/build_figure.py
 python3 scripts/build_command_figure.py
+python3 scripts/build_story_figures.py
 python3 scripts/render_figure.py
 python3 scripts/verify_figure.py
 ```
@@ -38,8 +42,9 @@ renderer/font provenance, and PNG dimensions. It
 deliberately does not make visual claims about physical truth, model quality, or
 cross-run comparability.
 
-At README width, the lifecycle thesis and the command/output distinction remain
-visible. At full size, every edge, proof limit, evidence category, and source-backed
-annotation is readable. Solid horizontal arrows in the command switchboard mean
+At README width, each figure retains one thesis: what is collected, what check does, or
+how mutation is detected. At full size, every edge, proof limit, evidence category, and
+source-backed annotation is readable. Solid horizontal arrows in the command index mean
 “produces”; its dotted vertical spine is recommended learning order, not a runtime
-dependency.
+dependency. The three story figures use numbered objects and scenes so their meaning
+does not depend on color or prior knowledge of the implementation terms.

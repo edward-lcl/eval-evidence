@@ -50,8 +50,8 @@ def svg(brief: dict, render: dict, brief_digest: str, render_digest: str) -> str
         f'<text x="70" y="82" fill="#0F172A" font-family="Arial, sans-serif" font-size="48" font-weight="700" letter-spacing="1">{text(brief["title"])}</text>',
         f'<text x="70" y="126" fill="#334155" font-family="Arial, sans-serif" font-size="25">{text(render["subtitle"])}</text>',
         '<text x="70" y="178" fill="#64748B" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">COMMAND</text>',
-        '<text x="450" y="178" fill="#64748B" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">WHAT IT DOES</text>',
-        '<text x="875" y="178" fill="#64748B" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">WHAT YOU GET</text>',
+        '<text x="450" y="178" fill="#64748B" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">YOUR NEXT MOVE</text>',
+        '<text x="875" y="178" fill="#64748B" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">VISIBLE RESULT</text>',
         '<text x="1200" y="178" fill="#64748B" font-family="Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="2">PROOF BOUNDARY</text>',
         '<path d="M42 235 V900" stroke="#94A3B8" stroke-width="3" stroke-dasharray="7 10"/>',
     ]

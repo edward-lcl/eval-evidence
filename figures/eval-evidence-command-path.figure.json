@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "title": "FOUR COMMANDS, ONE EVIDENCE PATH",
-  "question": "Which Eval Evidence command should I run, what does it produce, and what does that result prove?",
-  "takeaway": "Practice with demo, inspect without writing with check, create a portable baseline with bundle, and re-check retained bytes with verify --run-root.",
+  "title": "START HERE: PICK THE MOMENT YOU'RE IN",
+  "question": "Which Eval Evidence command matches what I need to do right now?",
+  "takeaway": "Make a safe example with demo, inspect a run now with check, save today's fingerprint with bundle, or compare later files with verify --run-root.",
   "readers": ["engineer", "team", "agent-ci"],
   "reading_speeds": {
-    "at_2_seconds": "Four commands lead to four visibly different outputs along one evidence path.",
-    "at_20_seconds": "Each row maps a command through its action to a named artifact or result.",
+    "at_2_seconds": "Four moments lead to four visibly different next steps.",
+    "at_20_seconds": "Each row starts with a human need, names the exact command, and shows the concrete result.",
     "at_2_minutes": "Each output is paired with an explicit proof limit, source mapping, edge meaning, accessibility contract, and render provenance."
   },
   "archetype": "command-switchboard",
@@ -27,14 +27,14 @@
     {"text": "check", "claim": "Detects and validates a run in memory and re-hashes references, producing a pass/fail report but no stored baseline.", "source_ids": ["cli-check", "readme-boundary"]},
     {"text": "bundle", "claim": "Validates and writes canonical evidence JSON that binds claims to referenced digests but does not authenticate a signer.", "source_ids": ["cli-bundle", "trust-model"]},
     {"text": "verify --run-root", "claim": "Validates the bundle and re-hashes retained source bytes, reporting match or mismatch without establishing physical truth.", "source_ids": ["cli-verify", "readme-boundary", "trust-model"]},
-    {"text": "PRACTICE INPUT", "claim": "Output of demo.", "source_ids": ["cli-demo"]},
-    {"text": "PASS / FAIL REPORT", "claim": "Output of check.", "source_ids": ["cli-check"]},
-    {"text": "STORED BASELINE", "claim": "Output of bundle.", "source_ids": ["cli-bundle"]},
+    {"text": "PRACTICE FOLDER", "claim": "Output of demo.", "source_ids": ["cli-demo"]},
+    {"text": "NOW REPORT", "claim": "Output of check.", "source_ids": ["cli-check"]},
+    {"text": "EVIDENCE.JSON", "claim": "Output of bundle.", "source_ids": ["cli-bundle"]},
     {"text": "MATCH / MISMATCH", "claim": "Output of verify with a run root.", "source_ids": ["cli-verify"]},
     {"text": "DOES NOT PROVE", "claim": "Every command result is paired with an explicit adjacent proof limit.", "source_ids": ["readme-boundary", "trust-model"]}
     ,{"text": "COMMAND", "claim": "The first column names exact CLI commands.", "source_ids": ["cli-demo", "cli-check", "cli-bundle", "cli-verify"]}
-    ,{"text": "WHAT IT DOES", "claim": "The second column summarizes the sourced command action.", "source_ids": ["cli-demo", "cli-check", "cli-bundle", "cli-verify"]}
-    ,{"text": "WHAT YOU GET", "claim": "The third column names the distinct artifact or report produced by the command.", "source_ids": ["cli-demo", "cli-check", "cli-bundle", "cli-verify"]}
+    ,{"text": "YOUR NEXT MOVE", "claim": "The second column explains the command in plain language.", "source_ids": ["cli-demo", "cli-check", "cli-bundle", "cli-verify"]}
+    ,{"text": "VISIBLE RESULT", "claim": "The third column names the distinct artifact or report produced by the command.", "source_ids": ["cli-demo", "cli-check", "cli-bundle", "cli-verify"]}
     ,{"text": "PROOF BOUNDARY", "claim": "The final column distinguishes supported facts from adjacent unsupported claims.", "source_ids": ["readme-boundary", "trust-model"]}
     ,{"text": "PROVES", "claim": "Names the scoped fact established by the command path.", "source_ids": ["readme-boundary", "trust-model"]}
     ,{"text": "KEEP THE BOUNDARY VISIBLE", "claim": "Summarizes the three command-level limitations that must survive at full size.", "source_ids": ["readme-boundary", "trust-model"]}

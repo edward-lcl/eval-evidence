@@ -16,6 +16,10 @@ All notable package, wire-contract, and adapter-compatibility changes are record
 - Source-mapped lifecycle and command-switchboard figures with deterministic SVG
   generation, locked local raster provenance, accessibility metadata, overflow checks,
   and explicit proof boundaries.
+- Three source-mapped visual stories that show retained files becoming an evidence
+  envelope, open `check` into six concrete gates, and demonstrate a later byte mismatch;
+  the command switchboard is now a plain-language index rather than an implementation
+  summary.
 
 ### Changed
 

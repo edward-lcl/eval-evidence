@@ -12,7 +12,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "figures"
 LOCK = FIGURES / "renderer.lock"
-FIGURE_IDS = ("eval-evidence-lifecycle", "eval-evidence-command-path")
+FIGURE_IDS = (
+    "eval-evidence-lifecycle",
+    "eval-evidence-command-path",
+    "eval-evidence-envelope-anatomy",
+    "eval-evidence-check-story",
+    "eval-evidence-tamper-story",
+)
 
 
 def require_local_provenance(config: dict) -> str:

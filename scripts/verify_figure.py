@@ -24,6 +24,11 @@ COMMAND_SOURCE = FIGURES / "eval-evidence-command-path.figure.json"
 COMMAND_RENDER_SOURCE = FIGURES / "eval-evidence-command-path.render.json"
 COMMAND_SVG = FIGURES / "eval-evidence-command-path.svg"
 COMMAND_PNG = FIGURES / "eval-evidence-command-path.png"
+STORY_IDS = (
+    "eval-evidence-envelope-anatomy",
+    "eval-evidence-check-story",
+    "eval-evidence-tamper-story",
+)
 BRIEF_SCHEMA = FIGURES / "figure-brief.schema.json"
 RENDER = ROOT / "scripts" / "render_figure.py"
 OUTCOME_CARD_WIDTH = 340
@@ -223,6 +228,22 @@ def main() -> int:
         COMMAND_PNG,
         ROOT / "scripts" / "build_command_figure.py",
     )
+    story_hashes = {}
+    for figure_id in STORY_IDS:
+        story_source_path = FIGURES / f"{figure_id}.figure.json"
+        story_render_path = FIGURES / f"{figure_id}.render.json"
+        story_source_bytes = story_source_path.read_text(encoding="utf-8").encode("utf-8")
+        story_render_bytes = story_render_path.read_text(encoding="utf-8").encode("utf-8")
+        story_hashes[figure_id] = verify_common(
+            errors,
+            json.loads(story_source_bytes),
+            story_source_bytes,
+            json.loads(story_render_bytes),
+            story_render_bytes,
+            FIGURES / f"{figure_id}.svg",
+            FIGURES / f"{figure_id}.png",
+            ROOT / "scripts" / "build_story_figures.py",
+        )
     for outcome in render["outcomes"]:
         if "detail_lines" not in outcome or " ".join(outcome["detail_lines"]) != outcome["detail"]:
             fail(errors, f'{outcome["label"]} detail_lines must preserve the single-line detail')
@@ -249,6 +270,11 @@ def main() -> int:
     print(f"command_render_sha256={command_hashes[1]}")
     print(f"command_svg_sha256={command_hashes[2]}")
     print(f"command_png_sha256={command_hashes[3]}")
+    for figure_id, hashes in story_hashes.items():
+        print(f"{figure_id}_brief_sha256={hashes[0]}")
+        print(f"{figure_id}_render_sha256={hashes[1]}")
+        print(f"{figure_id}_svg_sha256={hashes[2]}")
+        print(f"{figure_id}_png_sha256={hashes[3]}")
     return 0
 
 if __name__ == "__main__":

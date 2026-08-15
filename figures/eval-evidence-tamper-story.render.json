@@ -1,0 +1,11 @@
+{
+  "render_version": 1,
+  "figure_id": "eval-evidence-tamper-story",
+  "canvas": {"width": 1600, "height": 900, "png_width": 3200, "png_height": 1800},
+  "subtitle": "The bundle is a remembered byte identity — not a claim that the score is true.",
+  "before": {"file_line": "reward: 1", "digest": "8d14…a6c2"},
+  "after": {"file_line": "reward: 0", "digest": "f913…7b40"},
+  "error": "Referenced file digest mismatch for result.json",
+  "colors": {"saved": "#20D66B", "changed": "#FF6F59", "accent": "#F7D73A", "teal": "#39D0C3"},
+  "forbidden_claims": ["ATTRIBUTED TO AN ACTOR", "ORIGINAL RUN PROVEN", "TAMPER-PROOF", "AUTHENTICATED BASELINE", "TRUE SCORE"]
+}

@@ -14,6 +14,12 @@ trust score.
 Eval Evidence produces a deterministic JSON bundle that carries three kinds of evidence
 without pretending to adjudicate them:
 
+![Three retained Harbor run files become one reviewable evidence JSON record: the adapter labels what happened, how the run was configured, and which source bytes can be checked again.](figures/eval-evidence-envelope-anatomy.png)
+
+This is what “build a bundle” means in concrete terms. The adapter reads retained run
+files, labels where values came from, records missing fields as `unavailable`, and adds
+file fingerprints. It does not copy a whole run or turn a reported value into truth.
+
 1. **Item validity:** record supplied validity claims—or state that none were supplied.
 2. **Evaluation instrument:** record model, agent, harness, budgets, and other fields
    with explicit provenance and coverage.
@@ -36,11 +42,15 @@ eval-evidence bundle /tmp/eval-run -o /tmp/eval-evidence.json
 eval-evidence verify /tmp/eval-evidence.json --run-root /tmp/eval-run
 ```
 
-![Eval Evidence command switchboard: demo creates practice input, check reports without storing a baseline, bundle writes a canonical baseline, and verify with run root compares retained bytes.](figures/eval-evidence-command-path.png)
+![Eval Evidence command index: make a safe example with demo, inspect a run now with check, save today's file fingerprints with bundle, or compare later files with verify and run root.](figures/eval-evidence-command-path.png)
 
 The [command switchboard brief and editable SVG](figures/README.md) keep each command's
-output beside its proof boundary. The diagram is a teaching layer; the command help and
-JSON output remain authoritative for automation.
+output beside its proof boundary. It is an index into the story, not the whole story:
+
+![Eval Evidence check shown as six explicit tests: find the run, read files, label each field, test the record, re-hash local files, and name a pass or failure with its reason.](figures/eval-evidence-check-story.png)
+
+The diagram is a teaching layer; the command help and JSON output remain authoritative
+for automation.
 
 The demo is deterministic and synthetic. `check` is the one-command path: it detects
 the input adapter, builds a bundle in memory, validates the schema and digest, re-hashes
@@ -170,6 +180,8 @@ paths, `..`, and resolved escapes are rejected. The Action also accepts optional
 claims match its embedded digest. It does **not** re-hash source files. Add
 `--run-root PATH` to compare referenced files with local bytes. Neither mode proves who
 created the bundle: anyone who edits an unsigned bundle can recompute its digest.
+
+![A three-act tamper story: save the baseline fingerprint for result.json, change the retained file, then verify later bytes and receive a referenced-file digest mismatch with exit 1.](figures/eval-evidence-tamper-story.png)
 
 ## What a bundle does not prove
 

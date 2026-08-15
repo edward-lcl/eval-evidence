@@ -1,42 +1,42 @@
 {
   "render_version": 1,
   "figure_id": "eval-evidence-command-path",
-  "subtitle": "Choose the command by the artifact or proof you need next.",
+  "subtitle": "The command is syntax. The moment is how a teammate remembers it.",
   "canvas": {"width": 1600, "height": 1120, "png_width": 3200, "png_height": 2240},
   "commands": [
     {
       "step": "LEARN",
       "command": "demo",
-      "action_lines": ["materialize example", "run files"],
-      "output_lines": ["PRACTICE", "INPUT"],
-      "proof": "Synthetic shape repeats",
+      "action_lines": ["make a safe example", "you can inspect"],
+      "output_lines": ["PRACTICE", "FOLDER"],
+      "proof": "Practice files repeat",
       "limit": "Not real-run evidence",
       "color": "#2563EB"
     },
     {
       "step": "CHECK",
       "command": "check",
-      "action_lines": ["detect + validate", "+ re-hash references"],
-      "output_lines": ["PASS / FAIL", "REPORT"],
-      "proof": "Current run passes checks",
+      "action_lines": ["inspect this run", "right now"],
+      "output_lines": ["NOW", "REPORT"],
+      "proof": "Problems are named now",
       "limit": "No stored baseline",
       "color": "#0F766E"
     },
     {
       "step": "SEAL",
       "command": "bundle",
-      "action_lines": ["validate + write", "canonical JSON"],
-      "output_lines": ["STORED", "BASELINE"],
-      "proof": "Claims bind to digests",
+      "action_lines": ["save today's", "file fingerprints"],
+      "output_lines": ["EVIDENCE.JSON"],
+      "proof": "Today's baseline is saved",
       "limit": "Not signer authenticity",
       "color": "#7C3AED"
     },
     {
       "step": "RECHECK",
       "command": "verify --run-root",
-      "action_lines": ["validate bundle", "+ re-hash source bytes"],
+      "action_lines": ["compare later files", "with the saved baseline"],
       "output_lines": ["MATCH /", "MISMATCH"],
-      "proof": "Bytes match or differ",
+      "proof": "Later bytes match or differ",
       "limit": "Not physical truth",
       "color": "#B42318"
     }

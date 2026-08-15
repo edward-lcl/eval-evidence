@@ -12,7 +12,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class FigurePipelineTests(unittest.TestCase):
     def test_canonical_svgs_match_their_briefs(self) -> None:
-        for script in ("scripts/build_figure.py", "scripts/build_command_figure.py"):
+        for script in (
+            "scripts/build_figure.py",
+            "scripts/build_command_figure.py",
+            "scripts/build_story_figures.py",
+        ):
             with self.subTest(script=script):
                 result = subprocess.run(
                     [sys.executable, script, "--check"],
