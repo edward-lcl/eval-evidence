@@ -1,0 +1,51 @@
+{
+  "render_version": 1,
+  "figure_id": "eval-evidence-command-path",
+  "subtitle": "The command is syntax. The moment is how a teammate remembers it.",
+  "canvas": {"width": 1600, "height": 1120, "png_width": 3200, "png_height": 2240},
+  "commands": [
+    {
+      "step": "LEARN",
+      "command": "demo",
+      "action_lines": ["make a safe example", "you can inspect"],
+      "output_lines": ["PRACTICE", "FOLDER"],
+      "proof": "Practice files repeat",
+      "limit": "Not real-run evidence",
+      "color": "#69A7FF"
+    },
+    {
+      "step": "CHECK",
+      "command": "check",
+      "action_lines": ["inspect this run", "right now"],
+      "output_lines": ["NOW", "REPORT"],
+      "proof": "Problems are named now",
+      "limit": "No stored baseline",
+      "color": "#39D0C3"
+    },
+    {
+      "step": "SEAL",
+      "command": "bundle",
+      "action_lines": ["save today's", "file fingerprints"],
+      "output_lines": ["EVIDENCE.JSON"],
+      "proof": "Today's baseline is saved",
+      "limit": "Not signer authenticity",
+      "color": "#B18CFF"
+    },
+    {
+      "step": "RECHECK",
+      "command": "verify --run-root",
+      "action_lines": ["compare later files", "with the saved baseline"],
+      "output_lines": ["MATCH /", "MISMATCH"],
+      "proof": "Later bytes match or differ",
+      "limit": "Not physical truth",
+      "color": "#FF6F59"
+    }
+  ],
+  "edge_semantics": "Solid arrows mean produces; the dotted vertical spine means recommended learning order, not a runtime dependency.",
+  "boundaries": [
+    "check does not store a baseline",
+    "verify without --run-root does not re-hash source files",
+    "byte identity is not authenticity or physical truth"
+  ],
+  "forbidden_claims": ["AUTHENTICATED RESULT", "CERTIFIED RESULT", "PHYSICALLY VERIFIED", "MODEL RANKING", "PRODUCTION READY"]
+}

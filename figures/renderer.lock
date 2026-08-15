@@ -1,0 +1,14 @@
+{
+  "renderer": "rsvg-convert",
+  "version": "2.62.3",
+  "command": ["rsvg-convert", "--width", "3200", "--height", "2000", "--output"],
+  "font": {
+    "fontconfig_pattern": "Arial:style=Regular",
+    "family": "Arial",
+    "file_name": "Arial.ttf",
+    "sha256": "525979822591a3447cfc49d943d6f7683508e25543407871c0ed8fed05fd2bd9",
+    "fontversion": "328335",
+    "provenance": "system-provided font; not bundled or redistributed"
+  },
+  "purpose": "Pinned local renderer and resolved-font provenance for eval-evidence-lifecycle.png. Rendering fails closed when the declared offline environment resolves another font; this does not claim cross-platform PNG byte identity."
+}

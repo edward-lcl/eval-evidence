@@ -1,0 +1,17 @@
+{
+  "render_version": 1,
+  "figure_id": "eval-evidence-envelope-anatomy",
+  "canvas": {"width": 1600, "height": 900, "png_width": 3200, "png_height": 1800},
+  "subtitle": "Harbor example · the generic adapter follows the same contract",
+  "inputs": [
+    {"number": "1", "name": "result.json", "detail": "score · task · timing"},
+    {"number": "2", "name": "config.json", "detail": "model · agent · limits"},
+    {"number": "3", "name": "agent/trajectory.json", "detail": "steps · final metrics"}
+  ],
+  "compartments": [
+    {"title": "WHAT HAPPENED", "lines": ["run + task identity", "timing + reward + scores"], "color": "#FF7A59"},
+    {"title": "HOW IT RAN", "lines": ["model + agent + harness", "budgets + field provenance"], "color": "#39D0C3"},
+    {"title": "WHAT CAN BE RECHECKED", "lines": ["file path + byte count", "SHA-256 of retained bytes"], "color": "#F7D73A"}
+  ],
+  "forbidden_claims": ["FULL TRAJECTORY COPIED", "TRUSTED RUN", "GROUND TRUTH", "CERTIFIED RESULT", "AUTHENTICATED RUNNER"]
+}

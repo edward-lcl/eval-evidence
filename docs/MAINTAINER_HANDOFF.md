@@ -47,6 +47,10 @@ eval-evidence verify /tmp/evidence.json --run-root /tmp/demo
 
 ## Release state
 
+Pull request #2 merged the reviewed 0.2.0 candidate into `main` on 2026-08-07; its
+deleted review branch is no longer an installation or release authority. No `v0.2.0`
+tag or PyPI release exists yet.
+
 The GitHub repository and CI are public. GitHub CI covers Python 3.11–3.14, distribution
 scope, installed-wheel dogfood on Linux/macOS/Windows, and the composite action. The repository-side PyPI Trusted
 Publishing path is configured without a stored token: `.github/workflows/publish-pypi.yml`

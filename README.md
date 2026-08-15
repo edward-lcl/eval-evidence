@@ -14,6 +14,12 @@ trust score.
 Eval Evidence produces a deterministic JSON bundle that carries three kinds of evidence
 without pretending to adjudicate them:
 
+![Three retained Harbor run files become one reviewable evidence JSON record: the adapter labels what happened, how the run was configured, and which source bytes can be checked again.](figures/eval-evidence-envelope-anatomy.png)
+
+This is what “build a bundle” means in concrete terms. The adapter reads retained run
+files, labels where values came from, records missing fields as `unavailable`, and adds
+file fingerprints. It does not copy a whole run or turn a reported value into truth.
+
 1. **Item validity:** record supplied validity claims—or state that none were supplied.
 2. **Evaluation instrument:** record model, agent, harness, budgets, and other fields
    with explicit provenance and coverage.
@@ -29,12 +35,22 @@ cannot decide whether a task is broken, a verifier is correct, or one model is b
 Python 3.11–3.14:
 
 ```bash
-python -m pip install "eval-evidence @ git+https://github.com/edward-lcl/eval-evidence@release/v0.2.0-readiness"
+python -m pip install "eval-evidence @ git+https://github.com/edward-lcl/eval-evidence@main"
 eval-evidence demo -o /tmp/eval-run
 eval-evidence check /tmp/eval-run
 eval-evidence bundle /tmp/eval-run -o /tmp/eval-evidence.json
 eval-evidence verify /tmp/eval-evidence.json --run-root /tmp/eval-run
 ```
+
+![Eval Evidence command index: make a safe example with demo, inspect a run now with check, save today's file fingerprints with bundle, or compare later files with verify and run root.](figures/eval-evidence-command-path.png)
+
+The [command switchboard brief and editable SVG](figures/README.md) keep each command's
+output beside its proof boundary. It is an index into the story, not the whole story:
+
+![Eval Evidence check shown as six explicit tests: find the run, read files, label each field, test the record, re-hash local files, and name a pass or failure with its reason.](figures/eval-evidence-check-story.png)
+
+The diagram is a teaching layer; the command help and JSON output remain authoritative
+for automation.
 
 The demo is deterministic and synthetic. `check` is the one-command path: it detects
 the input adapter, builds a bundle in memory, validates the schema and digest, re-hashes
@@ -129,21 +145,22 @@ Terminal-Bench and Harbor maintainers should start with the focused
 
 ## Check-only GitHub Action
 
-During the 0.2.0 pre-release review, use the review branch; for production, replace it
-with the reviewed commit SHA or `v0.2.0` after that tag exists:
+Pull request #2 has merged, so `main` is the current 0.2.0 pre-release authority. For
+reproducible or production use, replace the mutable branch with the reviewed commit SHA
+or `v0.2.0` after that tag exists:
 
 ```yaml
-- uses: edward-lcl/eval-evidence@release/v0.2.0-readiness
+- uses: edward-lcl/eval-evidence@main
   with:
     run-path: evaluation-runs
     adapter: auto
 ```
 
-The review-branch reference is intentional while pull request #2 is open; the older
-`main`/`v0.1.0` code does not provide `--min-coverage`, `inspect --explain`, or Harbor
-schema compatibility warnings. The review branch is mutable; pull request #2 records
-the tested head SHA. Record that SHA for reproduction, and pin an accepted commit or
-release tag before relying on it in production.
+The pre-release `main` reference is intentionally easy to try but remains mutable.
+Pull request #2 records the reviewed candidate history; record the exact installed SHA
+for reproduction, and pin an accepted commit or release tag before relying on it in
+production. The older `v0.1.0` tag does not provide `--min-coverage`, `inspect
+--explain`, or Harbor schema compatibility warnings.
 
 The Action runs `check` in memory. It does not write or upload a baseline bundle, so it
 cannot by itself detect a later mutation. Stage downloaded Harbor artifacts inside the
@@ -163,6 +180,8 @@ paths, `..`, and resolved escapes are rejected. The Action also accepts optional
 claims match its embedded digest. It does **not** re-hash source files. Add
 `--run-root PATH` to compare referenced files with local bytes. Neither mode proves who
 created the bundle: anyone who edits an unsigned bundle can recompute its digest.
+
+![A three-act tamper story: save the baseline fingerprint for result.json, change the retained file, then verify later bytes and receive a referenced-file digest mismatch with exit 1.](figures/eval-evidence-tamper-story.png)
 
 ## What a bundle does not prove
 
