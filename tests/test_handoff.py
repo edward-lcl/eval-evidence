@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class HandoffTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.handoff = json.loads((ROOT / "PROJECT_HANDOFF.json").read_text())
+        self.handoff = json.loads((ROOT / "PROJECT_HANDOFF.json").read_text(encoding="utf-8"))
 
     def test_entrypoints_and_work_starts_exist(self) -> None:
         paths = list(self.handoff["entrypoints"].values())
@@ -40,12 +40,12 @@ class HandoffTests(unittest.TestCase):
                 self.assertTrue(item.get("blocked_by"))
 
     def test_human_router_names_machine_readable_authority(self) -> None:
-        router = (ROOT / "docs" / "START_HERE.md").read_text()
+        router = (ROOT / "docs" / "START_HERE.md").read_text(encoding="utf-8")
         self.assertIn("PROJECT_HANDOFF.json", router)
         self.assertIn("Handoff does not mean every gate is met", router)
 
     def test_distribution_audit_cannot_self_authorize_release(self) -> None:
-        source = (ROOT / "scripts" / "audit_distribution.py").read_text()
+        source = (ROOT / "scripts" / "audit_distribution.py").read_text(encoding="utf-8")
         self.assertIn('"authorized_for_distribution": False', source)
         self.assertIn('"owner_authorization_required": True', source)
 
