@@ -12,11 +12,17 @@ do not choose the more optimistic interpretation.
 
 - **Authority:** the latest protected commit on `main` is the development authority.
 - **Current decision:** ready for a narrow Terminal-Bench/Harbor mapping review.
-- **Not release-ready:** the genuine-Harbor G2 fixture still skips in regular CI.
-- **Distribution:** `v0.1.0` is the latest tag; `0.2.0` is an unreleased candidate and
+- **Not release-ready:** G2 structural CI is met, but upstream mapping review,
+  campaign completeness, external emission, and final release authorization remain open.
+- **Distribution:** `v0.1.0` is the latest tag; source identifies as `0.2.0rc1`, while
+  `0.2.0` remains an unreleased final version and
   is not available from PyPI.
 - **Supported claim:** deterministic per-trial evidence bundles and scoped local
   integrity/provenance checks.
+- **Research decision:** the adversarial review and next experiments are frozen in
+  [`research/DECISION_GATE_2026-08-15.md`](research/DECISION_GATE_2026-08-15.md);
+  [`research/STATE_REGISTER.md`](research/STATE_REGISTER.md) distinguishes current
+  proof, historical/local evidence, gaps, and hypotheses.
 - **Unsupported claims:** campaign completeness, trusted-runner authenticity,
   leaderboard correctness, model ranking, or physical truth.
 
@@ -38,7 +44,7 @@ implementation, and keep one writer per checkout.
 | New teammate | this page, then the [README](../README.md) | run the synthetic quickstart and select one `ready` item in `PROJECT_HANDOFF.json` | command transcript plus any undocumented correction |
 | Developer | [architecture](ARCHITECTURE.md), then [contributing](../CONTRIBUTING.md) | run tests and inspect the adapter/core boundary before editing | focused tests, full suite, and diff review |
 | Repository owner | [maintainer handoff](MAINTAINER_HANDOFF.md) and [readiness gates](READINESS.md) | resolve an owner-only approval or release decision | dated sign-off with exact commit/artifact hashes |
-| Terminal-Bench or Harbor maintainer | [five-minute review brief](TBENCH_REVIEW.md) | red-line the field mapping and answer the four requested decisions | recorded decisions and a reproducible G2 route |
+| Terminal-Bench or Harbor maintainer | [five-minute review brief](TBENCH_REVIEW.md) | red-line the field mapping and answer the four requested decisions | recorded decisions and a reviewed G2 fixture |
 | Paper author or reviewer | [paper alignment](PAPER_ALIGNMENT.md) and [trust model](TRUST_MODEL.md) | freeze the manuscript authority or review one acceptance-contract row | canonical revision plus row-level disposition |
 | Agent | [`AGENTS.md`](../AGENTS.md), this page, then `PROJECT_HANDOFF.json` | choose one bounded item whose dependencies are met | tests, receipts, changed-path summary, and remaining gaps |
 | Security reviewer | [security policy](../SECURITY.md) and [trust model](TRUST_MODEL.md) | test a documented threat boundary with synthetic input | minimal reproduction and scoped impact |
@@ -54,8 +60,8 @@ implementation, and keep one writer per checkout.
 6. Implement and validate only that bounded outcome.
 7. Update code, tests, status, and reader-facing documentation together.
 
-No silence means approval. If work would share genuine run data, mark G2 met, publish a
-release, change the paper authority, or claim upstream endorsement, stop at the owner or
+No silence means approval. If work would share genuine run data, materially broaden the
+G2 claim, publish a release, change the paper authority, or claim upstream endorsement, stop at the owner or
 external-approval boundary.
 
 ## Minimum local verification
@@ -73,7 +79,7 @@ sign-off in [`OWNER_WALKTHROUGH.md`](OWNER_WALKTHROUGH.md).
 
 ## What “handoff complete” means
 
-Handoff does not mean every gate is met. It means an unfamiliar teammate can determine:
+Handoff readiness is not release authorization. It means an unfamiliar teammate can determine:
 
 - which source is authoritative;
 - what works and what is still unknown;

@@ -36,17 +36,17 @@ The useful outcomes are therefore:
 
 ## Session 1 — rehearse the user path
 
-Do this from a clean virtual environment, not an editable checkout. During the 0.2.0
+Do this from a clean virtual environment, not an editable checkout. During the 0.2.0rc1
 review, install the reviewed wheel you built; after publication, use the exact released
 wheel and record its SHA-256.
 
 ```bash
 python3 -m venv /tmp/ee-owner-venv
-/tmp/ee-owner-venv/bin/python -m pip install /path/to/eval_evidence-0.2.0-py3-none-any.whl
+/tmp/ee-owner-venv/bin/python -m pip install /path/to/eval_evidence-0.2.0rc1-py3-none-any.whl
 /tmp/ee-owner-venv/bin/eval-evidence --version
 
 python3 -c 'import hashlib, pathlib, sys; p=pathlib.Path(sys.argv[1]); print(hashlib.sha256(p.read_bytes()).hexdigest(), p)' \
-  /path/to/eval_evidence-0.2.0-py3-none-any.whl
+  /path/to/eval_evidence-0.2.0rc1-py3-none-any.whl
 
 rm -rf /tmp/ee-owner-demo
 /tmp/ee-owner-venv/bin/eval-evidence demo --format harbor -o /tmp/ee-owner-demo

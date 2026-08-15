@@ -1,0 +1,8 @@
+{
+  "job_name": "sanitized-structural-job",
+  "n_concurrent_trials": 1,
+  "n_attempts": 2,
+  "retry": {"max_retries": 0},
+  "agents": [{"name": "sanitized-agent", "model_name": "example/sanitized-model"}],
+  "tasks": [{"path": "tasks/sanitized-task", "source": "sanitized-fixture"}]
+}

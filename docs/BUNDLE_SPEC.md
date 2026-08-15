@@ -30,6 +30,12 @@ mapping must preserve unavailable state. An `eval-run.json` instrument value wit
 matching `provenance` entry, or a plain claim without an inline evidence object,
 defaults to `operator_asserted`. To make a stronger claim, an emitter must supply the
 instrument's `provenance` entry or a complete `{value, status, source}` claim object.
+Partial provenance declarations are invalid. `unavailable` requires a null value, and
+all other statuses require a non-null value.
+
+Coverage is computed metadata, not an independent claim. Verification recomputes
+`field_count`, every status count, and `available_fraction` from the fields even when a
+modified unsigned bundle has been re-digested.
 
 ## Compatibility
 
@@ -38,4 +44,5 @@ The wire contract is `eval-evidence.bundle/v0.1`. Additive integration data belo
 This general new-wire-version rule remains authoritative after adoption;
 [`COMPATIBILITY.md`](COMPATIBILITY.md) documents the explicitly limited pre-adoption
 0.2.0 semantic correction.
-The schema `$id` is the document identity, not the wire-version value.
+The schema `$id` is an immutable, versioned URN document identity, not the
+wire-version value or a mutable source-control URL.

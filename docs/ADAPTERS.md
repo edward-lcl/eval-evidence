@@ -30,6 +30,8 @@ Rules:
 4. Preserve provenance: observed, derived, operator/provider asserted, unavailable.
 5. Missing item-validity or reward-independent verifier evidence remains unavailable.
 6. Harness-specific data belongs under a namespaced `extensions` key.
+7. When retained sources disagree, preserve candidate values and a conflict resolution;
+   do not silently select by precedence.
 
 ## Built-in adapters
 

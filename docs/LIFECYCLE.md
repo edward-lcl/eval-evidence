@@ -127,14 +127,16 @@ ship `compare`, a campaign-claim contract, or an HTML report generator.
 
 ## Product sequence
 
-1. Validate and ship deterministic run sealing for real Harbor data.
-2. Give regular CI an approved genuine/sanitized fixture so G2 is reproducible.
-3. Add the Inspect AI post-run exporter as the second integration.
-4. Specify a campaign/evaluation-claim package for denominators, retries, exclusions,
-   aggregation, seeds, and uncertainty.
-5. Generate a structured comparison and static report from that claim package.
-6. Add preflight evidence policies before considering event streaming.
-7. Add signing or physical-facility profiles only after signer roles, calibration,
+1. Maintain deterministic run sealing and sanitized Harbor structural CI.
+2. Reconstruct campaign denominators from native Harbor job/result/lock state before
+   proposing a campaign format.
+3. Measure retrospective recoverability, conflicts, and claim-specific readiness.
+4. Prototype the smallest prospective native Harbor capture needed for lost fields.
+5. Add one Inspect AI post-run exporter to test the surviving portable contract.
+6. Specify only the campaign/reference primitive that upstream systems do not already
+   own, then generate a structured comparison if evidence supports it.
+7. Add preflight evidence policies before considering event streaming.
+8. Add signing or physical-facility profiles only after signer roles, calibration,
    chain of custody, and revocation semantics are defined.
 
 This sequence supports prospective and retrospective evaluation work without competing

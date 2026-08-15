@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/edward-lcl/eval-evidence/main/eval_evidence/schemas/eval-evidence-run-v0.1.schema.json",
+  "$id": "urn:eval-evidence:schema:run:v0.1",
   "title": "Eval Evidence generic run manifest v0.1",
   "type": "object",
   "required": ["schema_version", "run", "instrument", "metrics", "outcome", "references"],
@@ -23,6 +23,7 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
+        "required": ["status", "source"],
         "properties": {
           "status": {
             "enum": ["observed", "derived", "operator_asserted", "provider_asserted", "unavailable"]

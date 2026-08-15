@@ -6,7 +6,7 @@
     "repository": "https://github.com/edward-lcl/eval-evidence",
     "branch": "main",
     "released_tag": "v0.1.0",
-    "candidate_version": "0.2.0",
+    "candidate_version": "0.2.0rc1",
     "rule": "The latest protected main commit is the development authority. A release tag becomes the distribution authority only after its release checklist passes.",
     "verify_commands": [
       "git status --short --branch",
@@ -34,6 +34,10 @@
     "owner_release": "docs/MAINTAINER_HANDOFF.md",
     "upstream_review": "docs/TBENCH_REVIEW.md",
     "paper_review": "docs/PAPER_ALIGNMENT.md",
+    "research_state": "docs/research/STATE_REGISTER.md",
+    "research_plan": "docs/research/RESEARCH_MAP.md",
+    "upstream_placement": "docs/research/UPSTREAM_MAP.md",
+    "decision_gate": "docs/research/DECISION_GATE_2026-08-15.md",
     "agent_instructions": "AGENTS.md",
     "readiness": "docs/READINESS.md"
   },
@@ -46,10 +50,9 @@
     },
     {
       "id": "G2",
-      "name": "Real Harbor evidence in regular CI",
-      "status": "unmet",
-      "evidence": "tests.test_readiness.ReadinessTests.test_real_harbor_archive_when_supplied",
-      "blocked_by": "Data-owner approval for a sanitized structural fixture or secure read-only CI fixture access."
+      "name": "Sanitized Harbor structural evidence in regular CI",
+      "status": "met",
+      "evidence": "tests.test_readiness.ReadinessTests.test_sanitized_harbor_structural_fixture"
     },
     {
       "id": "G3",
@@ -66,28 +69,43 @@
   ],
   "next_work": [
     {
-      "id": "EE-01",
-      "title": "Close the reproducible real-Harbor gate",
+      "id": "EE-06",
+      "title": "Reconstruct campaign denominators from native Harbor state",
       "priority": 1,
-      "status": "blocked-owner-input",
-      "owner": "repository owner plus Harbor data owner",
-      "start_at": "docs/DOGFOOD.md",
+      "status": "ready",
+      "owner": "research contributor with approved archive access",
+      "start_at": "docs/research/CAMPAIGN_MINIMUM.md",
       "acceptance": [
-        "G2 runs in regular CI without a skip",
-        "the fixture contains no benchmark content, prompts, trajectories, credentials, model names, or private identifiers",
-        "a reviewer spot-checks the resulting mapping and unavailable fields"
+        "expected, discovered, completed, errored, cancelled, and retried denominators are reported by Harbor version",
+        "every unexplained count delta remains explicit",
+        "only aggregate or redacted receipts enter this repository",
+        "no campaign schema is proposed before reconstruction results exist"
+      ]
+    },
+    {
+      "id": "EE-07",
+      "title": "Measure retrospective recoverability and source conflicts",
+      "priority": 2,
+      "status": "ready",
+      "owner": "research contributor with approved archive access",
+      "start_at": "docs/research/RESEARCH_MAP.md",
+      "acceptance": [
+        "field states and conflicts are measured with explicit version/sample denominators",
+        "precedence is not applied before disagreement is counted",
+        "prospective-only fields and operator time are reported",
+        "negative or negligible conflict findings are preserved"
       ]
     },
     {
       "id": "EE-02",
       "title": "Obtain Terminal-Bench and Harbor mapping decisions",
-      "priority": 2,
+      "priority": 3,
       "status": "ready-for-review",
       "owner": "upstream liaison",
       "start_at": "docs/TBENCH_REVIEW.md",
       "acceptance": [
         "field mapping corrections or approvals are recorded",
-        "the G2 fixture route is chosen",
+        "the sanitized G2 mapping is reviewed",
         "the job-level denominator source is decided",
         "capture-time field locations are decided"
       ]
@@ -95,7 +113,7 @@
     {
       "id": "EE-03",
       "title": "Freeze the paper authority and claim crosswalk",
-      "priority": 3,
+      "priority": 4,
       "status": "blocked-owner-input",
       "owner": "paper owners",
       "start_at": "docs/PAPER_ALIGNMENT.md",
@@ -109,7 +127,7 @@
     {
       "id": "EE-04",
       "title": "Prove independent pickup",
-      "priority": 4,
+      "priority": 5,
       "status": "ready",
       "owner": "teammate who did not author the implementation",
       "start_at": "docs/START_HERE.md",
@@ -122,11 +140,11 @@
     {
       "id": "EE-05",
       "title": "Validate the framework-neutral contract with a second evaluator",
-      "priority": 5,
+      "priority": 6,
       "status": "blocked-by-sequence",
       "owner": "adapter contributor",
       "start_at": "docs/ADAPTERS.md",
-      "blocked_by": "EE-01 must close first.",
+      "blocked_by": "EE-06 and EE-07 must establish the smallest useful common contract first.",
       "acceptance": [
         "one external evaluator emits eval-run.json from public documentation alone",
         "friction is recorded before any plugin system is designed",
@@ -142,7 +160,6 @@
     ],
     "owner_or_external_approval_required": [
       "sharing any genuine evaluation fixture",
-      "marking G2 met",
       "naming a canonical paper revision",
       "publishing a GitHub release or PyPI package",
       "claiming upstream endorsement or general availability"

@@ -44,7 +44,8 @@ product vision from being mistaken for shipped v0.2 behavior.
 2. Read [`VISION.md`](VISION.md) for the product translation.
 3. Read [`BUNDLE_SPEC.md`](BUNDLE_SPEC.md) and [`TRUST_MODEL.md`](TRUST_MODEL.md) for the
    current wire and proof boundaries.
-4. Read [`READINESS.md`](READINESS.md) for executable evidence and unmet gates.
+4. Read [`READINESS.md`](READINESS.md) for executable evidence, gate state, and
+   remaining adoption limits.
 5. Use [`TBENCH_REVIEW.md`](TBENCH_REVIEW.md) for the first upstream integration review.
 
 An aligned roadmap is not validation of the paper's empirical claims. A passing bundle

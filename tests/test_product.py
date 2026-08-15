@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BUNDLE_SCHEMA = ROOT / "eval_evidence/schemas/eval-evidence-bundle-v0.1.schema.json"
 RUN_SCHEMA = ROOT / "eval_evidence/schemas/eval-evidence-run-v0.1.schema.json"
 GENERIC_GOLDEN = "13c06a8b06a90b4ae58c4fae6e36252f05105a9aac761a9834a4bd1e7d69c081"
-HARBOR_GOLDEN = "3322d9ec11f24be40fc1dcbcee1dc8d799e3e7da1920461755c093c483cad8a5"
+HARBOR_GOLDEN = "51cca5fbd988c901be9e61d40fcf1f6bfb363651a6a158501221a3367b0dbdcc"
 
 
 class ProductTests(unittest.TestCase):
@@ -413,7 +413,7 @@ class ProductTests(unittest.TestCase):
                     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                     outputs.append(json.loads(result.stdout))
                 self.assertTrue(outputs[1]["valid"])
-                self.assertEqual(outputs[1]["tool_version"], "0.2.0")
+                self.assertEqual(outputs[1]["tool_version"], "0.2.0rc1")
                 self.assertEqual(outputs[1]["bundle_schema_version"], BUNDLE_SCHEMA_VERSION)
                 self.assertTrue(outputs[3]["valid"])
                 self.assertEqual(
@@ -597,7 +597,8 @@ class ProductTests(unittest.TestCase):
         for path in sorted((ROOT / "eval_evidence/schemas").glob("*.json")):
             document = json.loads(path.read_text())
             if "$id" in document:
-                self.assertTrue(document["$id"].startswith("https://raw.githubusercontent.com/edward-lcl/eval-evidence/"))
+                self.assertTrue(document["$id"].startswith("urn:eval-evidence:"))
+                self.assertNotIn("/main/", document["$id"])
         schema = json.loads(BUNDLE_SCHEMA.read_text())
         self.assertEqual(schema["properties"]["schema_version"]["const"], BUNDLE_SCHEMA_VERSION)
 

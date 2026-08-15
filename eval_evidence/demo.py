@@ -93,6 +93,11 @@ def materialize_harbor_demo(root: Path) -> Path:
             "id": "00000000-0000-0000-0000-000000000001",
             "task_name": "synthetic-harbor-task",
             "trial_name": "synthetic-harbor-task__demo",
+            "task_id": {
+                "path": "tasks/synthetic-harbor-task",
+                "git_url": "https://example.invalid/synthetic.git",
+                "git_commit_id": "demo-v1",
+            },
             "task_checksum": "a" * 64,
             "started_at": "2026-01-01T00:00:00Z",
             "finished_at": "2026-01-01T00:00:02Z",
@@ -109,7 +114,11 @@ def materialize_harbor_demo(root: Path) -> Path:
     _write(
         root / "config.json",
         {
-            "task": {"path": "tasks/synthetic", "git_commit_id": "demo-v1"},
+            "task": {
+                "path": "tasks/synthetic-harbor-task",
+                "git_url": "https://example.invalid/synthetic.git",
+                "git_commit_id": "demo-v1",
+            },
             "timeout_multiplier": 1.0,
             "agent_timeout_multiplier": 1.0,
             "agent": {

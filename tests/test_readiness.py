@@ -9,6 +9,7 @@ from eval_evidence.core import build_bundle, verify_bundle, verify_referenced_fi
 ROOT = Path(__file__).resolve().parents[1]
 READINESS = ROOT / "docs/READINESS.md"
 BUNDLE_SCHEMA = ROOT / "eval_evidence/schemas/eval-evidence-bundle-v0.1.schema.json"
+SANITIZED_HARBOR_FIXTURE = ROOT / "tests/fixtures/harbor-job-sanitized"
 
 
 class ReadinessTests(unittest.TestCase):
@@ -35,6 +36,44 @@ class ReadinessTests(unittest.TestCase):
                     f"failures={result.failures}, errors={result.errors}",
                 )
                 self.assertEqual(result.skipped, [], f"met gate {test_name} skipped")
+
+    def test_sanitized_harbor_structural_fixture(self):
+        matches = discover_runs(SANITIZED_HARBOR_FIXTURE, "harbor")
+        self.assertEqual(len(matches), 2)
+        bundles = {
+            match.root.parent.name: build_bundle(match.adapter.load(match.root))
+            for match in matches
+        }
+        for name, bundle in bundles.items():
+            errors = verify_bundle(bundle, schema_path=BUNDLE_SCHEMA)
+            match = next(
+                match for match in matches if match.root.parent.name == name
+            )
+            errors += verify_referenced_files(bundle, match.root)
+            self.assertEqual(errors, [], f"{name}: {errors}")
+
+        completed = bundles["completed"]
+        self.assertEqual(
+            completed["extensions"]["harbor"]["trajectory_schema_version"],
+            "ATIF-v1.5",
+        )
+        self.assertEqual(
+            completed["instrument_manifest"]["fields"]["tools"]["status"],
+            "unavailable",
+        )
+        self.assertTrue(
+            any(
+                not item["required"] and not item["present"]
+                for item in completed["inputs"]
+            )
+        )
+
+        conflicted = bundles["conflict-error"]
+        self.assertEqual(conflicted["outcome"]["termination_reason"], "SyntheticError")
+        conflicts = conflicted["extensions"]["harbor"]["source_conflicts"]
+        self.assertIn("instrument.model_id", conflicts)
+        self.assertIn("instrument.agent_name", conflicts)
+        self.assertIn("execution.metrics.input_tokens", conflicts)
 
     @unittest.skipUnless(
         os.environ.get("EVAL_EVIDENCE_REAL_HARBOR_ROOT"),

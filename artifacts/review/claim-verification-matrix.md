@@ -69,17 +69,41 @@ grep -nE '"network_policy"|extra_allowed_hosts|agent_extra_allowed_hosts|Configu
 grep -nE 'class NetworkPolicy|class PhaseNetworkPolicyConfig|class BaselineNetworkPolicyConfig|network_mode|allowed_hosts' ../tbench3-archive/sources/repos/harbor/src/harbor/models/task/config.py
 ```
 
-## Claim (e) — generic values without provenance default to observed
+## Claim (e) — generic values without provenance or with partial provenance default to observed
 
-**Status: confirmed, then resolved.** Missing per-field provenance and plain
-item-validity/verifier claims previously defaulted to observation. Both paths now call
-`operator_asserted`; an explicit provenance object still preserves the emitter's
-status and source. `test_generic_values_without_provenance_are_operator_asserted`
-covers undeclared instrument and plain claim values plus an explicit observed value.
+**Status: confirmed, resolved, then adversarially tightened.** Missing per-field
+provenance and plain item-validity/verifier claims previously defaulted to observation.
+The first correction made missing declarations `operator_asserted`, but a partial object
+still supplied default `observed`/source values. Partial declarations now fail schema
+validation, complete declarations pass through a contradiction check, and absent
+declarations remain `operator_asserted`.
 
 ```bash
 grep -nE 'def _evidence_claim|return operator_asserted|declaration is None|instrument\[name\] = operator_asserted' eval_evidence/adapters.py
 python3 -m unittest tests.test_product.ProductTests.test_generic_values_without_provenance_are_operator_asserted
+python3 -m unittest tests.test_adversarial_semantics.AdversarialSemanticTests.test_partial_provenance_never_upgrades_a_value_to_observed
+```
+
+## Claim (h) — conflicting Harbor sources are silently reduced by precedence
+
+**Status: confirmed, then resolved for mapped multi-source fields.** Model/provider,
+agent, task identity/revision, and token/cost candidates are reconciled only when
+non-null values agree. Otherwise the standard evidence value is unavailable/null and
+`extensions.harbor.source_conflicts` retains safe candidates and the resolution. Task
+identity candidates use redacted digests so local paths are not copied.
+
+```bash
+python3 -m unittest tests.test_adversarial_semantics.AdversarialSemanticTests.test_harbor_disagreement_is_preserved_not_reduced_by_precedence
+```
+
+## Claim (i) — coverage metadata is not independently verified
+
+**Status: confirmed, then resolved.** A bundle with false coverage could previously be
+re-digested and pass verification. `verify_bundle` now recomputes field count, complete
+status counts, and available fraction from the fields.
+
+```bash
+python3 -m unittest tests.test_adversarial_semantics.AdversarialSemanticTests.test_coverage_is_recomputed_even_after_valid_redigest
 ```
 
 ## Claim (f) — `available_fraction` equally counts every non-unavailable field
@@ -97,13 +121,12 @@ grep -nE 'min-coverage|available_fraction' eval_evidence/__main__.py
 
 ## Claim (g) — `step_results` and `source_trial` do not appear in Eval Evidence
 
-**Status: confirmed.** The package search returns no match, while the gap is documented
+**Status: confirmed and refreshed against current upstream.** The package search returns no match, while the gap is documented
 at `docs/HARBOR_MAPPING.md` (`Layout support and known gaps`: `Multi-step step_results` and `Regraded trials`). Current local Harbor does define `step_results` at
 `../tbench3-archive/sources/repos/harbor/src/harbor/models/trial/result.py:60-88`.
-Qualification: no current Harbor result field literally named `source_trial` was found,
-so the stronger claim that this exact regrade wire field exists in current Harbor is
-**unverifiable**; only Eval Evidence's absence and stated regrade-lineage gap are
-confirmed.
+Current public Harbor at `a27e9c2ae10a31c40b2dcef33ef5486bce36e185` also defines
+`SourceTrialConfig`, `SourceTrialLock`, job `source_jobs`, and `RegradeTrial`. Eval
+Evidence does not consume those config/lock lineage fields.
 
 ```bash
 grep -RInE 'step_results|source_trial' eval_evidence || true
@@ -121,4 +144,6 @@ grep -nE 'class StepResult|step_results' ../tbench3-archive/sources/repos/harbor
 | (d) network completeness | refuted | Scope is disclosed in code and mapping; incompleteness is a documented gap, not an overclaim. |
 | (e) generic provenance default | resolved | Undeclared operator input is no longer upgraded to observation. |
 | (f) equal coverage fraction | confirmed | Coverage is coarse, not publication readiness. |
-| (g) multi-step/regrade names absent | confirmed, qualified | Multi-step is current; exact `source_trial` wire claim is unverified. |
+| (g) multi-step/regrade names absent | confirmed | Current Harbor has multi-step and regrade lineage primitives; Eval Evidence ignores them. |
+| (h) retained-source conflicts | resolved for mapped fields | Contradictions remain visible; E2 must measure real prevalence. |
+| (i) coverage self-consistency | resolved | Verification recomputes coverage even after a valid re-digest. |

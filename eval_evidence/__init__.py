@@ -1,6 +1,6 @@
 """Eval Evidence: machine-checkable evidence for AI evaluation runs."""
 
-__version__ = "0.2.0"
+__version__ = "0.2.0rc1"
 
 from .adapters import ADAPTERS, GenericManifestAdapter, HarborAdapter, discover_runs
 from .core import (

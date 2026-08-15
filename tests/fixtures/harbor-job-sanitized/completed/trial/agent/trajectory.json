@@ -1,0 +1,7 @@
+{
+  "schema_version": "ATIF-v1.5",
+  "session_id": "sanitized-session-completed",
+  "agent": {"name": "sanitized-agent", "version": "1.0", "model_name": "sanitized-model", "extra": {"parser": "sanitized"}},
+  "steps": [{"step_id": 1, "source": "user", "message": "sanitized placeholder"}],
+  "final_metrics": {"total_prompt_tokens": 10, "total_cached_tokens": 2, "total_completion_tokens": 5, "total_cost_usd": 0.001}
+}

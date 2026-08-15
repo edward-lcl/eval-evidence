@@ -1,5 +1,9 @@
 # Final review gate report
 
+> **Historical report, superseded for current gate status on 2026-08-15.** The
+> sanitized structural fixture now makes G2 reproducible without the private
+> environment variable. See `docs/READINESS.md` and `PROJECT_HANDOFF.json`.
+
 Recorded from repository root on 2026-07-29. This report validates the bounded review
 deliverables; it does not change G2, authenticate archive data, or substitute for the
 external immutable acceptance script.

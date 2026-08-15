@@ -11,7 +11,7 @@ import zipfile
 from pathlib import Path, PurePosixPath
 
 PACKAGE = "eval-evidence"
-VERSION = "0.2.0"
+VERSION = "0.2.0rc1"
 EXPECTED_SCHEMAS = {
     "eval-evidence-bundle-v0.1.schema.json",
     "eval-evidence-instrument-v0.1.schema.json",
@@ -129,6 +129,17 @@ def audit(dist: Path) -> dict:
         "scripts/dogfood.sh",
         "scripts/render_figure.py",
         "scripts/verify_figure.py",
+        "tests/fixtures/harbor-job-sanitized/README.md",
+        "tests/fixtures/harbor-job-sanitized/config.json",
+        "tests/fixtures/harbor-job-sanitized/result.json",
+        "tests/fixtures/harbor-job-sanitized/lock.json",
+        "tests/fixtures/harbor-job-sanitized/completed/trial/config.json",
+        "tests/fixtures/harbor-job-sanitized/completed/trial/result.json",
+        "tests/fixtures/harbor-job-sanitized/completed/trial/agent/trajectory.json",
+        "tests/fixtures/harbor-job-sanitized/completed/trial/verifier/reward.txt",
+        "tests/fixtures/harbor-job-sanitized/conflict-error/trial/config.json",
+        "tests/fixtures/harbor-job-sanitized/conflict-error/trial/result.json",
+        "tests/fixtures/harbor-job-sanitized/conflict-error/trial/agent/trajectory.json",
     }
     for figure_id in (
         "eval-evidence-lifecycle",

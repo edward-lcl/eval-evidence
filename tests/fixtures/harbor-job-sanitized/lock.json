@@ -1,0 +1,25 @@
+{
+  "schema_version": 3,
+  "created_at": "2026-01-01T00:00:00Z",
+  "harbor": {"version": "sanitized-fixture", "git_commit_hash": null, "is_editable": null},
+  "n_concurrent_trials": 1,
+  "retry": {"max_retries": 0},
+  "trials": [
+    {
+      "schema_version": 2,
+      "task": {"name": "sanitized-task", "type": "local", "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "path": "tasks/sanitized-task"},
+      "agent": {"name": "sanitized-agent", "model_name": "example/sanitized-model"},
+      "skills": [],
+      "environment": {"type": "docker"},
+      "verifier": {"environment_mode": "shared"}
+    },
+    {
+      "schema_version": 2,
+      "task": {"name": "sanitized-task", "type": "local", "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "path": "tasks/sanitized-task"},
+      "agent": {"name": "sanitized-agent", "model_name": "other/different-model"},
+      "skills": [],
+      "environment": {"type": "docker"},
+      "verifier": {"environment_mode": "shared"}
+    }
+  ]
+}
