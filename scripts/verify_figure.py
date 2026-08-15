@@ -189,9 +189,9 @@ def main() -> int:
     parser.add_argument("--fixture-overflow", action="store_true", help="prove the card text-bound check rejects an overflowing line")
     args = parser.parse_args()
     errors: list[str] = []
-    source_bytes = SOURCE.read_bytes()
+    source_bytes = SOURCE.read_text(encoding="utf-8").encode("utf-8")
     source = json.loads(source_bytes)
-    render_bytes = RENDER_SOURCE.read_bytes()
+    render_bytes = RENDER_SOURCE.read_text(encoding="utf-8").encode("utf-8")
     render = json.loads(render_bytes)
     if args.fixture_overflow:
         fixture = [dict(outcome) for outcome in render["outcomes"]]
@@ -209,9 +209,9 @@ def main() -> int:
     lifecycle_hashes = verify_common(
         errors, source, source_bytes, render, render_bytes, SVG, PNG, ROOT / "scripts" / "build_figure.py"
     )
-    command_source_bytes = COMMAND_SOURCE.read_bytes()
+    command_source_bytes = COMMAND_SOURCE.read_text(encoding="utf-8").encode("utf-8")
     command_source = json.loads(command_source_bytes)
-    command_render_bytes = COMMAND_RENDER_SOURCE.read_bytes()
+    command_render_bytes = COMMAND_RENDER_SOURCE.read_text(encoding="utf-8").encode("utf-8")
     command_render = json.loads(command_render_bytes)
     command_hashes = verify_common(
         errors,

@@ -10,8 +10,9 @@ Each `.figure.json` file is the frozen, portable semantic brief and source map. 
 validates against `figure-brief.schema.json`, the same contract used by the global
 `visual-system-explainer` skill. The paired `.render.json` contains only the deliberate
 layout vocabulary needed by this renderer: canvas, line wraps, colors, and structured
-rows/cards. Both inputs are content-addressed in the SVG comment and checked together,
-so the human render cannot silently drift from the agent-readable contract.
+rows/cards. Both inputs are content-addressed after checkout line-ending normalization
+in the SVG comment and checked together, so the human render cannot silently drift
+from the agent-readable contract or appear stale only because Git used CRLF on Windows.
 
 The SVG is canonical and keeps its text selectable; the PNG is a 2x raster rendition
 for contexts that require one. Exact labels and topology are generated deterministically

@@ -93,8 +93,10 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true", help="fail if the canonical SVG is stale")
     args = parser.parse_args()
-    source_bytes = SOURCE.read_bytes()
-    render_bytes = RENDER_SPEC.read_bytes()
+    # Text mode normalizes checkout line endings before content addressing, so
+    # Git's Windows CRLF policy cannot make a canonical SVG appear stale.
+    source_bytes = SOURCE.read_text(encoding="utf-8").encode("utf-8")
+    render_bytes = RENDER_SPEC.read_text(encoding="utf-8").encode("utf-8")
     rendered = svg(
         json.loads(source_bytes),
         json.loads(render_bytes),
