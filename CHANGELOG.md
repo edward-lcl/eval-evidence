@@ -13,6 +13,9 @@ All notable package, wire-contract, and adapter-compatibility changes are record
 - Compatibility, contribution, and support policies.
 - A product-lifecycle guide covering pre-run capture setup, post-run sealing,
   retrospective reprocessing without model compute, and static comparison reports.
+- Source-mapped lifecycle and command-switchboard figures with deterministic SVG
+  generation, locked local raster provenance, accessibility metadata, overflow checks,
+  and explicit proof boundaries.
 
 ### Changed
 

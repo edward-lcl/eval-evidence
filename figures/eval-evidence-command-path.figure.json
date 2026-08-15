@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "title": "FOUR COMMANDS, ONE EVIDENCE PATH",
+  "question": "Which Eval Evidence command should I run, what does it produce, and what does that result prove?",
+  "takeaway": "Practice with demo, inspect without writing with check, create a portable baseline with bundle, and re-check retained bytes with verify --run-root.",
+  "readers": ["engineer", "team", "agent-ci"],
+  "reading_speeds": {
+    "at_2_seconds": "Four commands lead to four visibly different outputs along one evidence path.",
+    "at_20_seconds": "Each row maps a command through its action to a named artifact or result.",
+    "at_2_minutes": "Each output is paired with an explicit proof limit, source mapping, edge meaning, accessibility contract, and render provenance."
+  },
+  "archetype": "command-switchboard",
+  "medium": {
+    "kind": "svg",
+    "rationale": "Exact command syntax, distinct output geometry, accessible text, and auditable proof boundaries must survive code review."
+  },
+  "evidence_sources": [
+    {"id": "cli-demo", "path": "eval_evidence/__main__.py", "authority": "source-of-truth"},
+    {"id": "cli-check", "path": "eval_evidence/__main__.py", "authority": "source-of-truth"},
+    {"id": "cli-bundle", "path": "eval_evidence/__main__.py", "authority": "source-of-truth"},
+    {"id": "cli-verify", "path": "eval_evidence/__main__.py", "authority": "source-of-truth"},
+    {"id": "readme-boundary", "path": "README.md", "authority": "source-of-truth"},
+    {"id": "trust-model", "path": "docs/TRUST_MODEL.md", "authority": "source-of-truth"}
+  ],
+  "labels": [
+    {"text": "demo", "claim": "Writes deterministic synthetic practice input; it is not real-run evidence.", "source_ids": ["cli-demo", "readme-boundary"]},
+    {"text": "check", "claim": "Detects and validates a run in memory and re-hashes references, producing a pass/fail report but no stored baseline.", "source_ids": ["cli-check", "readme-boundary"]},
+    {"text": "bundle", "claim": "Validates and writes canonical evidence JSON that binds claims to referenced digests but does not authenticate a signer.", "source_ids": ["cli-bundle", "trust-model"]},
+    {"text": "verify --run-root", "claim": "Validates the bundle and re-hashes retained source bytes, reporting match or mismatch without establishing physical truth.", "source_ids": ["cli-verify", "readme-boundary", "trust-model"]},
+    {"text": "PRACTICE INPUT", "claim": "Output of demo.", "source_ids": ["cli-demo"]},
+    {"text": "PASS / FAIL REPORT", "claim": "Output of check.", "source_ids": ["cli-check"]},
+    {"text": "STORED BASELINE", "claim": "Output of bundle.", "source_ids": ["cli-bundle"]},
+    {"text": "MATCH / MISMATCH", "claim": "Output of verify with a run root.", "source_ids": ["cli-verify"]},
+    {"text": "DOES NOT PROVE", "claim": "Every command result is paired with an explicit adjacent proof limit.", "source_ids": ["readme-boundary", "trust-model"]}
+    ,{"text": "COMMAND", "claim": "The first column names exact CLI commands.", "source_ids": ["cli-demo", "cli-check", "cli-bundle", "cli-verify"]}
+    ,{"text": "WHAT IT DOES", "claim": "The second column summarizes the sourced command action.", "source_ids": ["cli-demo", "cli-check", "cli-bundle", "cli-verify"]}
+    ,{"text": "WHAT YOU GET", "claim": "The third column names the distinct artifact or report produced by the command.", "source_ids": ["cli-demo", "cli-check", "cli-bundle", "cli-verify"]}
+    ,{"text": "PROOF BOUNDARY", "claim": "The final column distinguishes supported facts from adjacent unsupported claims.", "source_ids": ["readme-boundary", "trust-model"]}
+    ,{"text": "PROVES", "claim": "Names the scoped fact established by the command path.", "source_ids": ["readme-boundary", "trust-model"]}
+    ,{"text": "KEEP THE BOUNDARY VISIBLE", "claim": "Summarizes the three command-level limitations that must survive at full size.", "source_ids": ["readme-boundary", "trust-model"]}
+    ,{"text": "LEARN", "claim": "Demo appears first as the recommended learning entry point.", "source_ids": ["cli-demo"]}
+    ,{"text": "CHECK", "claim": "Check follows as the read-only validation path.", "source_ids": ["cli-check"]}
+    ,{"text": "SEAL", "claim": "Bundle follows as the stored-baseline path.", "source_ids": ["cli-bundle"]}
+    ,{"text": "RECHECK", "claim": "Verify with run root follows as the retained-byte comparison path.", "source_ids": ["cli-verify"]}
+  ],
+  "boundaries": [
+    "check is read-only and does not create the later baseline.",
+    "verify without --run-root checks schema and embedded digest only; it does not re-hash source files.",
+    "Digests show scoped byte identity, not who created the evidence or whether a reported result is physically true."
+  ],
+  "forbidden_claims": [
+    "Do not label any command result authenticated, certified, or physically verified.",
+    "Do not claim model ranking or production readiness.",
+    "Do not present the recommended learning order as a required runtime dependency."
+  ],
+  "accessibility": {
+    "alt_text": "Demo creates practice input, check reports without storing a baseline, bundle writes a canonical baseline, and verify with run root compares retained bytes.",
+    "long_description": "Four rows form a command switchboard. Demo materializes deterministic example files. Check detects, validates, and re-hashes references in memory. Bundle validates and writes canonical evidence JSON. Verify with run root validates the bundle and re-hashes retained source bytes. Each row names its output and a fact the command does not prove.",
+    "color_independent_cues": ["numbered row order", "exact command labels", "four distinct output shapes", "explicit PROVES and DOES NOT PROVE text"],
+    "minimum_text_px": 21
+  },
+  "provenance": {
+    "repository": "https://github.com/edward-lcl/eval-evidence",
+    "revision": "base d371def; contract and render inputs content-addressed in the SVG",
+    "brief_path": "figures/eval-evidence-command-path.figure.json",
+    "method": "deterministic SVG from this validated semantic brief and its paired render manifest",
+    "generated_image_used": false
+  },
+  "output": {
+    "path": "figures/eval-evidence-command-path.svg",
+    "embed_location": "README five-minute quickstart",
+    "format": "svg"
+  }
+}

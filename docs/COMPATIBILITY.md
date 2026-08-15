@@ -66,8 +66,10 @@ the bounds are best-effort and may exhaust time, memory, or I/O, as recorded in
 
 ## Distribution status
 
-While pull request #2 is open, the README intentionally installs the 0.2.0 candidate
-from `release/v0.2.0-readiness`; `main` and the older `v0.1.0` tag lack the readiness
-features. After review, pin the accepted commit or validated `v0.2.0` tag. The tag
-becomes authoritative until the PyPI trusted publisher and project page are confirmed. Do not claim `pip install eval-evidence` availability based only
-on the presence of the publishing workflow.
+Pull request #2 merged the 0.2.0 candidate into `main`; the deleted review branch is no
+longer an authority. Until a validated `v0.2.0` tag exists, the README uses mutable
+`main` for evaluation and tells reproducible consumers to pin an accepted commit. The
+older `v0.1.0` tag lacks the readiness features. A validated tag becomes authoritative
+until the PyPI trusted publisher and project page are confirmed. Do not claim plain
+`pip install eval-evidence` availability based only on the presence of the publishing
+workflow.

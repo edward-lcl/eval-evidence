@@ -97,7 +97,22 @@ def audit(dist: Path) -> dict:
         "SECURITY.md",
         "action.yml",
         "pyproject.toml",
+        "figures/README.md",
+        "figures/eval-evidence-command-path.figure.json",
+        "figures/eval-evidence-command-path.render.json",
+        "figures/eval-evidence-command-path.svg",
+        "figures/eval-evidence-command-path.png",
+        "figures/eval-evidence-lifecycle.figure.json",
+        "figures/eval-evidence-lifecycle.render.json",
+        "figures/eval-evidence-lifecycle.svg",
+        "figures/eval-evidence-lifecycle.png",
+        "figures/figure-brief.schema.json",
+        "figures/renderer.lock",
+        "scripts/build_command_figure.py",
+        "scripts/build_figure.py",
         "scripts/dogfood.sh",
+        "scripts/render_figure.py",
+        "scripts/verify_figure.py",
     }
     missing = required_sdist.difference(sdist_items)
     if missing:

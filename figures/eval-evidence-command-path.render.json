@@ -1,0 +1,51 @@
+{
+  "render_version": 1,
+  "figure_id": "eval-evidence-command-path",
+  "subtitle": "Choose the command by the artifact or proof you need next.",
+  "canvas": {"width": 1600, "height": 1120, "png_width": 3200, "png_height": 2240},
+  "commands": [
+    {
+      "step": "LEARN",
+      "command": "demo",
+      "action_lines": ["materialize example", "run files"],
+      "output_lines": ["PRACTICE", "INPUT"],
+      "proof": "Synthetic shape repeats",
+      "limit": "Not real-run evidence",
+      "color": "#2563EB"
+    },
+    {
+      "step": "CHECK",
+      "command": "check",
+      "action_lines": ["detect + validate", "+ re-hash references"],
+      "output_lines": ["PASS / FAIL", "REPORT"],
+      "proof": "Current run passes checks",
+      "limit": "No stored baseline",
+      "color": "#0F766E"
+    },
+    {
+      "step": "SEAL",
+      "command": "bundle",
+      "action_lines": ["validate + write", "canonical JSON"],
+      "output_lines": ["STORED", "BASELINE"],
+      "proof": "Claims bind to digests",
+      "limit": "Not signer authenticity",
+      "color": "#7C3AED"
+    },
+    {
+      "step": "RECHECK",
+      "command": "verify --run-root",
+      "action_lines": ["validate bundle", "+ re-hash source bytes"],
+      "output_lines": ["MATCH /", "MISMATCH"],
+      "proof": "Bytes match or differ",
+      "limit": "Not physical truth",
+      "color": "#B42318"
+    }
+  ],
+  "edge_semantics": "Solid arrows mean produces; the dotted vertical spine means recommended learning order, not a runtime dependency.",
+  "boundaries": [
+    "check does not store a baseline",
+    "verify without --run-root does not re-hash source files",
+    "byte identity is not authenticity or physical truth"
+  ],
+  "forbidden_claims": ["AUTHENTICATED RESULT", "CERTIFIED RESULT", "PHYSICALLY VERIFIED", "MODEL RANKING", "PRODUCTION READY"]
+}

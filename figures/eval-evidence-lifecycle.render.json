@@ -1,0 +1,23 @@
+{
+  "render_version": 1,
+  "figure_id": "eval-evidence-lifecycle",
+  "subtitle": "Eval Evidence preserves the record needed to review a reported evaluation result.",
+  "canvas": {"width": 1600, "height": 1000, "png_width": 3200, "png_height": 2000},
+  "stages": [
+    {"label": "Reported score", "detail_lines": ["Result enters with declared or", "captured evidence"], "color": "#1D4ED8"},
+    {"label": "Seal & verify", "detail_lines": ["Bind model, harness, budgets,", "verifier, artifacts, and", "field provenance"], "color": "#0F766E"},
+    {"label": "Compare or report", "detail_lines": ["Show what aligns, differs, or", "remains unavailable"], "color": "#7C3AED"}
+  ],
+  "outcomes": [
+    {"label": "MATCHED", "label_lines": ["MATCHED"], "detail": "recorded conditions align", "detail_lines": ["recorded conditions align"], "color": "#166534"},
+    {"label": "DIFFERENT", "label_lines": ["DIFFERENT"], "detail": "material condition differs", "detail_lines": ["material condition differs"], "color": "#9A3412"},
+    {"label": "UNKNOWN / UNAVAILABLE", "label_lines": ["UNKNOWN /", "UNAVAILABLE"], "detail": "evidence was not retained", "detail_lines": ["evidence was not retained"], "color": "#475569"},
+    {"label": "INTEGRITY FAILURE", "label_lines": ["INTEGRITY", "FAILURE"], "detail": "referenced bytes no longer match", "detail_lines": ["referenced bytes no longer", "match"], "color": "#B91C1C"}
+  ],
+  "boundaries": [
+    "Does not run evaluations or models",
+    "Does not establish physical truth",
+    "Does not reduce evidence to a universal trust or fairness score"
+  ],
+  "forbidden_claims": ["universal trust score", "physically true", "runs evaluations", "model ranking", "adoption"]
+}
