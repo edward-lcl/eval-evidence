@@ -25,6 +25,14 @@ do not choose the more optimistic interpretation.
   proof, historical/local evidence, gaps, and hypotheses.
 - **Unsupported claims:** campaign completeness, trusted-runner authenticity,
   leaderboard correctness, model ranking, or physical truth.
+- **Research horizon (2026-08-16):** the
+  [claim reconstruction study](research/CLAIM_RECONSTRUCTION.md) found that the layer
+  above trial evidence is a missing *record* rather than a missing lineage abstraction —
+  small, PROV-shaped, mostly owned by Harbor and publishers — with two genuinely new but
+  small pieces (per-field evidence state; a claim-relative required-edge set checked
+  against an expected set). Its placement recommendation, that Eval Evidence should own
+  less, is a recommendation awaiting owner decision, not a gate change. No schema, CLI,
+  or wire change follows from it.
 
 Verify the checkout before doing work:
 
