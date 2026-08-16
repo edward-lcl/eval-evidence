@@ -16,11 +16,9 @@ FIGURE_IDS = (
     "eval-evidence-lifecycle",
     "eval-evidence-command-path",
     "eval-evidence-envelope-anatomy",
-    "eval-evidence-check-story",
+    "eval-evidence-evidence-states",
     "eval-evidence-tamper-story",
 )
-MOBILE_PNG_WIDTH = 1800
-MOBILE_PNG_HEIGHT = 3200
 
 
 def require_local_provenance(config: dict) -> str:
@@ -71,8 +69,9 @@ def main() -> int:
             executable, "--width", str(canvas["png_width"]), "--height", str(canvas["png_height"]),
             "--output", str(FIGURES / f"{figure_id}.png"), str(FIGURES / f"{figure_id}.svg"),
         ], check=True)
+        mobile = json.loads((FIGURES / f"{figure_id}.render.json").read_text(encoding="utf-8"))["mobile_canvas"]
         subprocess.run([
-            executable, "--width", str(MOBILE_PNG_WIDTH), "--height", str(MOBILE_PNG_HEIGHT),
+            executable, "--width", str(mobile["png_width"]), "--height", str(mobile["png_height"]),
             "--output", str(FIGURES / f"{figure_id}-mobile.png"),
             str(FIGURES / f"{figure_id}-mobile.svg"),
         ], check=True)

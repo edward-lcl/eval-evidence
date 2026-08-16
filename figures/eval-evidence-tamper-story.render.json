@@ -1,11 +1,12 @@
 {
-  "render_version": 1,
+  "render_version": 2,
   "figure_id": "eval-evidence-tamper-story",
-  "canvas": {"width": 1600, "height": 900, "png_width": 3200, "png_height": 1800},
-  "subtitle": "The bundle is a remembered byte identity — not a claim that the score is true.",
-  "before": {"file_line": "reward: 1", "digest": "8d14…a6c2"},
-  "after": {"file_line": "reward: 0", "digest": "f913…7b40"},
+  "subtitle": "The baseline remembers bytes—not who changed them or which value is true",
+  "canvas": {"width": 1600, "height": 760, "png_width": 3200, "png_height": 1520},
+  "mobile_canvas": {"width": 900, "height": 1060, "png_width": 1800, "png_height": 2120},
+  "before": {"verb": "SAVE", "file": "result.json", "value": "reward: 1", "digest": "8d14…a6c2"},
+  "after": {"verb": "CHANGE", "file": "result.json", "value": "reward: 0", "digest": "f913…7b40"},
+  "verify": {"verb": "VERIFY", "expected": "8d14…a6c2", "actual": "f913…7b40", "result": "MISMATCH · EXIT 1"},
   "error": "Referenced file digest mismatch for result.json",
-  "colors": {"saved": "#20D66B", "changed": "#FF6F59", "accent": "#F7D73A", "teal": "#39D0C3"},
   "forbidden_claims": ["ATTRIBUTED TO AN ACTOR", "ORIGINAL RUN PROVEN", "TAMPER-PROOF", "AUTHENTICATED BASELINE", "TRUE SCORE"]
 }

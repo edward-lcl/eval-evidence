@@ -1,17 +1,15 @@
 {
-  "render_version": 1,
+  "render_version": 2,
   "figure_id": "eval-evidence-envelope-anatomy",
-  "canvas": {"width": 1600, "height": 900, "png_width": 3200, "png_height": 1800},
-  "subtitle": "Harbor example · the generic adapter follows the same contract",
-  "inputs": [
-    {"number": "1", "name": "result.json", "detail": "score · task · timing"},
-    {"number": "2", "name": "config.json", "detail": "model · agent · limits"},
-    {"number": "3", "name": "agent/trajectory.json", "detail": "steps · final metrics"}
+  "subtitle": "Separation prevents a score, its context, and byte identity from becoming one claim",
+  "canvas": {"width": 1600, "height": 820, "png_width": 3200, "png_height": 1640},
+  "mobile_canvas": {"width": 900, "height": 1120, "png_width": 1800, "png_height": 2240},
+  "input": {"label": "RETAINED RUN", "detail": "selected artifacts"},
+  "sections": [
+    {"number": "1", "title": "WHAT WAS REPORTED", "detail": "run + task · outcome · timing · scores", "color": "#FF7A59"},
+    {"number": "2", "title": "HOW IT RAN + HOW KNOWN", "detail": "model · agent · harness · budgets · provenance", "color": "#39D0C3"},
+    {"number": "3", "title": "WHAT BYTES CAN BE RECHECKED", "detail": "selected paths · byte counts · SHA-256", "color": "#F7D73A"}
   ],
-  "compartments": [
-    {"title": "WHAT HAPPENED", "lines": ["run + task identity", "timing + reward + scores"], "color": "#FF7A59"},
-    {"title": "HOW IT RAN", "lines": ["model + agent + harness", "budgets + field provenance"], "color": "#39D0C3"},
-    {"title": "WHAT CAN BE RECHECKED", "lines": ["file path + byte count", "SHA-256 of retained bytes"], "color": "#F7D73A"}
-  ],
-  "forbidden_claims": ["FULL TRAJECTORY COPIED", "TRUSTED RUN", "GROUND TRUTH", "CERTIFIED RESULT", "AUTHENTICATED RUNNER"]
+  "badge": "UNAVAILABLE STAYS EXPLICIT",
+  "forbidden_claims": ["FULL RUN COPIED", "GROUND TRUTH", "TRUSTED EXECUTION", "AUTHENTICATED RUNNER", "CERTIFIED RESULT"]
 }

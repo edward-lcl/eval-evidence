@@ -22,13 +22,11 @@ All notable package, wire-contract, and adapter-compatibility changes are record
 - Compatibility, contribution, and support policies.
 - A product-lifecycle guide covering pre-run capture setup, post-run sealing,
   retrospective reprocessing without model compute, and static comparison reports.
-- Source-mapped lifecycle and command-switchboard figures with deterministic SVG
-  generation, locked local raster provenance, accessibility metadata, overflow checks,
-  and explicit proof boundaries.
-- Three source-mapped visual stories that show retained files becoming an evidence
-  envelope, open `check` into six concrete gates, and demonstrate a later byte mismatch;
-  the command switchboard is now a plain-language index rather than an implementation
-  summary. The complete figure set now uses one high-contrast visual system.
+- Five source-mapped, single-question figures covering the current retained-run
+  pipeline, envelope anatomy, now-versus-later command choice, exact evidence states,
+  and later byte-mismatch detection. Each has deterministic desktop and content-sized
+  mobile SVG/PNG outputs, locked local raster provenance, accessibility metadata, and a
+  text-density gate.
 
 ### Changed
 

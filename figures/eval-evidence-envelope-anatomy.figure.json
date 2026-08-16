@@ -1,43 +1,34 @@
 {
   "schema_version": 1,
-  "title": "THREE RUN FILES BECOME ONE REVIEWABLE RECORD",
-  "question": "What does Eval Evidence actually build from a Harbor run?",
-  "takeaway": "It reads retained run files, preserves where each value came from, hashes the referenced bytes, and writes one portable evidence envelope.",
+  "title": "ONE ENVELOPE, THREE SEPARATE QUESTIONS",
+  "question": "What stays separate inside evidence.json?",
+  "takeaway": "The reported outcome, the evaluation instrument with provenance, and recheckable file identities remain distinct.",
   "readers": ["engineer", "team", "agent-ci"],
   "reading_speeds": {
-    "at_2_seconds": "Three familiar run files flow into one evidence envelope.",
-    "at_20_seconds": "The envelope separates what happened, how the run was configured, and which retained bytes can be checked again.",
-    "at_2_minutes": "Every visible field family and boundary is sourced to adapter and bundle-construction code; unavailable fields remain explicit rather than inferred."
+    "at_2_seconds": "One envelope contains three visibly separate compartments.",
+    "at_20_seconds": "The reader can distinguish what was reported, how the run was configured and how each field is known, and which retained bytes can be rechecked.",
+    "at_2_minutes": "Source-backed labels and the unavailable rule prevent configuration, outcome, and byte identity from collapsing into one trust claim."
   },
   "archetype": "lifecycle-evidence-path",
-  "medium": {"kind": "svg", "rationale": "Exact filenames, evidence categories, and proof boundaries need deterministic text and reviewable topology."},
+  "medium": {"kind": "svg", "rationale": "The three-part semantic separation and exact field families require deterministic, reviewable labels."},
   "evidence_sources": [
-    {"id": "harbor-adapter", "path": "eval_evidence/adapters.py", "authority": "source-of-truth"},
-    {"id": "bundle-core", "path": "eval_evidence/core.py", "authority": "source-of-truth"},
-    {"id": "bundle-spec", "path": "docs/BUNDLE_SPEC.md", "authority": "source-of-truth"},
-    {"id": "readme", "path": "README.md", "authority": "source-of-truth"}
+    {"id": "core", "path": "eval_evidence/core.py", "authority": "source-of-truth"},
+    {"id": "models", "path": "eval_evidence/models.py", "authority": "source-of-truth"},
+    {"id": "schema", "path": "eval_evidence/schemas/eval-evidence-bundle-v0.1.schema.json", "authority": "source-of-truth"},
+    {"id": "spec", "path": "docs/BUNDLE_SPEC.md", "authority": "source-of-truth"}
   ],
   "labels": [
-    {"text": "result.json", "claim": "A required Harbor input containing result and related metadata.", "source_ids": ["harbor-adapter"]},
-    {"text": "config.json", "claim": "A required Harbor input containing selected run configuration.", "source_ids": ["harbor-adapter"]},
-    {"text": "agent/trajectory.json", "claim": "A required Harbor input containing trajectory and final-metric data.", "source_ids": ["harbor-adapter"]},
-    {"text": "READ + LABEL", "claim": "The adapter normalizes source values and assigns explicit evidence provenance/status.", "source_ids": ["harbor-adapter", "bundle-core"]},
-    {"text": "WHAT HAPPENED", "claim": "The bundle records run/task identity, execution metadata, and outcome values.", "source_ids": ["bundle-core", "bundle-spec"]},
-    {"text": "HOW IT RAN", "claim": "The instrument manifest records model, agent, harness, budgets, and other fields with provenance.", "source_ids": ["bundle-core", "bundle-spec"]},
-    {"text": "WHAT CAN BE RECHECKED", "claim": "Input records carry path, presence, byte count, role, and SHA-256 identity.", "source_ids": ["bundle-core", "bundle-spec"]},
-    {"text": "evidence.json", "claim": "Bundle writes produce canonical evidence JSON.", "source_ids": ["bundle-core", "readme"]},
-    {"text": "UNAVAILABLE stays visible", "claim": "Missing evidence is represented explicitly and is not guessed.", "source_ids": ["bundle-core", "readme"]}
+    {"text": "WHAT WAS REPORTED", "claim": "The envelope records run and task identity, outcome, timing, and score claims.", "source_ids": ["core", "schema", "spec"]},
+    {"text": "HOW IT RAN + HOW KNOWN", "claim": "Instrument fields retain their values, evidence status, source, and optional note.", "source_ids": ["models", "schema", "spec"]},
+    {"text": "WHAT BYTES CAN BE RECHECKED", "claim": "Selected references record path, presence, byte count, role, and SHA-256.", "source_ids": ["core", "schema", "spec"]},
+    {"text": "UNAVAILABLE STAYS EXPLICIT", "claim": "Evidence that cannot be established remains unavailable rather than being guessed.", "source_ids": ["models", "schema", "spec"]}
   ],
-  "boundaries": [
-    "The Harbor adapter selects identifiers and configured values; it does not copy full prompts, trajectories, credentials, or environment variables into the bundle.",
-    "A digest identifies bytes and serialized claims; it does not authenticate the runner or establish physical truth.",
-    "Missing evidence remains unavailable rather than inferred."
-  ],
-  "forbidden_claims": ["FULL TRAJECTORY COPIED", "TRUSTED RUN", "GROUND TRUTH", "CERTIFIED RESULT", "AUTHENTICATED RUNNER"],
+  "boundaries": ["The envelope references selected files instead of copying an entire run.", "A recorded value is not automatically ground truth.", "A file digest establishes scoped byte identity, not trusted execution or signer authenticity."],
+  "forbidden_claims": ["FULL RUN COPIED", "GROUND TRUTH", "TRUSTED EXECUTION", "AUTHENTICATED RUNNER", "CERTIFIED RESULT"],
   "accessibility": {
-    "alt_text": "Harbor result, config, and trajectory files pass through an adapter into an evidence JSON envelope containing run outcome, instrument settings with provenance, and recheckable file hashes.",
-    "long_description": "On the left, result.json, config.json, and agent/trajectory.json appear as retained run files. An arrow sends them through a Read and Label adapter. On the right, one evidence.json envelope opens into three compartments: what happened, how it ran, and what can be rechecked. A footer states that unavailable evidence stays visible and is never invented.",
-    "color_independent_cues": ["numbered input files", "left-to-right arrows", "three named envelope compartments", "explicit unavailable footer"],
+    "alt_text": "Evidence JSON separates reported outcome, evaluation instrument fields with provenance, and selected retained-file identities that can be rechecked; unavailable evidence stays explicit.",
+    "long_description": "A retained-run icon points to one evidence.json envelope divided into three horizontal compartments. The first contains reported run and outcome claims. The second contains model, harness, budgets, verifier identity, and field provenance. The third contains selected paths, byte counts, and SHA-256 fingerprints. A badge below says unavailable stays explicit.",
+    "color_independent_cues": ["three numbered compartments", "distinct compartment labels", "left-to-right input arrow", "explicit unavailable badge"],
     "minimum_text_px": 20
   },
   "provenance": {"repository": "https://github.com/edward-lcl/eval-evidence", "revision": "content-addressed semantic and render inputs", "brief_path": "figures/eval-evidence-envelope-anatomy.figure.json", "method": "deterministic SVG from validated semantic brief and paired render manifest", "generated_image_used": false},

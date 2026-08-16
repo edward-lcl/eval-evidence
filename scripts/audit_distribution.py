@@ -108,10 +108,10 @@ def audit(dist: Path) -> dict:
         "figures/eval-evidence-envelope-anatomy.render.json",
         "figures/eval-evidence-envelope-anatomy.svg",
         "figures/eval-evidence-envelope-anatomy.png",
-        "figures/eval-evidence-check-story.figure.json",
-        "figures/eval-evidence-check-story.render.json",
-        "figures/eval-evidence-check-story.svg",
-        "figures/eval-evidence-check-story.png",
+        "figures/eval-evidence-evidence-states.figure.json",
+        "figures/eval-evidence-evidence-states.render.json",
+        "figures/eval-evidence-evidence-states.svg",
+        "figures/eval-evidence-evidence-states.png",
         "figures/eval-evidence-tamper-story.figure.json",
         "figures/eval-evidence-tamper-story.render.json",
         "figures/eval-evidence-tamper-story.svg",
@@ -145,7 +145,7 @@ def audit(dist: Path) -> dict:
         "eval-evidence-lifecycle",
         "eval-evidence-command-path",
         "eval-evidence-envelope-anatomy",
-        "eval-evidence-check-story",
+        "eval-evidence-evidence-states",
         "eval-evidence-tamper-story",
     ):
         required_sdist.add(f"figures/{figure_id}-mobile.svg")

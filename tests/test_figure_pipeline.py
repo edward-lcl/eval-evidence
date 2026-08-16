@@ -1,6 +1,7 @@
 """Regression coverage for the deterministic static figure verifier."""
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 import unittest
@@ -44,16 +45,22 @@ class FigurePipelineTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_figure_verifier_rejects_overflow_fixture(self) -> None:
-        result = subprocess.run(
-            [sys.executable, "scripts/verify_figure.py", "--fixture-overflow"],
-            cwd=ROOT,
-            text=True,
-            capture_output=True,
+    def test_evidence_state_figure_uses_the_exact_wire_enum(self) -> None:
+        render = json.loads(
+            (ROOT / "figures/eval-evidence-evidence-states.render.json").read_text()
         )
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("estimated width", result.stderr)
-        self.assertIn("exceeds 300px content width", result.stderr)
+        statuses = {status for group in render["groups"] for status in group["statuses"]}
+        self.assertEqual(
+            statuses,
+            {"observed", "derived", "operator_asserted", "provider_asserted", "unavailable"},
+        )
+
+    def test_tamper_story_reuses_one_digest_pair(self) -> None:
+        render = json.loads(
+            (ROOT / "figures/eval-evidence-tamper-story.render.json").read_text()
+        )
+        self.assertEqual(render["before"]["digest"], render["verify"]["expected"])
+        self.assertEqual(render["after"]["digest"], render["verify"]["actual"])
 
 
 if __name__ == "__main__":

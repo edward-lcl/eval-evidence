@@ -1,68 +1,41 @@
 {
   "schema_version": 1,
-  "title": "A score should never travel alone.",
-  "question": "What happens to a reported evaluation result after the run, and which review states can Eval Evidence support?",
-  "takeaway": "Eval Evidence binds a reported score to retained evidence so review can distinguish aligned conditions, differences, missing evidence, and changed bytes.",
+  "title": "FROM RETAINED RUN TO SCOPED CHECK",
+  "question": "What does Eval Evidence do today to a retained evaluation run?",
+  "takeaway": "It reads retained artifacts, builds a deterministic evidence bundle, and returns scoped integrity results.",
   "readers": ["engineer", "team", "agent-ci"],
   "reading_speeds": {
-    "at_2_seconds": "A reported score moves through sealing and verification to explicit review states.",
-    "at_20_seconds": "The reader can follow the three-stage lifecycle and distinguish matched, different, unavailable, and integrity-failure outcomes.",
-    "at_2_minutes": "The retained evidence categories, proof limits, source map, accessibility contract, and deterministic provenance are inspectable."
+    "at_2_seconds": "One current pipeline turns retained artifacts into a scoped result.",
+    "at_20_seconds": "An adapter normalizes evidence, bundle construction records claims and file fingerprints, and verification checks only named integrity surfaces.",
+    "at_2_minutes": "The source map and adjacent prose preserve the boundary between recorded evidence, byte identity, and claims the current release does not implement."
   },
   "archetype": "lifecycle-evidence-path",
-  "medium": {
-    "kind": "svg",
-    "rationale": "Exact evidence states, editable labels, accessible text, and reviewable proof boundaries are required."
-  },
+  "medium": {"kind": "svg", "rationale": "The shipped stage order and proof scope require exact, reviewable labels on desktop and mobile."},
   "evidence_sources": [
-    {"id": "vision", "path": "docs/VISION.md", "authority": "source-of-truth"},
-    {"id": "lifecycle", "path": "docs/LIFECYCLE.md", "authority": "source-of-truth"},
-    {"id": "readme-boundary", "path": "README.md", "authority": "source-of-truth"},
-    {"id": "evidence-model", "path": "eval_evidence/models.py", "authority": "source-of-truth"},
-    {"id": "verification-code", "path": "eval_evidence/core.py", "authority": "source-of-truth"}
+    {"id": "architecture", "path": "docs/ARCHITECTURE.md", "authority": "source-of-truth"},
+    {"id": "cli", "path": "eval_evidence/__main__.py", "authority": "source-of-truth"},
+    {"id": "adapters", "path": "eval_evidence/adapters.py", "authority": "source-of-truth"},
+    {"id": "core", "path": "eval_evidence/core.py", "authority": "source-of-truth"}
   ],
   "labels": [
-    {"text": "Reported score", "claim": "A result enters the post-run evidence lifecycle with captured, asserted, derived, or unavailable evidence.", "source_ids": ["vision", "evidence-model"]},
-    {"text": "Seal & verify", "claim": "Bundle construction binds normalized claims and referenced-file digests; verification checks only the named integrity surfaces.", "source_ids": ["lifecycle", "verification-code"]},
-    {"text": "Compare or report", "claim": "Review reports aligned conditions, material differences, missing evidence, or integrity failures without ranking models.", "source_ids": ["vision", "lifecycle"]},
-    {"text": "MATCHED", "claim": "The recorded conditions being reviewed align.", "source_ids": ["lifecycle"]},
-    {"text": "DIFFERENT", "claim": "A recorded material condition differs.", "source_ids": ["lifecycle"]},
-    {"text": "UNKNOWN / UNAVAILABLE", "claim": "The evidence needed for the comparison was not retained.", "source_ids": ["evidence-model", "lifecycle"]},
-    {"text": "INTEGRITY FAILURE", "claim": "Referenced bytes no longer match the stored digest.", "source_ids": ["verification-code", "lifecycle"]}
-    ,{"text": "model", "claim": "Model identity is one retained instrument field.", "source_ids": ["evidence-model", "lifecycle"]}
-    ,{"text": "harness", "claim": "Harness identity is one retained instrument field.", "source_ids": ["evidence-model", "lifecycle"]}
-    ,{"text": "budgets", "claim": "Configured or observed budgets are retained with field provenance when available.", "source_ids": ["evidence-model", "lifecycle"]}
-    ,{"text": "verifier", "claim": "Verifier evidence remains distinct from the reported reward.", "source_ids": ["vision", "lifecycle"]}
-    ,{"text": "artifacts", "claim": "Selected referenced artifacts are bound by content digests.", "source_ids": ["verification-code", "lifecycle"]}
-    ,{"text": "field provenance", "claim": "Normalized evidence fields retain explicit status and source information.", "source_ids": ["evidence-model", "vision"]}
-    ,{"text": "BOUNDARY", "claim": "The bottom annotation limits the adjacent lifecycle claims.", "source_ids": ["readme-boundary"]}
+    {"text": "RETAINED RUN", "claim": "Eval Evidence begins from already retained evaluator artifacts.", "source_ids": ["architecture", "adapters"]},
+    {"text": "NORMALIZE EVIDENCE", "claim": "The selected adapter maps retained values into the framework-neutral normalized model.", "source_ids": ["architecture", "adapters"]},
+    {"text": "CANONICAL BUNDLE", "claim": "Bundle construction records normalized claims and selected file fingerprints deterministically.", "source_ids": ["architecture", "core"]},
+    {"text": "SCOPED CHECK", "claim": "Verification checks schema, embedded digest, and optionally referenced local bytes.", "source_ids": ["architecture", "cli", "core"]},
+    {"text": "SCOPED JSON RESULT", "claim": "Commands report validity and named failures without adjudicating truth or comparability.", "source_ids": ["cli", "core"]}
   ],
   "boundaries": [
-    "Eval Evidence does not run evaluations or models.",
-    "Digest and reference checks do not establish physical truth or signer authenticity.",
-    "The visual does not reduce evidence to a universal trust, fairness, or model-ranking score."
+    "The current release does not run models or evaluations.",
+    "It does not ship a comparison engine or generated publication report.",
+    "A successful integrity check does not establish score truth, runner authenticity, or model quality."
   ],
-  "forbidden_claims": [
-    "Do not claim model ranking or comparative model quality.",
-    "Do not claim physical verification or authenticity.",
-    "Do not claim deployment, release, or adoption status."
-  ],
+  "forbidden_claims": ["COMPARE OR REPORT", "MODEL RANKING", "TRUSTED RUN", "CERTIFIED", "PHYSICAL TRUTH"],
   "accessibility": {
-    "alt_text": "A reported score moves through sealing and verification to matched, different, unavailable, or integrity-failure review states.",
-    "long_description": "A left-to-right post-run lifecycle starts with a reported score, binds recorded model, harness, budget, verifier, artifact, and field-provenance evidence, and then reports one of four explicit review states. A boundary note states that Eval Evidence does not run evaluations, establish physical truth, or issue a universal score.",
-    "color_independent_cues": ["numbered stages", "explicit state labels", "patterned unavailable and integrity-failure cards", "boundary text"],
-    "minimum_text_px": 22
+    "alt_text": "Retained run artifacts pass through evidence normalization and deterministic bundle construction to scoped schema, digest, and referenced-byte checks.",
+    "long_description": "A single left-to-right pipeline has four numbered stages: retained run, normalize evidence, canonical bundle, and scoped check. The last stage emits a scoped JSON result. A small boundary note says the current release records and checks evidence but does not run evaluations, compare models, or establish truth.",
+    "color_independent_cues": ["numbered stage order", "left-to-right arrows", "distinct final result shape", "explicit current-scope label"],
+    "minimum_text_px": 20
   },
-  "provenance": {
-    "repository": "https://github.com/edward-lcl/eval-evidence",
-    "revision": "base d371def; contract and render inputs content-addressed in the SVG",
-    "brief_path": "figures/eval-evidence-lifecycle.figure.json",
-    "method": "deterministic SVG from this validated semantic brief and its paired render manifest",
-    "generated_image_used": false
-  },
-  "output": {
-    "path": "figures/eval-evidence-lifecycle.svg",
-    "embed_location": "README opening product explanation",
-    "format": "svg"
-  }
+  "provenance": {"repository": "https://github.com/edward-lcl/eval-evidence", "revision": "content-addressed semantic and render inputs", "brief_path": "figures/eval-evidence-lifecycle.figure.json", "method": "deterministic SVG from validated semantic brief and paired render manifest", "generated_image_used": false},
+  "output": {"path": "figures/eval-evidence-lifecycle.svg", "embed_location": "README project overview", "format": "svg"}
 }

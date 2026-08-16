@@ -1,74 +1,39 @@
 {
   "schema_version": 1,
-  "title": "START HERE: PICK THE MOMENT YOU'RE IN",
-  "question": "Which Eval Evidence command matches what I need to do right now?",
-  "takeaway": "Make a safe example with demo, inspect a run now with check, save today's fingerprint with bundle, or compare later files with verify --run-root.",
+  "title": "REPORT NOW OR SAVE A BASELINE?",
+  "question": "Do I need a current report, or a saved baseline that can be checked later?",
+  "takeaway": "check reports now without saving a baseline; bundle plus verify --run-root saves and later rechecks referenced bytes.",
   "readers": ["engineer", "team", "agent-ci"],
   "reading_speeds": {
-    "at_2_seconds": "Four moments lead to four visibly different next steps.",
-    "at_20_seconds": "Each row starts with a human need, names the exact command, and shows the concrete result.",
-    "at_2_minutes": "Each output is paired with an explicit proof limit, source mapping, edge meaning, accessibility contract, and render provenance."
+    "at_2_seconds": "Two needs split into two command paths.",
+    "at_20_seconds": "The now path is read-only; the later path writes evidence.json and compares retained bytes against it.",
+    "at_2_minutes": "Exact commands, products, and baseline semantics are mapped to the CLI, bundle core, README, and trust model."
   },
   "archetype": "command-switchboard",
-  "medium": {
-    "kind": "svg",
-    "rationale": "Exact command syntax, distinct output geometry, accessible text, and auditable proof boundaries must survive code review."
-  },
+  "medium": {"kind": "svg", "rationale": "Exact CLI syntax and the behavioral difference between ephemeral checking and stored-baseline verification must remain unambiguous."},
   "evidence_sources": [
-    {"id": "cli-demo", "path": "eval_evidence/__main__.py", "authority": "source-of-truth"},
-    {"id": "cli-check", "path": "eval_evidence/__main__.py", "authority": "source-of-truth"},
-    {"id": "cli-bundle", "path": "eval_evidence/__main__.py", "authority": "source-of-truth"},
-    {"id": "cli-verify", "path": "eval_evidence/__main__.py", "authority": "source-of-truth"},
-    {"id": "readme-boundary", "path": "README.md", "authority": "source-of-truth"},
-    {"id": "trust-model", "path": "docs/TRUST_MODEL.md", "authority": "source-of-truth"}
+    {"id": "cli", "path": "eval_evidence/__main__.py", "authority": "source-of-truth"},
+    {"id": "core", "path": "eval_evidence/core.py", "authority": "source-of-truth"},
+    {"id": "readme", "path": "README.md", "authority": "source-of-truth"},
+    {"id": "trust", "path": "docs/TRUST_MODEL.md", "authority": "source-of-truth"}
   ],
   "labels": [
-    {"text": "demo", "claim": "Writes deterministic synthetic practice input; it is not real-run evidence.", "source_ids": ["cli-demo", "readme-boundary"]},
-    {"text": "check", "claim": "Detects and validates a run in memory and re-hashes references, producing a pass/fail report but no stored baseline.", "source_ids": ["cli-check", "readme-boundary"]},
-    {"text": "bundle", "claim": "Validates and writes canonical evidence JSON that binds claims to referenced digests but does not authenticate a signer.", "source_ids": ["cli-bundle", "trust-model"]},
-    {"text": "verify --run-root", "claim": "Validates the bundle and re-hashes retained source bytes, reporting match or mismatch without establishing physical truth.", "source_ids": ["cli-verify", "readme-boundary", "trust-model"]},
-    {"text": "PRACTICE FOLDER", "claim": "Output of demo.", "source_ids": ["cli-demo"]},
-    {"text": "NOW REPORT", "claim": "Output of check.", "source_ids": ["cli-check"]},
-    {"text": "EVIDENCE.JSON", "claim": "Output of bundle.", "source_ids": ["cli-bundle"]},
-    {"text": "MATCH / MISMATCH", "claim": "Output of verify with a run root.", "source_ids": ["cli-verify"]},
-    {"text": "DOES NOT PROVE", "claim": "Every command result is paired with an explicit adjacent proof limit.", "source_ids": ["readme-boundary", "trust-model"]}
-    ,{"text": "COMMAND", "claim": "The first column names exact CLI commands.", "source_ids": ["cli-demo", "cli-check", "cli-bundle", "cli-verify"]}
-    ,{"text": "YOUR NEXT MOVE", "claim": "The second column explains the command in plain language.", "source_ids": ["cli-demo", "cli-check", "cli-bundle", "cli-verify"]}
-    ,{"text": "VISIBLE RESULT", "claim": "The third column names the distinct artifact or report produced by the command.", "source_ids": ["cli-demo", "cli-check", "cli-bundle", "cli-verify"]}
-    ,{"text": "PROOF BOUNDARY", "claim": "The final column distinguishes supported facts from adjacent unsupported claims.", "source_ids": ["readme-boundary", "trust-model"]}
-    ,{"text": "PROVES", "claim": "Names the scoped fact established by the command path.", "source_ids": ["readme-boundary", "trust-model"]}
-    ,{"text": "KEEP THE BOUNDARY VISIBLE", "claim": "Summarizes the three command-level limitations that must survive at full size.", "source_ids": ["readme-boundary", "trust-model"]}
-    ,{"text": "LEARN", "claim": "Demo appears first as the recommended learning entry point.", "source_ids": ["cli-demo"]}
-    ,{"text": "CHECK", "claim": "Check follows as the read-only validation path.", "source_ids": ["cli-check"]}
-    ,{"text": "SEAL", "claim": "Bundle follows as the stored-baseline path.", "source_ids": ["cli-bundle"]}
-    ,{"text": "RECHECK", "claim": "Verify with run root follows as the retained-byte comparison path.", "source_ids": ["cli-verify"]}
+    {"text": "REPORT NOW", "claim": "The immediate path answers whether the retained run passes the requested checks now.", "source_ids": ["cli", "readme"]},
+    {"text": "check RUN", "claim": "Check detects, builds, and verifies in memory without writing a stored baseline.", "source_ids": ["cli", "core", "readme"]},
+    {"text": "NO BASELINE WRITTEN", "claim": "The immediate report cannot later prove that source files stayed unchanged.", "source_ids": ["readme", "trust"]},
+    {"text": "RECHECK LATER", "claim": "The baseline path persists the evidence record for a later local byte comparison.", "source_ids": ["cli", "readme"]},
+    {"text": "bundle RUN -o evidence.json", "claim": "Bundle writes the canonical evidence baseline.", "source_ids": ["cli", "core"]},
+    {"text": "verify evidence.json --run-root RUN", "claim": "Verify with run root re-hashes referenced files and reports match or mismatch.", "source_ids": ["cli", "core"]},
+    {"text": "MATCH / MISMATCH", "claim": "The later path compares current referenced bytes with saved fingerprints.", "source_ids": ["cli", "core"]}
   ],
-  "boundaries": [
-    "check is read-only and does not create the later baseline.",
-    "verify without --run-root checks schema and embedded digest only; it does not re-hash source files.",
-    "Digests show scoped byte identity, not who created the evidence or whether a reported result is physically true."
-  ],
-  "forbidden_claims": [
-    "Do not label any command result authenticated, certified, or physically verified.",
-    "Do not claim model ranking or production readiness.",
-    "Do not present the recommended learning order as a required runtime dependency."
-  ],
+  "boundaries": ["check does not write a baseline.", "verify without --run-root does not re-hash source files.", "Byte identity is not signer authenticity or physical truth."],
+  "forbidden_claims": ["AUTHENTICATED RESULT", "CERTIFIED RESULT", "PHYSICALLY VERIFIED", "MODEL RANKING", "PRODUCTION READY"],
   "accessibility": {
-    "alt_text": "Demo creates practice input, check reports without storing a baseline, bundle writes a canonical baseline, and verify with run root compares retained bytes.",
-    "long_description": "Four rows form a command switchboard. Demo materializes deterministic example files. Check detects, validates, and re-hashes references in memory. Bundle validates and writes canonical evidence JSON. Verify with run root validates the bundle and re-hashes retained source bytes. Each row names its output and a fact the command does not prove.",
-    "color_independent_cues": ["numbered row order", "exact command labels", "four distinct output shapes", "explicit PROVES and DOES NOT PROVE text"],
-    "minimum_text_px": 21
+    "alt_text": "Choose check for a report now with no baseline written, or choose bundle followed later by verify with run root for a saved byte-identity baseline and match or mismatch result.",
+    "long_description": "Two parallel command paths answer one decision. Report now runs check on a run and produces a current report without a saved baseline. Recheck later runs bundle to create evidence.json, then verify with run root to compare current referenced bytes with saved fingerprints and report match or mismatch.",
+    "color_independent_cues": ["two labeled lanes", "different command counts", "solid directional arrows", "explicit no-baseline and saved-baseline labels"],
+    "minimum_text_px": 20
   },
-  "provenance": {
-    "repository": "https://github.com/edward-lcl/eval-evidence",
-    "revision": "base d371def; contract and render inputs content-addressed in the SVG",
-    "brief_path": "figures/eval-evidence-command-path.figure.json",
-    "method": "deterministic SVG from this validated semantic brief and its paired render manifest",
-    "generated_image_used": false
-  },
-  "output": {
-    "path": "figures/eval-evidence-command-path.svg",
-    "embed_location": "README five-minute quickstart",
-    "format": "svg"
-  }
+  "provenance": {"repository": "https://github.com/edward-lcl/eval-evidence", "revision": "content-addressed semantic and render inputs", "brief_path": "figures/eval-evidence-command-path.figure.json", "method": "deterministic SVG from validated semantic brief and paired render manifest", "generated_image_used": false},
+  "output": {"path": "figures/eval-evidence-command-path.svg", "embed_location": "README five-minute quickstart", "format": "svg"}
 }

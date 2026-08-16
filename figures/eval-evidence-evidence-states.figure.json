@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "title": "EVERY FIELD SAYS HOW IT IS KNOWN",
+  "question": "How does each normalized field communicate its evidence state?",
+  "takeaway": "A value remains distinguishable as observed, derived, operator asserted, provider asserted, or unavailable.",
+  "readers": ["engineer", "team", "agent-ci"],
+  "reading_speeds": {
+    "at_2_seconds": "Four evidence origins lead to five exact status labels.",
+    "at_20_seconds": "Retained artifacts support observed values, named transforms support derived values, people or providers support asserted values, and missing support stays unavailable.",
+    "at_2_minutes": "The five wire-level enum values, source requirement, and null boundary map directly to the normalized model and JSON schemas."
+  },
+  "archetype": "proof-boundary",
+  "medium": {"kind": "svg", "rationale": "The exact five status strings and their distinctions must remain selectable, diffable, and legible on mobile."},
+  "evidence_sources": [
+    {"id": "models", "path": "eval_evidence/models.py", "authority": "source-of-truth"},
+    {"id": "architecture", "path": "docs/ARCHITECTURE.md", "authority": "source-of-truth"},
+    {"id": "instrument-schema", "path": "eval_evidence/schemas/eval-evidence-instrument-v0.1.schema.json", "authority": "source-of-truth"},
+    {"id": "bundle-schema", "path": "eval_evidence/schemas/eval-evidence-bundle-v0.1.schema.json", "authority": "source-of-truth"}
+  ],
+  "labels": [
+    {"text": "observed", "claim": "The value is present in a named retained run artifact.", "source_ids": ["models", "architecture", "instrument-schema"]},
+    {"text": "derived", "claim": "The value is computed from named retained evidence.", "source_ids": ["models", "architecture", "instrument-schema"]},
+    {"text": "operator_asserted", "claim": "An operator supplied or reconstructed the value.", "source_ids": ["models", "architecture", "instrument-schema"]},
+    {"text": "provider_asserted", "claim": "A provider-side source supplied the value.", "source_ids": ["models", "architecture", "instrument-schema"]},
+    {"text": "unavailable", "claim": "The retained evidence cannot establish a value; the value is null.", "source_ids": ["models", "architecture", "bundle-schema"]},
+    {"text": "STATUS + SOURCE TRAVEL WITH THE FIELD", "claim": "Available evidence values include both an evidence status and a source string.", "source_ids": ["models", "instrument-schema", "bundle-schema"]}
+  ],
+  "boundaries": ["A configured value is not upgraded to observed unless a retained artifact supports it.", "Assertions remain assertions even when plausible.", "Unavailable evidence is represented as null rather than guessed."],
+  "forbidden_claims": ["ASSERTED MEANS VERIFIED", "UNAVAILABLE MEANS FALSE", "CONFIGURED MEANS OBSERVED", "TRUST SCORE", "CERTIFIED"],
+  "accessibility": {
+    "alt_text": "Four origins map to five evidence statuses: retained artifact to observed, named transform to derived, operator or provider statement to their respective asserted statuses, and no retained support to unavailable.",
+    "long_description": "Four vertically arranged source groups each point to exact status pills. Found in a retained artifact maps to observed. Computed from named inputs maps to derived. Stated by someone maps to operator asserted and provider asserted. Not established maps to unavailable. A footer says status and source travel with the field.",
+    "color_independent_cues": ["four numbered origin groups", "exact monospace status labels", "one-to-one or one-to-two arrows", "explicit source footer"],
+    "minimum_text_px": 20
+  },
+  "provenance": {"repository": "https://github.com/edward-lcl/eval-evidence", "revision": "content-addressed semantic and render inputs", "brief_path": "figures/eval-evidence-evidence-states.figure.json", "method": "deterministic SVG from validated semantic brief and paired render manifest", "generated_image_used": false},
+  "output": {"path": "figures/eval-evidence-evidence-states.svg", "embed_location": "README provenance explanation", "format": "svg"}
+}

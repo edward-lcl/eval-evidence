@@ -1,41 +1,37 @@
 {
   "schema_version": 1,
-  "title": "A CHANGED FILE BREAKS THE SAVED PROMISE",
-  "question": "Why save a bundle and later verify it with --run-root?",
-  "takeaway": "The saved bundle remembers each referenced file's byte identity, so a later edit becomes a named mismatch instead of a silent change.",
+  "title": "ONE BYTE CHANGES. VERIFY NAMES IT.",
+  "question": "What does a saved bundle detect when a referenced file changes later?",
+  "takeaway": "A saved fingerprint and a later fingerprint differ, so verify reports the referenced file mismatch instead of hiding the change.",
   "readers": ["engineer", "team", "agent-ci"],
   "reading_speeds": {
-    "at_2_seconds": "A green saved fingerprint and a red later fingerprint do not match.",
-    "at_20_seconds": "Bundle records result.json as it exists at baseline time; verify --run-root re-hashes the later file and names the mismatch.",
-    "at_2_minutes": "The story demonstrates post-baseline mutation detection while preserving the limits of an unsigned, retrospectively created baseline."
+    "at_2_seconds": "Saved and current fingerprints differ.",
+    "at_20_seconds": "Bundle records result.json at baseline time; verify with run root re-hashes it later and names the mismatch.",
+    "at_2_minutes": "The exact error and digest examples come from one render manifest, while adjacent prose preserves the limits of an unsigned retrospective baseline."
   },
   "archetype": "lifecycle-evidence-path",
-  "medium": {"kind": "svg", "rationale": "The baseline/later timeline, exact mismatch message, and proof boundary require deterministic, source-verifiable text."},
+  "medium": {"kind": "svg", "rationale": "The before/after fingerprints and exact mismatch text require deterministic, shared desktop/mobile semantics."},
   "evidence_sources": [
-    {"id": "cli-bundle", "path": "eval_evidence/__main__.py", "authority": "source-of-truth"},
-    {"id": "cli-verify", "path": "eval_evidence/__main__.py", "authority": "source-of-truth"},
-    {"id": "core-verify", "path": "eval_evidence/core.py", "authority": "source-of-truth"},
+    {"id": "cli", "path": "eval_evidence/__main__.py", "authority": "source-of-truth"},
+    {"id": "core", "path": "eval_evidence/core.py", "authority": "source-of-truth"},
     {"id": "lifecycle", "path": "docs/LIFECYCLE.md", "authority": "source-of-truth"},
     {"id": "trust", "path": "docs/TRUST_MODEL.md", "authority": "source-of-truth"}
   ],
   "labels": [
-    {"text": "1  SAVE THE BASELINE", "claim": "Bundle validates and writes canonical evidence JSON with referenced-file hashes.", "source_ids": ["cli-bundle", "core-verify"]},
-    {"text": "result.json", "claim": "A referenced source file whose bytes are hashed into its input record.", "source_ids": ["core-verify"]},
-    {"text": "SAVED SHA-256", "claim": "The baseline input record stores the file's SHA-256 value.", "source_ids": ["core-verify"]},
-    {"text": "2  THE FILE CHANGES", "claim": "A later mutation can change the retained source bytes after the baseline was stored.", "source_ids": ["lifecycle", "trust"]},
-    {"text": "3  VERIFY LATER BYTES", "claim": "Verify with run root re-hashes referenced local files.", "source_ids": ["cli-verify", "core-verify"]},
-    {"text": "EXPECTED", "claim": "The comparison uses the digest saved in the bundle.", "source_ids": ["core-verify"]},
-    {"text": "ACTUAL", "claim": "The comparison recomputes the local file digest at verification time.", "source_ids": ["core-verify"]},
-    {"text": "MISMATCH · EXIT 1", "claim": "A referenced-file digest difference is reported as an error and verify returns one.", "source_ids": ["cli-verify", "core-verify"]},
-    {"text": "Referenced file digest mismatch for result.json", "claim": "This is the exact error form produced for a changed referenced file.", "source_ids": ["core-verify"]},
-    {"text": "STORE THE BUNDLE SEPARATELY", "claim": "A separately retained baseline is required to detect later source mutation.", "source_ids": ["lifecycle"]}
+    {"text": "SAVE", "claim": "Bundle records the selected file fingerprint at baseline time.", "source_ids": ["cli", "core"]},
+    {"text": "CHANGE", "claim": "The referenced file may later contain different bytes.", "source_ids": ["lifecycle", "trust"]},
+    {"text": "VERIFY", "claim": "Verify with run root re-hashes the current referenced file.", "source_ids": ["cli", "core"]},
+    {"text": "EXPECTED", "claim": "The expected digest comes from the saved bundle.", "source_ids": ["core"]},
+    {"text": "ACTUAL", "claim": "The actual digest is computed from current local bytes.", "source_ids": ["core"]},
+    {"text": "MISMATCH · EXIT 1", "claim": "A referenced-file digest mismatch fails verification with exit one.", "source_ids": ["cli", "core"]},
+    {"text": "Referenced file digest mismatch for result.json", "claim": "The report names the changed reference.", "source_ids": ["core"]}
   ],
-  "boundaries": ["A retrospective first bundle proves only what the archive contained when bundled.", "Anyone who edits an unsigned bundle can recompute its internal digest.", "A byte mismatch detects change; it does not identify who changed the file or which version is true."],
+  "boundaries": ["The bundle must be retained separately from the source files to serve as a later baseline.", "Anyone who edits an unsigned bundle can recompute its embedded digest.", "A mismatch detects changed bytes; it does not identify an actor or determine which value is true."],
   "forbidden_claims": ["ATTRIBUTED TO AN ACTOR", "ORIGINAL RUN PROVEN", "TAMPER-PROOF", "AUTHENTICATED BASELINE", "TRUE SCORE"],
   "accessibility": {
-    "alt_text": "At baseline time, result.json is hashed into a separately stored evidence bundle. After the file changes, verify with run root computes a different hash and reports a referenced-file digest mismatch with exit 1.",
-    "long_description": "A three-act horizontal timeline begins with Save the Baseline: result.json with reward one is connected to a saved SHA-256 fingerprint inside evidence.json. In act two the file changes to reward zero and receives a different current fingerprint. In act three verify --run-root compares expected and actual fingerprints, shows a not-equal sign, and reports the exact result.json digest mismatch. A footer says to store the bundle separately and explains that detection is not attribution or truth.",
-    "color_independent_cues": ["numbered acts", "before and after labels", "fingerprint strings", "not-equal symbol", "exact error message"],
+    "alt_text": "A saved result.json fingerprint differs from its later fingerprint, so verify reports a referenced-file digest mismatch and exits one.",
+    "long_description": "A compact three-step line reads Save, Change, Verify. Save records result.json with reward one and digest 8d14 through a6c2. Change shows reward zero and digest f913 through 7b40. Verify compares expected and actual fingerprints, displays a not-equal sign, and reports the named result.json mismatch with exit one.",
+    "color_independent_cues": ["three numbered verbs", "before and after values", "expected and actual labels", "not-equal symbol", "exact error text"],
     "minimum_text_px": 20
   },
   "provenance": {"repository": "https://github.com/edward-lcl/eval-evidence", "revision": "content-addressed semantic and render inputs", "brief_path": "figures/eval-evidence-tamper-story.figure.json", "method": "deterministic SVG from validated semantic brief and paired render manifest", "generated_image_used": false},

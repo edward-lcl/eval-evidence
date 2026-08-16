@@ -1,13 +1,13 @@
 # Static figures
 
-This directory contains five figures designed to be read at three speeds:
+This directory contains five single-question figures designed to be read at three
+speeds:
 
-- `eval-evidence-lifecycle` answers what happens to a reported result after a run;
-- `eval-evidence-command-path` is the plain-language index for choosing a command;
-- `eval-evidence-envelope-anatomy` shows concrete run files becoming a reviewable
-  evidence envelope;
-- `eval-evidence-check-story` opens the word “check” into six inspectable operations;
-- `eval-evidence-tamper-story` tells the baseline/edit/mismatch story in three acts.
+- `eval-evidence-lifecycle`: What does the current release do to a retained run?
+- `eval-evidence-envelope-anatomy`: What stays separate inside `evidence.json`?
+- `eval-evidence-command-path`: Do I need a report now or a saved baseline for later?
+- `eval-evidence-evidence-states`: How does each field say how it is known?
+- `eval-evidence-tamper-story`: What happens when a referenced file later changes?
 
 Each `.figure.json` file is the frozen, portable semantic brief and source map. It
 validates against `figure-brief.schema.json`, the same contract used by the global
@@ -17,15 +17,18 @@ rows/cards. Both inputs are content-addressed after checkout line-ending normali
 in the SVG comment and checked together, so the human render cannot silently drift
 from the agent-readable contract or appear stale only because Git used CRLF on Windows.
 
-Each story has two layouts generated from the same semantic brief: a wide overview and
-a `-mobile` portrait sequence. The SVG is canonical and keeps its text selectable; the
-PNG is a 2x raster rendition for contexts that require one. The portrait layout changes
-the reading order, not the evidence or claims. Exact labels and topology are generated
-deterministically rather than delegated to an image model.
+Each story has two layouts generated from the same semantic brief and render manifest:
+a wide overview and a content-sized `-mobile` portrait sequence. The SVG is canonical
+and keeps its text selectable; the PNG is a 2x raster rendition for contexts that
+require one. Mobile changes reading order only: titles, takeaways, labels, example
+digests, and claims come from the same inputs and are verified against them. Exact
+labels and topology are generated deterministically rather than delegated to an image
+model.
 
-All five figures share one high-contrast dark canvas, panel vocabulary, coral/teal/
-yellow teaching palette, arrow treatment, and proof-boundary footer. Color is always
-paired with numbering, geometry, labels, or patterns.
+All five figures share one high-contrast dark canvas and restrained teaching palette.
+Color is always paired with numbering, lane position, geometry, or exact labels. The
+figures intentionally do not share a mandatory proof-boundary footer: long limits live
+in adjacent prose so each image can answer one question cleanly.
 
 From the repository root, rebuild and validate deterministically:
 
@@ -42,16 +45,14 @@ Rendering requires the local `rsvg-convert` and system-font identity pinned in
 `renderer.lock`; `scripts/render_figure.py --check-provenance` fails closed when either
 resolves differently. PNG digests are reproducible only in that declared local
 environment; this project does not claim cross-platform PNG byte identity or bundle the
-system font. `verify_figure.py` checks the frozen-source/SVG digest link, SVG
-accessibility structure, required and prohibited claims, font-size and contrast proxies,
-source-map paths, deterministic text bounds, canonical SVG reproducibility,
-renderer/font provenance, and PNG dimensions. It
-deliberately does not make visual claims about physical truth, model quality, or
-cross-run comparability.
+system font. `verify_figure.py` checks source/SVG digest linkage, accessibility,
+required and prohibited claims, source-map paths, minimum text size, a text-node density
+budget, complete mobile title/takeaway rendering, canonical SVG reproducibility,
+desktop/mobile dimensions, renderer/font provenance, the exact five evidence states,
+and shared tamper-story digests.
 
-At README width, each figure retains one thesis: what is collected, what check does, or
-how mutation is detected. At full size, every edge, proof limit, evidence category, and
-source-backed annotation is readable. Solid horizontal arrows in the command index mean
-“produces”; its dotted vertical spine is recommended learning order, not a runtime
-dependency. The three story figures use numbered objects and scenes so their meaning
-does not depend on color or prior knowledge of the implementation terms.
+At README width, each figure retains one thesis and one dominant reading direction. At
+full size, exact commands, status strings, file identities, and source-backed labels are
+readable. Detailed `check` internals remain developer prose in `docs/ARCHITECTURE.md`;
+they are not forced into the command-choice image. Numbered objects and named lanes keep
+meaning independent of color or prior implementation knowledge.

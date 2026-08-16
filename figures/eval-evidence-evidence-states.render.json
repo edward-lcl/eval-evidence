@@ -1,0 +1,15 @@
+{
+  "render_version": 1,
+  "figure_id": "eval-evidence-evidence-states",
+  "subtitle": "The status records the evidence relationship—not confidence in the value",
+  "canvas": {"width": 1600, "height": 820, "png_width": 3200, "png_height": 1640},
+  "mobile_canvas": {"width": 900, "height": 1180, "png_width": 1800, "png_height": 2360},
+  "groups": [
+    {"number": "1", "origin": "FOUND IN A RETAINED ARTIFACT", "detail": "value appears at a named source", "statuses": ["observed"], "color": "#39D0C3"},
+    {"number": "2", "origin": "COMPUTED FROM NAMED INPUTS", "detail": "a stated transform produces the value", "statuses": ["derived"], "color": "#B18CFF"},
+    {"number": "3", "origin": "STATED BY SOMEONE", "detail": "the source says it; Eval Evidence does not upgrade it", "statuses": ["operator_asserted", "provider_asserted"], "color": "#F7D73A"},
+    {"number": "4", "origin": "NOT ESTABLISHED", "detail": "retained evidence cannot support a value", "statuses": ["unavailable"], "color": "#CBD5E1"}
+  ],
+  "footer": "STATUS + SOURCE TRAVEL WITH THE FIELD",
+  "forbidden_claims": ["ASSERTED MEANS VERIFIED", "UNAVAILABLE MEANS FALSE", "CONFIGURED MEANS OBSERVED", "TRUST SCORE", "CERTIFIED"]
+}

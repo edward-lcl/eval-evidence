@@ -13,24 +13,25 @@ exact commit rather than treating mutable `main` as a release.
 
 <picture>
   <source media="(max-width: 600px)" srcset="figures/eval-evidence-lifecycle-mobile.png">
-  <img src="figures/eval-evidence-lifecycle.png" alt="Eval Evidence lifecycle: a reported score is sealed with model, harness, budget, verifier, artifact, and field-provenance evidence; review distinguishes matched conditions, differences, unavailable evidence, and integrity failures.">
+  <img src="figures/eval-evidence-lifecycle.png" alt="Retained run artifacts pass through evidence normalization and deterministic bundle construction to scoped schema, digest, and referenced-byte checks.">
 </picture>
 
-The [static lifecycle figure](figures/README.md) is generated offline from a frozen,
-machine-readable brief. It describes review states, not model quality or a universal
-trust score.
+This is the implemented core path, not a roadmap. Eval Evidence does not run an
+evaluation, compare models, or generate a publication report. The [figure brief and
+source map](figures/README.md) are machine-readable so engineers and agents can trace
+each visible stage back to code.
 
 Eval Evidence produces a deterministic JSON bundle that carries three kinds of evidence
 without pretending to adjudicate them:
 
 <picture>
   <source media="(max-width: 600px)" srcset="figures/eval-evidence-envelope-anatomy-mobile.png">
-  <img src="figures/eval-evidence-envelope-anatomy.png" alt="Three retained Harbor run files become one reviewable evidence JSON record: the adapter labels what happened, how the run was configured, and which source bytes can be checked again.">
+  <img src="figures/eval-evidence-envelope-anatomy.png" alt="Evidence JSON separates reported outcome, evaluation instrument fields with provenance, and selected retained-file identities that can be rechecked; unavailable evidence stays explicit.">
 </picture>
 
-This is what “build a bundle” means in concrete terms. The adapter reads retained run
-files, labels where values came from, records missing fields as `unavailable`, and adds
-file fingerprints. It does not copy a whole run or turn a reported value into truth.
+The envelope deliberately keeps three questions apart: what was reported, how the run
+was configured and how each field is known, and which selected bytes can be checked
+again. It does not copy a whole run or turn a reported value into truth.
 
 1. **Item validity:** record supplied validity claims—or state that none were supplied.
 2. **Evaluation instrument:** record model, agent, harness, budgets, and other fields
@@ -56,19 +57,13 @@ eval-evidence verify /tmp/eval-evidence.json --run-root /tmp/eval-run
 
 <picture>
   <source media="(max-width: 600px)" srcset="figures/eval-evidence-command-path-mobile.png">
-  <img src="figures/eval-evidence-command-path.png" alt="Eval Evidence command index: make a safe example with demo, inspect a run now with check, save today's file fingerprints with bundle, or compare later files with verify and run root.">
+  <img src="figures/eval-evidence-command-path.png" alt="Choose check for a report now with no baseline written, or choose bundle followed later by verify with run root for a saved byte-identity baseline and match or mismatch result.">
 </picture>
 
-The [command switchboard brief and editable SVG](figures/README.md) keep each command's
-output beside its proof boundary. It is an index into the story, not the whole story:
-
-<picture>
-  <source media="(max-width: 600px)" srcset="figures/eval-evidence-check-story-mobile.png">
-  <img src="figures/eval-evidence-check-story.png" alt="Eval Evidence check shown as six explicit tests: find the run, read files, label each field, test the record, re-hash local files, and name a pass or failure with its reason.">
-</picture>
-
-The diagram is a teaching layer; the command help and JSON output remain authoritative
-for automation.
+The choice is about time: use `check` for a current report, or persist `evidence.json`
+when a later byte comparison matters. `demo` remains the safe learning command shown
+in the quickstart; it is omitted from the figure because it answers a different
+question. Command help and JSON output remain authoritative for automation.
 
 The demo is deterministic and synthetic. `check` is the one-command path: it detects
 the input adapter, builds a bundle in memory, validates the schema and digest, re-hashes
@@ -132,6 +127,15 @@ provider-asserted values. A provenance entry must contain both `status` and `sou
 and its null/non-null value must agree with `unavailable`; partial or contradictory
 declarations fail closed. See the [owner walkthrough](docs/OWNER_WALKTHROUGH.md) for a
 complete application example and a paired-result investigation.
+
+<picture>
+  <source media="(max-width: 600px)" srcset="figures/eval-evidence-evidence-states-mobile.png">
+  <img src="figures/eval-evidence-evidence-states.png" alt="Four origins map to five evidence statuses: retained artifact to observed, named transform to derived, operator or provider statement to their respective asserted statuses, and no retained support to unavailable.">
+</picture>
+
+These statuses describe the relationship between a field and its evidence, not the
+probability that the value is correct. The exact wire strings are `observed`, `derived`,
+`operator_asserted`, `provider_asserted`, and `unavailable`.
 
 ### Harbor
 
@@ -211,8 +215,11 @@ created the bundle: anyone who edits an unsigned bundle can recompute its digest
 
 <picture>
   <source media="(max-width: 600px)" srcset="figures/eval-evidence-tamper-story-mobile.png">
-  <img src="figures/eval-evidence-tamper-story.png" alt="A three-act tamper story: save the baseline fingerprint for result.json, change the retained file, then verify later bytes and receive a referenced-file digest mismatch with exit 1.">
+  <img src="figures/eval-evidence-tamper-story.png" alt="A saved result.json fingerprint differs from its later fingerprint, so verify reports a referenced-file digest mismatch and exits one.">
 </picture>
+
+This detects a byte change relative to the saved baseline. It does not identify who
+changed the file, authenticate the bundle author, or determine which value is true.
 
 ## What a bundle does not prove
 

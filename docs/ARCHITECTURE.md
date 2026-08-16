@@ -24,6 +24,13 @@ run directory
              scoped JSON report with explicit gaps
 ```
 
+For maintainers tracing `check`, the command discovers supported run roots, selects or
+validates the adapter, parses retained inputs, maps field provenance, builds the bundle
+in memory, validates schema and embedded digest, optionally re-hashes run-relative
+references, then emits the scoped JSON result. These are implementation steps, not
+separate trust verdicts; the CLI report and tests remain authoritative when this path
+changes.
+
 | Layer | Authority | Responsibility | Must not do |
 |---|---|---|---|
 | CLI | `eval_evidence/__main__.py` | argument handling, discovery orchestration, exit codes, JSON reporting | reinterpret adapter evidence or hide failures |
