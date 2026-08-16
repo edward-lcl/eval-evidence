@@ -22,9 +22,11 @@ This complements rather than replaces Harbor:
 
 ## Try the review checkout
 
-Review pull request [#2](https://github.com/edward-lcl/eval-evidence/pull/2). Its
-description records the tested head SHA; confirm it matches `git rev-parse HEAD` before
-reproducing the evidence. From that checkout:
+Review protected `main` at a pinned commit: record the output of `git rev-parse HEAD`
+in your review so the mapping you red-line is tied to exact bytes (mutable `main` is
+the development authority, not a release; see [START_HERE](START_HERE.md)). The
+review history lives in pull requests [#2](https://github.com/edward-lcl/eval-evidence/pull/2)
+through [#7](https://github.com/edward-lcl/eval-evidence/pull/7). From that checkout:
 
 ```bash
 git rev-parse HEAD

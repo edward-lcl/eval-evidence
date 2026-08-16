@@ -25,9 +25,10 @@ no scope: the non-goals in [VISION.md](VISION.md) remain binding, and
 
 Row statuses — named to avoid colliding with the roadmap's own version numbers:
 
-- **covered-by-bundle** — exists in Eval Evidence's merged v0.2.0 readiness candidate
-  (PR [#2](https://github.com/edward-lcl/eval-evidence/pull/2); reviewed branch head
-  `2743a29`, squash-merged to `main`).
+- **covered-by-bundle** — exists on protected `main` (introduced in the v0.2.0
+  readiness candidate, PR [#2](https://github.com/edward-lcl/eval-evidence/pull/2),
+  and carried forward through [#7](https://github.com/edward-lcl/eval-evidence/pull/7);
+  pin `git rev-parse HEAD` when citing).
 - **known-gap** — a recorded gap, with its sequencing or unblocking condition stated.
 - **suggestion** — a maintainer decision, not an Eval Evidence commitment.
 - **out-of-scope** — outside the evidence layer's boundary.
