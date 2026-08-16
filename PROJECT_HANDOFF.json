@@ -95,7 +95,7 @@
       "acceptance": [
         "for every 2.0 row with a public submission folder, a per-row record is emitted with source jobs, counted trials per task, dropped trials with exception type, per-task rate, accuracy, SE, and the display multiplier",
         "the two candidate exclusion predicates from the study are tested over all 76 folders and rows reproducing under neither are named explicitly",
-        "no new schema, CLI command, or wire member is added; the record shape is a proposal filed as an issue on the 2.1 leaderboard tooling repository, with the body written to a file (no shell interpolation)",
+        "no new schema, CLI command, or wire member is added; the record shape is written up in docs/research/ only, and any upstream filing is a separate owner-approved step under authority_boundaries.owner_or_external_approval_required",
         "only public data enters this repository; per-trial trajectories are not copied"
       ]
     },

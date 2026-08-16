@@ -18,17 +18,31 @@ The question was whether "claim lineage" — why a particular collection of tria
 retries, revisions, exclusions, transformations, and aggregation decisions became a
 particular reported number — is a real missing abstraction above per-trial evidence.
 
-It is not a missing abstraction. It is a missing **record**, and the record is small,
-PROV-shaped, and mostly owned by other layers. Five real reported numbers from five
-ecosystems (a Terminal-Bench 2.0 row, a SWE-bench Verified row, a Hugging Face Open LLM
-Leaderboard row, a paper table cell, and an in-house paper number) were all reproduced to
-full precision from retained per-instance artifacts — and **none of the five reproduced
-from a written rule.** In every case the aggregation rule, exclusion predicate, or
-uncertainty formula was recovered by numerical matching against candidate policies, and
-in every case at least one instrument identity (harness commit, image digest, dataset
-revision, provider-returned model) was unavailable or had moved. Per-trial verification
-was the easy part everywhere. The failures lived at the row: which attempts counted, how
-they were aggregated, what the interval means, whether the row is still the row.
+The **lineage graph** is not a missing abstraction: every transition the proposed stack
+names maps onto relations that already exist in W3C PROV-DM, and most of the nodes are
+already materialised by Harbor and by publishers. What is missing is a **record** —
+small, PROV-shaped, and mostly owned by other layers. Two smaller pieces are genuinely
+new, and this study does not claim otherwise: a per-field evidence state (including
+`unavailable` and an unresolved two-source conflict), which no surveyed standard has;
+and the pairing of a claim-relative required-edge set with an *expected set* held by a
+different actor than the record, which no surveyed evaluation system implements at the
+row layer. Whether those two are better called a small vocabulary or a modest new
+abstraction is partly terminological. What the evidence settles is narrower and firmer:
+they do not require a new lineage graph, a new wire format, or a fourth layer.
+
+Five reported numbers, drawn from four evaluation ecosystems (a Terminal-Bench 2.0 row, a
+SWE-bench Verified row, a Hugging Face Open LLM Leaderboard row, a SWE-agent paper table
+cell from an earlier SWE-bench era, and an in-house paper number), were each reproduced
+from retained per-instance artifacts — four of them to the last displayed digit. In
+**none of the five was the rule that maps artifacts to the number stated alongside the
+number**: the aggregation formula, the exclusion predicate, the artifact-and-key
+selection, or the uncertainty method had to be recovered by numerical matching against
+candidate policies, or found in maintainer code or methods text that the published number
+does not cite. In every case at least one instrument identity (harness commit, image
+digest, dataset revision, provider-returned model) was unavailable or had moved.
+Per-trial verification was the easy part everywhere. The failures lived at the row: which
+attempts counted, how they were aggregated, what the interval means, whether the row is
+still the row.
 
 Consequences for this repository: the per-trial envelope duplicates native state that
 Harbor already writes (and in one measured case discovers 0 of 17 genuine trials while
@@ -77,14 +91,21 @@ receipts, not the vocabulary.
 
 ## A. What we learned
 
-**A1. Arithmetic reconstructs; rules do not.** Five of five reported numbers reproduced
-exactly from per-instance records; zero of five from a written rule.
+**A1. Arithmetic reconstructs; the rule that selects and combines is what goes missing.**
+Five of five reported numbers reproduced from per-instance records — four to the last
+displayed digit, and the TB2.0 row to about 1e-15 (two reviewers' recomputations differ
+from the site in the last two digits by summation order, which is immaterial to the
+finding). In none of the five was the selection-and-aggregation rule stated with the
+number. Where a rule was written down at all — SWE-bench's `analysis/get_leaderboard.py`,
+the HF normalization documentation, HELM's pinned aggregation function — it still had to
+be located by the reviewer, and the population it applies to (which artifact, which key,
+which instances count) was not recorded with it.
 
 | Case (lane) | Displayed | Reproduced | How the rule was recovered | Instrument identity unavailable |
 |---|---|---|---|---|
-| TB2.0 rank-1 row NexAU-AHE / GPT-5.5 (L2) | 84.7% ± 2.1 | `0.8471910112359551`, SE `0.010659…`, exact | Matching candidate rules over three rows plus the successor (2.1) leaderboard's public code | Harbor version (job predates job `lock.json`, added 2026-04-29), agent code revision (`agentVersion "unknown"`, local YAML path), model snapshot/effort, image digests, exact drop predicate; HF PR #176 review closed (HTTP 403) |
+| TB2.0 rank-1 row NexAU-AHE / GPT-5.5 (L2) | 84.7% ± 2.1 | site value `0.8471910112359551`, SE `0.010659…`; two reviewers reproduced it to ~1e-15 (last two digits differ by summation order) | Matching candidate rules over three rows plus the successor (2.1) leaderboard's public code | Harbor version (job predates job `lock.json`, added 2026-04-29), agent code revision (`agentVersion "unknown"`, local YAML path), model snapshot/effort, image digests, exact drop predicate; HF PR #176 review closed (HTTP 403) |
 | SWE-bench Verified rank-1 live-SWE-agent + Claude 4.5 Opus (L3) | 79.20 | 396/500 from 495 per-instance `report.json` (PR ref `refs/pull/388/head` and public S3, byte-identical); re-parsed from raw `test_output.txt` with `swebench` 4.1.0 = 396 | Disclosure for the parse; dataset revision by trying revisions until the number matched | Harness version, Docker image digest (`:latest` re-pushed 2026-08-16), the meaning of "verified submission" |
-| HF Open LLM Leaderboard v2 row Qwen2.5-72B-Instruct (L4) | 47.98045991216864 | Exact, from `results_2025-02-13T18-27-04.338360.json` | File 4 of 4 for the row (displayed model sha is file 1's); key `results.<task>` not `groups`/stderr (stale after two in-place rescorings); found by trying both | lm-eval `git_hash 9694c56` resolves to no public commit; results→table aggregator not public; per-sample details gated |
+| HF Open LLM Leaderboard v2 row Qwen2.5-72B-Instruct (L4) | 47.98045991216864 | Exact, from `results_2025-02-13T18-27-04.338360.json` | Normalization documented; artifact and key selection inferred — file 4 of 4 for the row (displayed model sha is file 1's), key `results.<task>` not `groups`/stderr (stale after two in-place rescorings), found by trying both | lm-eval `git_hash 9694c56` resolves to no public commit; results→table aggregator not public; per-sample details gated |
 | SWE-agent paper cell 12.47% vs 3.8% (L4) | 286/2294; 87/2294 | Exact from public `results.json` | Disclosure for the count; population unclean (12 duplicated ids, 28 absent, 154 empty patches in the denominator); baseline cited to a paper that says 1.96% (citation ≠ source) | Harness commit (pre-Docker conda harness), duplicate adjudication, README 12.29% → paper 12.47% unexplained, pre-2024-10-15 history reset |
 | In-house paper numbers (L5, aggregate only) | as stated | Re-derived from the frozen trial table in ~20 lines | Middle of the chain fully scripted; both ends not | Denominator of the headline count stated nowhere; snapshot id hashes one file while the input set drifted; one confidence-interval method has no committed code |
 
@@ -146,7 +167,8 @@ mis-selling.
 
 ## B. The evidence stack that survived
 
-Three layers, not four.
+Three layers, not four. This is the study's conclusion about layer *structure*; the
+placement of each layer's owner (§F) is a recommendation, not a demonstrated finding.
 
 | Layer | What it answers | Where its state lives today | Boundary |
 |---|---|---|---|
@@ -159,6 +181,16 @@ attempts → included cohort → transformations → aggregation → reported nu
 location → claim) maps to a PROV node, edge, role, or attribute; the transitions differ
 in *who* records them (runner vs publisher), not in kind. Naming a fourth layer implied
 a distinction the evidence does not support.
+
+The strongest objection to this merge, which the study accepts rather than dismisses:
+the two requirements that make the record load-bearing — a claim-relative statement of
+*which* edges must be present, and an expected set held by a different actor than the
+record (§E) — are structural requirements that PROV supplies notation for but does not
+impose, and that no surveyed evaluation system implements at the row layer. Someone could
+reasonably call that pairing a new abstraction. The reason this study does not is that it
+adds no node or edge type and changes no wire contract: it is a policy plus an invariant
+over an existing graph. Readers who prefer the stronger reading should note that it
+changes the *name*, not the recommended work, which is EE-08 and E1′ either way.
 
 ## C. Minimal evidence per claim class
 
@@ -288,7 +320,10 @@ trivial case + per-field evidence state; C2 §4):
    77.6% row; 21 undisplayed folders; a scan that stopped at part of its universe). The
    only fix is an *expected set* at each layer held by a different actor than the record
    — Harbor has it for trials (`lock.trials`, `n_total_trials`); no leaderboard studied
-   has it for rows. **A record without an expected-set check is decoration.**
+   has it for rows. **A record without an expected-set check cannot detect its own
+   omissions.** This is also the strongest argument that something more than a record is
+   missing (see §B): the requirement is structural, and nothing in PROV, Inspect, or
+   MLPerf's format imposes it.
 2. Externalities: private variants, provider identity, funder access, contamination.
    The record can hold `provider_asserted` facts and make absence visible; it cannot
    verify. Policy and audit did the work in every documented case.
@@ -310,11 +345,15 @@ case is a citation-target error (the 3.8% is not in the cited paper), not a conf
 mismatch. No real-archive conflict-frequency measurement yet (RESEARCH_MAP E2 unrun).
 Nothing in any lane shows trial-level sealing *preventing* a documented failure; the one
 archive where per-trial content identity would have directly helped (duplicate ingests,
-cheat-mirrors, a 56-trial ingest defect, L5) is not content-addressed.
+cheat-mirrors, and an ingest defect found only by re-reading raw verifier files, L5) is
+not content-addressed.
 
 ## F. What Eval Evidence should own
 
-Less than now. Ranked by value the receipts support over cost and overlap:
+This section is a **recommendation** derived from §A–§E, not itself a demonstrated
+finding; it needs an owner decision and, for the adapter items, the review surface named
+in `ARCHITECTURE.md`. Less than now. Ranked by value the receipts support over cost and
+overlap:
 
 1. **Per-field evidence state with source pointer** — `observed | derived |
    operator_asserted | provider_asserted | unavailable`, plus unresolved `conflicting`,
@@ -368,16 +407,17 @@ and 2 decide the direction; the rest refine it.
 
 | # | Experiment | Decides | Dependencies | Acceptance evidence |
 |---|---|---|---|---|
-| 1 | **E1′ — version-stratified denominator and aggregate reconstruction on genuine Harbor jobs** (the 17 oracle jobs plus the private archive; read-only). Per job: `n_total_trials` vs `len(lock.trials)` vs discovered trial dirs vs `n_completed/n_errored/n_cancelled/n_retries`; recompute `mean` under None→0 and compare to `stats.evals[k].metrics`; count `n_retries > 0`; flag reported reward vs `verifier/reward.json` disagreements | Whether retrospective campaign evidence is fine (unexplained expected-vs-discovered deltas rare, retries rare → a small Harbor PR + publisher checklist) or whether tombstones and a job-close manifest are needed | Private archive access; handling of lock schema v1 vs v3 | A table per Harbor version with counts and unexplained-delta rate; the 56-trial ingest defect reproduced or refuted from raw verifier files; no private values in the report |
-| 2 | **Row-manifest retro-fit over all 142 TB2.0 rows** (public HF dataset + tbench.ai detail payloads). Emit per row `{source_jobs, counted trials/task, dropped trials + exception type, per-task rate, accuracy, SE, ×1.96}`; test the two candidate drop predicates over all 76 folders; list rows that reproduce under neither | Whether the per-row manifest is sufficient retrospectively and whether the exclusion predicate is uniquely recoverable — if not, that is the strongest argument for prospective recording | Public data only; ~1 day | Rows with an HF folder reproduce exactly under one predicate, or the ambiguous rows are named; a filed issue on the 2.1 tooling repo with the manifest shape (body via file, no shell interpolation) |
+| 1 | **E1′ — version-stratified denominator and aggregate reconstruction on genuine Harbor jobs** (the 17 oracle jobs plus the private archive; read-only). Per job: `n_total_trials` vs `len(lock.trials)` vs discovered trial dirs vs `n_completed/n_errored/n_cancelled/n_retries`; recompute `mean` under None→0 and compare to `stats.evals[k].metrics`; count `n_retries > 0`; flag reported reward vs `verifier/reward.json` disagreements | Whether retrospective campaign evidence is fine or whether prospective capture is required. Preregistered flip condition: if the unexplained expected-vs-discovered delta rate is under 5% of jobs and `n_retries > 0` is rare, the work is a small Harbor PR plus a publisher checklist; if either is common, retry tombstones and a job-close manifest become the recommendation and outcome (7) rises | Private archive access; handling of lock schema v1 vs v3 | A table per Harbor version with counts and unexplained-delta rate; the 56-trial ingest defect reproduced or refuted from raw verifier files; no private values in the report |
+| 2 | **Row-manifest retro-fit over all 142 TB2.0 rows** (public HF dataset + tbench.ai detail payloads). Emit per row `{source_jobs, counted trials/task, dropped trials + exception type, per-task rate, accuracy, SE, ×1.96}`; test the two candidate drop predicates over all 76 folders; list rows that reproduce under neither | Whether the per-row manifest is sufficient retrospectively and whether the exclusion predicate is uniquely recoverable — if not, that is the strongest argument for prospective recording | Public data only; ~1 day | Rows with an HF folder reproduce exactly under one predicate, or the ambiguous rows are named; the manifest shape and the ambiguous rows are written up in `docs/research/`; filing it upstream is a separate owner-approved step (authority boundary: upstream contact), with any body written to a file rather than interpolated on a shell |
 | 3 | **E5′ — prospective capture cost in Harbor, oracle agent only**: retry tombstone instead of bare `rmtree`, member-trial `result.json` digests at job close, `MetricConfig` null-policy/denominator/version fields, an attempt ordinal on `TrialConfig`; count LOC/storage | Whether the three Harbor gaps close cheaply (then "publication tooling is the only hole" becomes true in practice) | Fresh Harbor clone; oracle runs are model-free but Docker execution — confirm permission or unit-test only | Draft PR text + LOC + a job dir with tombstones/digests/policy populated; no PR opened without maintainer consent |
 | 4 | **Structured-provenance-per-field companion on two public mixed-provenance cases** (HF Qwen row: `contents` vs `results`, four files; SWE-bench bash-only rows: `per_instance_details.json` vs `info.resolved` vs S3) | Whether item F1 earns its keep beyond prose | Public files only; ~1 day | The record flags "sha from file 1 / scores from file 4", "`groups` stale", and "47 rows with no input digests" mechanically; false-flag rate on the clean rows reported |
 | 5 | **E6′ — Inspect translation of the campaign edges only** (`total_samples/completed_samples`, `scored/unscored_samples`, `invalidation{author, reason, timestamp}`, `error_retries`, `log_updates`, `revision{commit, dirty}` → the per-transition record) from a synthetic public `.eval` log | Whether the portable layer is real and small, or coerced (then rename/redesign, do not abstract) | Synthetic log; no model calls | A two-column mapping with a "coerced" flag per field; ≤ 2 coerced fields |
 
-Cheap and worth doing alongside: file the SWE-bench "merged ≠ displayed" invariant
-(`20251127_openhands_claude-opus-4-5`) and the truthy-`checked` template string as
-issues on `SWE-bench/experiments` — each is a live instance of the deepest survivor
-in §E.
+Cheap and worth doing alongside, **subject to the owner's upstream-contact approval**:
+report the SWE-bench "merged ≠ displayed" invariant (`20251127_openhands_claude-opus-4-5`)
+and the truthy-`checked` template string to `SWE-bench/experiments` — each is a live
+instance of the deepest survivor in §E. Draft them in this repository first; opening them
+is an outward-facing act, not a contributor-level action.
 
 ## H. Language decision
 

@@ -104,7 +104,7 @@ SUBMIT.md/metrics.py); L2: mean of per-task success rates with some errored tria
   supported and only in a specific place".
 - L5 §5(1): content-addressed inputs "make duplicate ingests and cheat-mirrors an equality check
   rather than a heuristic key" — receipts: [in-house value redacted] mirrored as
-  honest, 56 harness-dropped rewards found only by re-reading verifier files.
+  honest, and harness-dropped rewards found only by re-reading verifier files.
 - Verdict: not a factual contradiction; a scope difference. L3/L6/L4 examined archives that are already
   content-addressed (git/S3/HF); L5 examined a directory-name-labelled archive that is not. L7 §6(2)
   states the reconciliation explicitly ("marginal value … in archives that are not otherwise
@@ -236,7 +236,7 @@ characterisations: "modern lock", "YES while hub serves", "reproduced in princip
 
 **(b) OBSERVED/DERIVED claims not supported by their receipt.** Only three defects in 21 groups, all
 minor: L1 §2.6 line numbers for `HarborLockInfo` (58-61, not 357-360); L5 F1 "97 commits
-`main..companion-site`" (120 today; the digests, merge-base and 28 reproduce); L2 §2.3 "four of which
+an in-house branch" (a different count today; the digests, merge-base and the reverse count reproduce); L2 §2.3 "four of which
 still have a reward" (all six do). One light paraphrase in quotation marks (L6, PROV invalidation). No
 claim was wrong in substance.
 
@@ -255,8 +255,8 @@ from public HF configs and are the only scrub candidates under a stricter rule.
 
 ## 4. What I could NOT establish, and where I looked
 
-- L5's "97 commits" — I tried `rev-list --count` plain (120), `--no-merges` (110), `--first-parent`
-  (106), `--left-right` (28/120) against `[in-house value redacted]` and against `origin/companion-site` (same SHA); none
+- L5's branch commit count — I tried `rev-list --count` plain, `--no-merges`,
+  and `--first-parent` against the in-house branch tip (same SHA by either name); none
   gives 97. UNAVAILABLE what L5 counted.
 - Whether L1's wrong `lock.py` line numbers came from a different file — I checked only
   `src/harbor/models/job/lock.py` at `a27e9c2` (649 lines) and `origin/main`; not resolved (irrelevant to

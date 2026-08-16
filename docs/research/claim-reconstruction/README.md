@@ -31,3 +31,17 @@ L2 §2.10 derives it exactly (the site renders `1.96 × stderr`); L1 §3 general
 §2.3 says four of six `AgentTimeoutError` trials carry a reward (all six do); L8 F14 says
 `response_model` has no native source, which holds for `result.json`/`config.json`/
 `lock.json` but not for ATIF steps written by LiteLLM-driven agents (L1 §2.7).
+
+One further correction, found in the 2026-08-16 pre-push review and **not** applied to
+the critic text: C2 §2.2 states "0/5 reproduce from a record that states the rule". That
+is too strong. SWE-bench's aggregation rule is readable in the maintainers' own
+`analysis/get_leaderboard.py`, the HF normalization is documented, and HELM's aggregation
+function is pinned — what those three lack is the *population* the rule applies to (which
+artifact, which key, which instances count) and any statement of the rule beside the
+published number. The main study document states the corrected version; C2's phrasing is
+preserved here as the receipt it was.
+
+Redactions applied to C1 and C2 beyond path scrubbing: values, digests, branch names, and
+commit counts belonging to the private in-house repository examined by lane L5 are
+replaced with `[in-house value redacted]` or generalised. The public argument does not
+depend on them.
