@@ -1,9 +1,9 @@
 {
-  "render_version": 2,
+  "render_version": 3,
   "figure_id": "eval-evidence-command-path",
   "subtitle": "Choose by whether tomorrow needs a remembered baseline",
   "canvas": {"width": 1600, "height": 780, "png_width": 3200, "png_height": 1560},
-  "mobile_canvas": {"width": 900, "height": 1000, "png_width": 1800, "png_height": 2000},
+  "mobile_canvas": {"width": 900, "height": 1180, "png_width": 1800, "png_height": 2360},
   "lanes": [
     {"label": "REPORT NOW", "prompt": "Need a report on this run now?", "color": "#39D0C3", "steps": ["check RUN"], "result": "SCOPED REPORT", "note": "NO BASELINE WRITTEN"},
     {"label": "RECHECK LATER", "prompt": "Need to detect later byte changes?", "color": "#F7D73A", "steps": ["bundle RUN -o evidence.json", "verify evidence.json --run-root RUN"], "result": "MATCH / MISMATCH", "note": "SAVED BASELINE REQUIRED"}

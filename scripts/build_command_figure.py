@@ -12,12 +12,29 @@ from xml.sax.saxutils import escape
 ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "figures"
 FIGURE_ID = "eval-evidence-command-path"
-GENERATOR_VERSION = "3"
+GENERATOR_VERSION = "4"
 BG, PANEL, INK, MUTED = "#090E16", "#111827", "#F8FAFC", "#A7B0C0"
 
 
 def t(value: object) -> str:
     return escape(str(value), {'"': '&quot;'})
+
+
+def horizontal_arrow(x1: int, x2: int, y: int) -> list[str]:
+    """Draw a connector whose body stays visible at every render scale."""
+    return [
+        f'<line class="flow-arrow-body" x1="{x1}" y1="{y}" x2="{x2 - 16}" y2="{y}" stroke="#CBD5E1" stroke-width="5" stroke-linecap="round"/>',
+        f'<path class="flow-arrow-head" d="M{x2 - 16} {y - 10} L{x2} {y} L{x2 - 16} {y + 10} Z" fill="#CBD5E1"/>',
+    ]
+
+
+def command_lines(step: str) -> list[str]:
+    """Wrap long commands only at a real CLI option boundary."""
+    for option in (" -o ", " --run-root "):
+        if option in step:
+            command, value = step.split(option, 1)
+            return [command, f"{option.strip()} {value}"]
+    return [step]
 
 
 def svg(brief: dict, render: dict, bd: str, rd: str) -> str:
@@ -44,22 +61,25 @@ def svg(brief: dict, render: dict, bd: str, rd: str) -> str:
         ])
         for i, prompt_line in enumerate(prompt_lines):
             p.append(f'<text x="195" y="{y + 113 + i * 28}" text-anchor="middle" fill="{INK}" font-family="Arial, sans-serif" font-size="20">{t(prompt_line)}</text>')
-        step_xs = [380] if len(lane["steps"]) == 1 else [350, 735]
-        step_widths = [510] if len(lane["steps"]) == 1 else [340, 520]
+        if len(lane["steps"]) == 1:
+            step_xs, step_widths = [400], [500]
+            result_x, result_width, note_x = 1190, 300, 400
+        else:
+            step_xs, step_widths = [350, 740], [280, 400]
+            result_x, result_width, note_x = 1285, 215, 350
         for idx, (step, x, step_width) in enumerate(zip(lane["steps"], step_xs, step_widths)):
-            p.extend([
-                f'<rect x="{x}" y="{y + 50}" width="{step_width}" height="82" rx="16" fill="#0B1220" stroke="{color}" stroke-width="3"/>',
-                f'<text x="{x + step_width / 2}" y="{y + 101}" text-anchor="middle" fill="{INK}" font-family="monospace" font-size="{20 if len(step) > 20 else 22}" font-weight="700">{t(step)}</text>',
-            ])
+            lines = command_lines(step)
+            p.append(f'<rect x="{x}" y="{y + 50}" width="{step_width}" height="82" rx="16" fill="#0B1220" stroke="{color}" stroke-width="3"/>')
+            for line, line_y in zip(lines, (y + 101,) if len(lines) == 1 else (y + 84, y + 112)):
+                p.append(f'<text x="{x + step_width / 2}" y="{line_y}" text-anchor="middle" fill="{INK}" font-family="monospace" font-size="{20 if len(lines) > 1 or len(line) > 20 else 22}" font-weight="700">{t(line)}</text>')
             if idx < len(lane["steps"]) - 1:
-                p.append(f'<path d="M{x + step_width + 10} {y + 91} H{x + step_width + 54}" stroke="#CBD5E1" stroke-width="5" marker-end="url(#arrow)"/>')
-        result_x = 1285 if len(lane["steps"]) == 2 else 1110
+                p.extend(horizontal_arrow(x + step_width + 16, step_xs[idx + 1] - 20, y + 91))
         prior_end = step_xs[-1] + step_widths[-1]
         p.extend([
-            f'<path d="M{prior_end + 10} {y + 91} H{result_x - 24}" stroke="#CBD5E1" stroke-width="5" marker-end="url(#arrow)"/>',
-            f'<rect x="{result_x}" y="{y + 42}" width="{210 if len(lane["steps"]) == 2 else 235}" height="98" rx="49" fill="#151A13" stroke="{color}" stroke-width="4"/>',
-            f'<text x="{result_x + (105 if len(lane["steps"]) == 2 else 117)}" y="{y + 101}" text-anchor="middle" fill="{color}" font-family="Arial, sans-serif" font-size="{20 if len(lane["result"]) > 16 else 21}" font-weight="700">{t(lane["result"])}</text>',
-            f'<text x="380" y="{y + 177}" fill="{color}" font-family="Arial, sans-serif" font-size="20" font-weight="700">{t(lane["note"])}</text>',
+            *horizontal_arrow(prior_end + 16, result_x - 20, y + 91),
+            f'<rect x="{result_x}" y="{y + 42}" width="{result_width}" height="98" rx="49" fill="#151A13" stroke="{color}" stroke-width="4"/>',
+            f'<text x="{result_x + result_width / 2}" y="{y + 101}" text-anchor="middle" fill="{color}" font-family="Arial, sans-serif" font-size="{20 if len(lane["result"]) > 15 else 21}" font-weight="700">{t(lane["result"])}</text>',
+            f'<text x="{note_x}" y="{y + 177}" fill="{color}" font-family="Arial, sans-serif" font-size="20" font-weight="700">{t(lane["note"])}</text>',
         ])
     p.append('</svg>')
     return "\n".join(p) + "\n"

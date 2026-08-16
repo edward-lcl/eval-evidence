@@ -37,6 +37,25 @@ def normalized(value: str) -> str:
     return re.sub(r"\s+", " ", value).strip()
 
 
+def verify_flow_connectors(errors: list[str], figure_id: str, suffix: str, expected: int) -> None:
+    """Reject head-only connectors and short shafts in the two sequential stories."""
+    path = FIGURES / f"{figure_id}{suffix}.svg"
+    root = ET.fromstring(path.read_text(encoding="utf-8"))
+    bodies = [element for element in root.iter() if element.attrib.get("class") == "flow-arrow-body"]
+    heads = [element for element in root.iter() if element.attrib.get("class") == "flow-arrow-head"]
+    if len(bodies) != expected or len(heads) != expected:
+        errors.append(
+            f"{path.name}: expected {expected} complete flow connectors, "
+            f"found {len(bodies)} bodies and {len(heads)} heads"
+        )
+        return
+    for body in bodies:
+        x1, y1 = float(body.attrib["x1"]), float(body.attrib["y1"])
+        x2, y2 = float(body.attrib["x2"]), float(body.attrib["y2"])
+        if ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5 < 20:
+            errors.append(f"{path.name}: flow connector shaft is too short to remain visible")
+
+
 def verify_svg(
     errors: list[str],
     figure_id: str,
@@ -135,6 +154,12 @@ def main() -> int:
             errors.append(f"{figure_id}: canonical desktop SVG is stale")
         wide = verify_svg(errors, figure_id, brief, brief_bytes, render, render_bytes, "", "canvas")
         mobile = verify_svg(errors, figure_id, brief, brief_bytes, render, render_bytes, "-mobile", "mobile_canvas")
+        if figure_id == "eval-evidence-command-path":
+            verify_flow_connectors(errors, figure_id, "", 3)
+            verify_flow_connectors(errors, figure_id, "-mobile", 3)
+        elif figure_id == "eval-evidence-tamper-story":
+            verify_flow_connectors(errors, figure_id, "", 2)
+            verify_flow_connectors(errors, figure_id, "-mobile", 2)
         hashes[figure_id] = (*wide, *mobile)
     mobile_check = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_mobile_figures.py"), "--check"], capture_output=True, text=True)
     if mobile_check.returncode:

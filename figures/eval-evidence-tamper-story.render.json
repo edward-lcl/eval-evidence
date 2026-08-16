@@ -1,9 +1,9 @@
 {
-  "render_version": 2,
+  "render_version": 3,
   "figure_id": "eval-evidence-tamper-story",
   "subtitle": "The baseline remembers bytes—not who changed them or which value is true",
   "canvas": {"width": 1600, "height": 760, "png_width": 3200, "png_height": 1520},
-  "mobile_canvas": {"width": 900, "height": 1060, "png_width": 1800, "png_height": 2120},
+  "mobile_canvas": {"width": 900, "height": 1160, "png_width": 1800, "png_height": 2320},
   "before": {"verb": "SAVE", "file": "result.json", "value": "reward: 1", "digest": "8d14…a6c2"},
   "after": {"verb": "CHANGE", "file": "result.json", "value": "reward: 0", "digest": "f913…7b40"},
   "verify": {"verb": "VERIFY", "expected": "8d14…a6c2", "actual": "f913…7b40", "result": "MISMATCH · EXIT 1"},
