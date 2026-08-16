@@ -38,6 +38,7 @@
     "research_plan": "docs/research/RESEARCH_MAP.md",
     "upstream_placement": "docs/research/UPSTREAM_MAP.md",
     "decision_gate": "docs/research/DECISION_GATE_2026-08-15.md",
+    "claim_reconstruction_study": "docs/research/CLAIM_RECONSTRUCTION.md",
     "agent_instructions": "AGENTS.md",
     "readiness": "docs/READINESS.md"
   },
@@ -79,13 +80,29 @@
         "expected, discovered, completed, errored, cancelled, and retried denominators are reported by Harbor version",
         "every unexplained count delta remains explicit",
         "only aggregate or redacted receipts enter this repository",
-        "no campaign schema is proposed before reconstruction results exist"
+        "no campaign schema is proposed before reconstruction results exist",
+        "counts are stratified by Harbor version and lock schema, and expected (lock.trials, n_total_trials) == discovered == included is checked per job; the study in docs/research/CLAIM_RECONSTRUCTION.md section G names this E1'"
+      ]
+    },
+    {
+      "id": "EE-08",
+      "title": "Row-manifest retro-fit over the 142 public Terminal-Bench 2.0 leaderboard rows",
+      "priority": 2,
+      "status": "ready",
+      "owner": "research contributor (public data only; no archive access needed)",
+      "start_at": "docs/research/CLAIM_RECONSTRUCTION.md",
+      "depends_on": "none; uses the public HF dataset harborframework/terminal-bench-2-leaderboard@572b2614be2c0cb2527e14f5b1e4026f1072e6c1 and tbench.ai row detail payloads",
+      "acceptance": [
+        "for every 2.0 row with a public submission folder, a per-row record is emitted with source jobs, counted trials per task, dropped trials with exception type, per-task rate, accuracy, SE, and the display multiplier",
+        "the two candidate exclusion predicates from the study are tested over all 76 folders and rows reproducing under neither are named explicitly",
+        "no new schema, CLI command, or wire member is added; the record shape is a proposal filed as an issue on the 2.1 leaderboard tooling repository, with the body written to a file (no shell interpolation)",
+        "only public data enters this repository; per-trial trajectories are not copied"
       ]
     },
     {
       "id": "EE-07",
       "title": "Measure retrospective recoverability and source conflicts",
-      "priority": 2,
+      "priority": 3,
       "status": "ready",
       "owner": "research contributor with approved archive access",
       "start_at": "docs/research/RESEARCH_MAP.md",
@@ -99,7 +116,7 @@
     {
       "id": "EE-02",
       "title": "Obtain Terminal-Bench and Harbor mapping decisions",
-      "priority": 3,
+      "priority": 4,
       "status": "ready-for-review",
       "owner": "upstream liaison",
       "start_at": "docs/TBENCH_REVIEW.md",
@@ -113,7 +130,7 @@
     {
       "id": "EE-03",
       "title": "Freeze the paper authority and claim crosswalk",
-      "priority": 4,
+      "priority": 5,
       "status": "blocked-owner-input",
       "owner": "paper owners",
       "start_at": "docs/PAPER_ALIGNMENT.md",
@@ -127,7 +144,7 @@
     {
       "id": "EE-04",
       "title": "Prove independent pickup",
-      "priority": 5,
+      "priority": 6,
       "status": "ready",
       "owner": "teammate who did not author the implementation",
       "start_at": "docs/START_HERE.md",
@@ -140,7 +157,7 @@
     {
       "id": "EE-05",
       "title": "Validate the framework-neutral contract with a second evaluator",
-      "priority": 6,
+      "priority": 7,
       "status": "blocked-by-sequence",
       "owner": "adapter contributor",
       "start_at": "docs/ADAPTERS.md",

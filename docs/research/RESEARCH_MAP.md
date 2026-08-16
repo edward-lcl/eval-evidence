@@ -1,6 +1,33 @@
 # Research map: evaluation evidence after execution
 
-Status: working plan, 2026-08-15. This is a falsification plan, not a paper claim.
+Status: working plan, 2026-08-15; hypothesis states updated 2026-08-16 from the
+[claim reconstruction study](CLAIM_RECONSTRUCTION.md). This is a falsification plan,
+not a paper claim.
+
+## 2026-08-16 update: what the claim reconstruction study changed
+
+The study asked whether a "claim lineage" layer above trial evidence is a real missing
+abstraction. Answer: no — it is a missing *record*, PROV-shaped and small, owned mostly
+by Harbor (job close) and publishers (row); "claim support" is out of infrastructure
+scope. Five real reported numbers reproduced exactly from per-instance artifacts; none
+from a written rule; all had at least one unavailable instrument pin. Consequences for
+the hypotheses below (details and receipts in the study):
+
+- H1: supported in a specific form — mixed-provenance values (a displayed model sha from
+  one run, scores from a later rewrite of another) and unavailable pins, not a coverage
+  fraction. Per-field source pointers, not `available_fraction`.
+- H3: weakly supported, only where an archive is not already content-addressed. No
+  documented failure was prevented by trial sealing.
+- H4: the falsifier is present — denominator, selection, rescoring, and aggregation
+  ambiguity dominated every walk-back even with near-complete trial records.
+- H5: further weakened — completeness is claim-relative; a Harbor bundle's ceiling is
+  14/20 even with perfect mapping.
+- H6: per-field, not global — arithmetic and membership are retrospectively recoverable;
+  retry history (Harbor `rmtree`s the failed attempt), harness commit, image digest,
+  dataset revision, and provider-returned model are prospective-only.
+- E1 becomes E1′ (version-stratified, with an expected == discovered == included check);
+  a public row-manifest retro-fit over the 142 TB2.0 rows is added ahead of E3–E6 (see
+  study §G and `PROJECT_HANDOFF.json` EE-08).
 
 ## Central question
 
