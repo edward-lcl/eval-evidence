@@ -40,7 +40,8 @@
     "decision_gate": "docs/research/DECISION_GATE_2026-08-15.md",
     "claim_reconstruction_study": "docs/research/CLAIM_RECONSTRUCTION.md",
     "agent_instructions": "AGENTS.md",
-    "readiness": "docs/READINESS.md"
+    "readiness": "docs/READINESS.md",
+    "experiment_results": "docs/research/E1_EE08_RESULTS.md"
   },
   "gates": [
     {
@@ -71,7 +72,7 @@
   "next_work": [
     {
       "id": "EE-06",
-      "title": "Reconstruct campaign denominators from native Harbor state",
+      "title": "Reconstruct campaign denominators from native Harbor state (public half done; private archive half open)",
       "priority": 1,
       "status": "ready",
       "owner": "research contributor with approved archive access",
@@ -81,14 +82,15 @@
         "every unexplained count delta remains explicit",
         "only aggregate or redacted receipts enter this repository",
         "no campaign schema is proposed before reconstruction results exist",
-        "counts are stratified by Harbor version and lock schema, and expected (lock.trials, n_total_trials) == discovered == included is checked per job; the study in docs/research/CLAIM_RECONSTRUCTION.md section G names this E1'"
+        "counts are stratified by Harbor version and lock schema, and expected (lock.trials, n_total_trials) == discovered == included is checked per job; the study in docs/research/CLAIM_RECONSTRUCTION.md section G names this E1'",
+        "the public Terminal-Bench 2.0 half is done (245 jobs, 1.2% delta, 0 retries: docs/research/E1_EE08_RESULTS.md); what remains is a corpus that actually configures retries and a version stratification beyond the four jobs that carry lock.json"
       ]
     },
     {
       "id": "EE-08",
       "title": "Row-manifest retro-fit over the 142 public Terminal-Bench 2.0 leaderboard rows",
       "priority": 2,
-      "status": "ready",
+      "status": "complete",
       "owner": "research contributor (public data only; no archive access needed)",
       "start_at": "docs/research/CLAIM_RECONSTRUCTION.md",
       "depends_on": "none; uses the public HF dataset harborframework/terminal-bench-2-leaderboard@572b2614be2c0cb2527e14f5b1e4026f1072e6c1 and tbench.ai row detail payloads",
@@ -97,7 +99,8 @@
         "the two candidate exclusion predicates from the study are tested over all 76 folders and rows reproducing under neither are named explicitly",
         "no new schema, CLI command, or wire member is added; the record shape is written up in docs/research/ only, and any upstream filing is a separate owner-approved step under authority_boundaries.owner_or_external_approval_required",
         "only public data enters this repository; per-trial trajectories are not copied"
-      ]
+      ],
+      "result": "docs/research/E1_EE08_RESULTS.md; 142/142 rows reproduce to 1e-12; exclusion predicate not uniquely recoverable; reproducible via scripts/research/tb20_reconstruction.py"
     },
     {
       "id": "EE-07",

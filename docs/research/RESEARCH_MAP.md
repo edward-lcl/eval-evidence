@@ -34,6 +34,17 @@ Consequences for the hypotheses below (details and receipts in the study):
   a public row-manifest retro-fit over the 142 TB2.0 rows is added ahead of E3–E6 (see
   study §G and `PROJECT_HANDOFF.json` EE-08).
 
+**Both were run on 2026-08-16; results in [`E1_EE08_RESULTS.md`](E1_EE08_RESULTS.md).**
+E1′ on the public half: expected equals discovered in 240/243 jobs (1.2% delta, under the
+5% flip threshold) and 0/245 jobs used retries, so the flip condition did not fire and the
+recommendation stays "a small Harbor change plus a publisher checklist" — with the caveat
+that zero retries leaves the retry-deletion hazard untested rather than refuted, and that
+leaderboard submissions are a survivorship-biased sample. EE-08: all 142 rows reproduce
+their accuracy and uncertainty from the published per-task breakdown, but the exclusion
+predicate fits no single rule, which is the preregistered argument for recording selection
+prospectively. E2 (conflict census), E4 (mutation/closure) and E6 (second evaluator)
+remain unrun.
+
 ## Central question
 
 What is the smallest evidence contract that makes a reported AI-evaluation claim

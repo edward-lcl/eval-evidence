@@ -54,6 +54,20 @@ and [`claim-reconstruction/`](claim-reconstruction/README.md).
 | Hypothesis (downgraded) | "Claim lineage" is a distinct fourth layer above campaign lineage. | Study §B, §H; lane L8 | Not supported: every proposed field maps to a PROV node/edge/attribute; layers 2 and 3 merge into campaign provenance; layer 4 is argumentation. |
 | Hypothesis (open) | A per-row publication record with an expected-set check is sufficient retrospectively for the TB2.0 rows. | Study §G item 2 (public retro-fit not yet run) | Decides whether the missing artifact is cheap or must be captured prospectively. |
 
+## Measured results from E1′ and EE-08 (2026-08-16)
+
+Receipts: [`E1_EE08_RESULTS.md`](E1_EE08_RESULTS.md); reproducible via
+`scripts/research/tb20_reconstruction.py`; committed tables in
+[`claim-reconstruction/data/`](claim-reconstruction/data/).
+
+| State | Statement | Evidence | Consequence |
+|---|---|---|---|
+| Verified fact | All 142 Terminal-Bench 2.0 leaderboard rows reproduce their displayed accuracy to within 1e-12 as a mean of per-task success rates, and all 134 rows displaying an uncertainty reproduce a within-task Bernoulli SE to within 1e-9; the 8 rows with no uncertainty are exactly those containing a task with fewer than 2 counted trials. | `scripts/research/tb20_reconstruction.py`; `claim-reconstruction/data/tb20_rows_reconstruction.csv` | The aggregation and uncertainty rules are uniquely recoverable when the per-task breakdown is published. Settles the "±" question left UNAVAILABLE by the study; the maintainer's "standard error across five runs" description remains CONFLICTING with the rendered formula. |
+| Verified fact | Across 245 genuine public Harbor jobs (32,803 trial directories, 2025-11 to 2026-05), stated `n_total_trials` equals the actual trial-directory count in 240 of 243 jobs that state one; 1 job states none and 1 result file is unreadable; `n_retries` is 0 in all 245. | same script; `claim-reconstruction/data/tb20_jobs_denominators.csv` | Both preregistered thresholds (delta under 5%, retries rare) are met, so retrospective campaign evidence is largely sufficient for this population. Zero retries means the retry-deletion hazard is untested here, not refuted. |
+| Verified fact | The exclusion predicate is not uniquely recoverable: across folders mapping to exactly one row, "count all job trials" fits 1,248 task-rows and "count only trials with a reward" fits 1,312, and 181 fit neither. | same script (per-task comparison) | Which trials were dropped must be recorded when the row is published; it cannot be derived afterwards. This is the preregistered case for prospective recording. |
+| Verified fact | Leaderboard row identity collides: 142 rows carry 140 distinct display keys, two pairs differing only by agent version. Two rows display a denominator about twice their public evidence (887 and 890 displayed against 445 trial directories, whose job records and stats agree internally at 445). | same script; `colliding_row_keys` in its report | A per-row manifest must key on agent, agent version, and models. The double-count cause is UNAVAILABLE; the importer is not public. |
+| Known gap | Only 47 of 142 rows can be matched to any public submission folder, and 32 of 75 folders match no displayed row. | same script | For most of the board there is no public evidence to reconcile a row against, independent of any rule question. |
+
 ## Immediate semantic findings to reproduce
 
 The adversarial suite reproduced and resolved four semantic defects plus release
