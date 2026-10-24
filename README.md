@@ -3,8 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://benchmarkaudit.org/rlls/"><img src="https://img.shields.io/badge/RLLS_2026-judge_page-39D0C3?style=flat-square&labelColor=111827" alt="RLLS 2026 judge page"></a>
-  <a href="https://benchmarkaudit.org/lab/platform/library/"><img src="https://img.shields.io/badge/investigations-case_library-B18CFF?style=flat-square&labelColor=111827" alt="Case library"></a>
+  <a href="https://benchmarkaudit.org/lab/platform/library/"><img src="https://img.shields.io/badge/investigations-case_library-39D0C3?style=flat-square&labelColor=111827" alt="Case library"></a>
   <a href="https://arxiv.org/abs/2609.26826"><img src="https://img.shields.io/badge/origin_study-arXiv_2609.26826-FF7A59?style=flat-square&labelColor=111827" alt="Origin study on arXiv"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-F7D73A?style=flat-square&labelColor=111827" alt="License: Apache-2.0"></a>
   <img src="https://img.shields.io/badge/python-3.11%E2%80%933.14-CBD5E1?style=flat-square&labelColor=111827" alt="Python 3.11 to 3.14">
@@ -43,8 +42,7 @@ built on it holds.
 <p align="center"><img src="figures/readme/eval-evidence-readme-findings.svg" width="100%" alt="What released artifacts showed: 142 of 142 leaderboard scores re-derive; 72 of 142 rows do not count the nominal 445 trials; 95 of 96 random-cohort papers source-reviewed, coverage not reproduction; our audit 15 vs a plain checklist 16 of 18 issues, no detection advantage."></p>
 
 Eval Evidence grew out of co-authored work on Terminal-Bench [1] and was tested on released
-AI-evaluation artifacts for the XJTLU Research-Led Learning Symposium 2026. Walk through the
-cases on the [RLLS 2026 page](https://benchmarkaudit.org/rlls/) or the
+AI-evaluation artifacts. Walk through each case, link by link, in the
 [case library](https://benchmarkaudit.org/lab/platform/library/). All review was AI review, not
 independent human expert validation.
 

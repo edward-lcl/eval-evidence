@@ -119,7 +119,7 @@ def readings():
 
 def findings():
     b = [t(70, 80, "WHAT RELEASED ARTIFACTS SHOWED", 44, INK, 700),
-         t(70, 122, "Investigations for the XJTLU Research-Led Learning Symposium 2026 · AI review, not human expert validation", 21, MUTED)]
+         t(70, 122, "Released AI-evaluation artifacts, checked link by link · AI review, not human expert validation", 21, MUTED)]
     gap = 28
     w = (1460 - 3 * gap) // 4
     for i, (c, big, l1, l2, small) in enumerate([(TEAL, "142 / 142", "leaderboard scores", "re-derive", "Terminal-Bench 2.0"),
