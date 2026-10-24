@@ -48,6 +48,21 @@ evaluator does not validate that role, shrink it.
 | Standard score-component provenance | Typed extra fields alongside reward | Terminal-Bench verifier contract, aligned with issue #1390 |
 | Fortify before/after acceptance regression | Task/verifier versions, attack result, accepted fix, legitimate-solution acceptance evidence | Fortify/Terminal-Bench review workflow |
 
+## 2026-08-16 addendum
+
+The [claim reconstruction study](CLAIM_RECONSTRUCTION.md) found that the record
+sketched below already exists, field for field, in the Terminal-Bench 2.1 leaderboard
+tooling (`harbor-framework/terminal-bench-2-1@7131e437…`: `leaderboard/submissions/*.json`
+with `source_jobs`, `source_filter`, `disqualified_trials[{trial_id, reason,
+judge_trial}]`, `trials[]`, `metrics`, plus public `core/metrics.py` with an explicit
+errored-trials rule and SE formula) — in the leaderboard layer, as this map predicted.
+Two additions the study makes to the placement: (i) every layer needs an *expected set*
+held by a different actor than the record (Harbor has `lock.trials` for trials; no
+leaderboard studied has "merged submissions == displayed rows"), or the record cannot
+detect an omitted transition; (ii) three Harbor-side gaps are concrete fields, not
+ontology — retry tombstones, member-trial digests at job close, and a metric
+null-policy/denominator/version field.
+
 ## Minimal campaign record to test, not yet build
 
 The first experiment needs only:
