@@ -1,26 +1,29 @@
-<p align="center"><img src="figures/eval-evidence-banner.png" alt="A score is not a diagnosis. Eval Evidence traces what each number actually establishes, and shows missing evidence as a gap instead of guessing." width="820"></p>
-
-<p align="center"><strong>A post-run evidence envelope and integrity checker for AI evaluations.</strong></p>
-
 <p align="center">
-  <a href="https://benchmarkaudit.org/rlls/"><img src="https://img.shields.io/badge/RLLS%202026-judge%20page-1C4E8F.svg" alt="RLLS 2026 judge page"></a>
-  <a href="https://benchmarkaudit.org/eval-evidence/"><img src="https://img.shields.io/badge/Evidence%20hub-cases%20%26%20data-1E7A46.svg" alt="Evidence hub"></a>
-  <a href="https://arxiv.org/abs/2609.26826"><img src="https://img.shields.io/badge/Origin%20study-arXiv%202609.26826-b31b1b.svg" alt="Origin study on arXiv"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/Code%20License-Apache--2.0-blue.svg" alt="Code License: Apache-2.0"></a>
-  <img src="https://img.shields.io/badge/python-3.11%E2%80%933.14-blue.svg" alt="Python 3.11 to 3.14">
+  <img src="figures/readme/eval-evidence-readme-hero.svg" width="100%" alt="Eval Evidence. A score is not a diagnosis: a reported score flows into an evidence.json record whose fields say how they are known (max_turns observed; model_id and item_validity unavailable), sealed with sha256 and re-checkable with verify.">
 </p>
 
-# Eval Evidence
+<p align="center">
+  <a href="https://benchmarkaudit.org/rlls/"><img src="https://img.shields.io/badge/RLLS_2026-judge_page-39D0C3?style=flat-square&labelColor=111827" alt="RLLS 2026 judge page"></a>
+  <a href="https://benchmarkaudit.org/lab/platform/library/"><img src="https://img.shields.io/badge/investigations-case_library-B18CFF?style=flat-square&labelColor=111827" alt="Case library"></a>
+  <a href="https://arxiv.org/abs/2609.26826"><img src="https://img.shields.io/badge/origin_study-arXiv_2609.26826-FF7A59?style=flat-square&labelColor=111827" alt="Origin study on arXiv"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-F7D73A?style=flat-square&labelColor=111827" alt="License: Apache-2.0"></a>
+  <img src="https://img.shields.io/badge/python-3.11%E2%80%933.14-CBD5E1?style=flat-square&labelColor=111827" alt="Python 3.11 to 3.14">
+</p>
+
+**Eval Evidence** is a post-run evidence envelope and integrity checker for AI evaluations.
+It records what a score rests on (which runs, which settings, how each field is known) and
+marks what is missing as missing. It works offline, runs no models and uploads nothing.
 
 > A score should travel with a machine-checkable record of what was observed,
 > asserted, derived, and unavailable.
 
-<p align="center"><img src="figures/eval-evidence-zero-three-explanations.png" alt="Zero passes can mean a real limit, a broken measurement, or a gap the record cannot decide." width="820"></p>
+## Why
+
+<p align="center"><img src="figures/readme/eval-evidence-readme-three-readings.svg" width="100%" alt="One zero, three readings: a task no agent passed could be a real limit, a broken measurement, or a gap the record cannot decide. Eval Evidence records the evidence for each reading and does not decide which one is true."></p>
 
 A benchmark score is a number; what it means depends on evidence the number does not carry:
 which runs produced it, which were counted, how they were scored, and whether the sentence
-built on it holds. Eval Evidence records that evidence next to the score, and marks what is
-missing as missing.
+built on it holds.
 
 ## Highlights
 
@@ -37,20 +40,12 @@ missing as missing.
 
 ## From the research
 
+<p align="center"><img src="figures/readme/eval-evidence-readme-findings.svg" width="100%" alt="What released artifacts showed: 142 of 142 leaderboard scores re-derive; 72 of 142 rows do not count the nominal 445 trials; 95 of 96 random-cohort papers source-reviewed, coverage not reproduction; our audit 15 vs a plain checklist 16 of 18 issues, no detection advantage."></p>
+
 Eval Evidence grew out of co-authored work on Terminal-Bench [1] and was tested on released
-AI-evaluation artifacts (XJTLU Research-Led Learning Symposium 2026):
-
-- In the cases examined, **printed numbers mostly re-derived, while the evidence for what they
-  mean often could not be checked**. On the Terminal-Bench 2.0 leaderboard, all 142 displayed
-  scores recalculate, but 72 rows do not count the nominal 445 trials and retry history is not
-  recorded.
-- A randomly drawn **96-paper cohort**: 95 source-reviewed, 1 procedurally unresolved; no model
-  result was reproduced from original predictions (coverage, not reproduction).
-- A small **self-test found no detection advantage** over an ordinary checklist (15 vs 16 of 18
-  consequential issues; 3 papers, AI-adjudicated, exploratory). We report it.
-
-Walk through the cases on the [judge page](https://benchmarkaudit.org/rlls/) or the
-[evidence hub](https://benchmarkaudit.org/eval-evidence/). All review was AI review, not
+AI-evaluation artifacts for the XJTLU Research-Led Learning Symposium 2026. Walk through the
+cases on the [RLLS 2026 page](https://benchmarkaudit.org/rlls/) or the
+[case library](https://benchmarkaudit.org/lab/platform/library/). All review was AI review, not
 independent human expert validation.
 
 [1] E. Lue Chee Lip, B. Moraski, T. Knappe, L. Xiong, S. Gharat, A. Mari, I. Bercovich.
