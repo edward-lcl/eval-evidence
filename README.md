@@ -1,15 +1,72 @@
-# Eval Evidence
+<p align="center"><img src="figures/eval-evidence-banner.png" alt="A score is not a diagnosis. Eval Evidence traces what each number actually establishes, and shows missing evidence as a gap instead of guessing." width="820"></p>
 
-**A post-run evidence envelope and integrity checker for AI evaluations.**
+<p align="center"><strong>A post-run evidence envelope and integrity checker for AI evaluations.</strong></p>
+
+<p align="center">
+  <a href="https://benchmarkaudit.org/rlls/"><img src="https://img.shields.io/badge/RLLS%202026-judge%20page-1C4E8F.svg" alt="RLLS 2026 judge page"></a>
+  <a href="https://benchmarkaudit.org/eval-evidence/"><img src="https://img.shields.io/badge/Evidence%20hub-cases%20%26%20data-1E7A46.svg" alt="Evidence hub"></a>
+  <a href="https://arxiv.org/abs/2609.26826"><img src="https://img.shields.io/badge/Origin%20study-arXiv%202609.26826-b31b1b.svg" alt="Origin study on arXiv"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/Code%20License-Apache--2.0-blue.svg" alt="Code License: Apache-2.0"></a>
+  <img src="https://img.shields.io/badge/python-3.11%E2%80%933.14-blue.svg" alt="Python 3.11 to 3.14">
+</p>
+
+# Eval Evidence
 
 > A score should travel with a machine-checkable record of what was observed,
 > asserted, derived, and unavailable.
+
+<p align="center"><img src="figures/eval-evidence-zero-three-explanations.png" alt="Zero passes can mean a real limit, a broken measurement, or a gap the record cannot decide." width="820"></p>
+
+A benchmark score is a number; what it means depends on evidence the number does not carry:
+which runs produced it, which were counted, how they were scored, and whether the sentence
+built on it holds. Eval Evidence records that evidence next to the score, and marks what is
+missing as missing.
+
+## Highlights
+
+- **Every field says how it is known.** Instrument and outcome fields are recorded as
+  observed, derived, asserted or unavailable, each with its source or reason.
+- **No silent picks.** When sources disagree, the field becomes `unavailable` instead of one
+  value being chosen.
+- **Sealed, re-checkable bundles.** A deterministic JSON bundle with file digests; `verify`
+  catches a one-byte change in a referenced file.
+- **Offline and read-only.** Runs no models, uploads nothing; reads Harbor / Terminal-Bench
+  job folders directly.
+- **Honest scope.** It does not run models, judge correctness, or prove that files are the
+  original run.
+
+## From the research
+
+Eval Evidence grew out of co-authored work on Terminal-Bench [1] and was tested on released
+AI-evaluation artifacts (XJTLU Research-Led Learning Symposium 2026):
+
+- In the cases examined, **printed numbers mostly re-derived, while the evidence for what they
+  mean often could not be checked**. On the Terminal-Bench 2.0 leaderboard, all 142 displayed
+  scores recalculate, but 72 rows do not count the nominal 445 trials and retry history is not
+  recorded.
+- A randomly drawn **96-paper cohort**: 95 source-reviewed, 1 procedurally unresolved; no model
+  result was reproduced from original predictions (coverage, not reproduction).
+- A small **self-test found no detection advantage** over an ordinary checklist (15 vs 16 of 18
+  consequential issues; 3 papers, AI-adjudicated, exploratory). We report it.
+
+Walk through the cases on the [judge page](https://benchmarkaudit.org/rlls/) or the
+[evidence hub](https://benchmarkaudit.org/eval-evidence/). All review was AI review, not
+independent human expert validation.
+
+[1] E. Lue Chee Lip, B. Moraski, T. Knappe, L. Xiong, S. Gharat, A. Mari, I. Bercovich.
+*What Makes a Terminal-Bench Task Hard? Separating Genuine Hardness from Fake-Hardness on an
+Adjudicated Agentic Corpus.* NeurIPS 2026 Workshop: Who Verifies the Agents? (poster).
+[arXiv:2609.26826](https://arxiv.org/abs/2609.26826)
+
+## Project status
 
 **Development status:** narrow mapping-review candidate; sanitized Harbor structural
 gate G2 is met, while genuine-value mapping review and campaign completeness remain
 open; the source tree identifies as `0.2.0rc1`, and `0.2.0` is not on PyPI. Start with the [handoff router](docs/START_HERE.md)
 or inspect the same state in [`PROJECT_HANDOFF.json`](PROJECT_HANDOFF.json). Pin an
 exact commit rather than treating mutable `main` as a release.
+
+## How it works
 
 <picture>
   <source media="(max-width: 600px)" srcset="figures/eval-evidence-lifecycle-mobile.png">
